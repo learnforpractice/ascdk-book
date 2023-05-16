@@ -1,0 +1,10 @@
+from chain.contract import Contract
+
+from C import say_hello(cobj);
+
+@contract(main=True)
+class MyContract(Contract):
+
+    @action("sayhello")
+    def say_hello(self):
+        say_hello("hello, world".c_str())

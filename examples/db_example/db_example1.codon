@@ -1,0 +1,103 @@
+# 数据库示例
+from chain.database import PrimaryTable, primary
+from chain.contract import Contract
+
+@table("mytable")
+class A(object):
+    a: primary[u64]
+    b: str
+    def __init__(self, a: u64, b: str):
+        self.a = primary[u64](a)
+        self.b = b
+
+@contract(main=True)
+class MyContract(Contract):
+
+    def __init__(self):
+        super().__init__()
+
+    @action('teststore')
+    def test_store(self):
+        print('db_test')
+        item = A(123u64, 'hello, world')
+        table = A.new_table(n'hello', n'')
+        table.store(item, n'hello')
+
+    @action('testupdate')
+    def test_update(self, value: str):
+        print('test update')
+        table = A.new_table(n'hello', n'')
+        key = 123u64
+        it = table.find(key)
+        if it.is_ok():
+            print('+++++update value:', value)
+            item = A(key, value)
+            table.update(it, item, n'hello')
+        else:
+            print('+++++store value:', value)
+            item = A(key, value)
+            table.store(item, n'hello')
+
+    @action('testremove')
+    def test_remove(self):
+        print('test remove')
+        item = A(123u64, 'hello, world')
+        table = A.new_table(n'hello', n'')
+        table.store(item, n'hello')
+
+        it = table.find(123u64)
+        assert it.is_ok()
+        table.remove(it)
+
+        it = table.find(123u64)
+        assert not it.is_ok()
+
+    @action('testbound')
+    def test_bound(self):
+        print('db_test')
+        table = A.new_table(n'hello', n'')
+        payer = n'hello'
+
+        value = A(1u64, "alice")
+        table.store(value, payer)
+
+        value = A(3u64, "bob")
+        table.store(value, payer)
+
+        value = A(5u64, "john")
+        table.store(value, payer)
+
+        it = table.lowerbound(1u64)
+        value2: A = it.get_value()
+        print("+++++:", value2.a(), value2.b)
+        assert value2.a() == 1u64 and value2.b == 'alice'
+
+        it = table.upperbound(1u64)
+        value2: A = it.get_value()
+        print("+++++:", value2.a(), value2.b)
+        assert value2.a() == 3u64 and value2.b == 'bob'
+
+    @action('testapi')
+    def test_get_rows_api(self):
+        print('db_test')
+        table = A.new_table(n'hello', n'')
+        payer = n'hello'
+
+        value = A(1u64, "alice")
+        table.store(value, payer)
+
+        value = A(3u64, "bob")
+        table.store(value, payer)
+
+        value = A(5u64, "john")
+        table.store(value, payer)
+
+        it = table.lowerbound(1u64)
+        value2: A = it.get_value()
+        print("+++++:", value2.a, value2.b)
+        assert value2.a() == 1u64 and value2.b == 'alice'
+
+        it = table.upperbound(1u64)
+        value2: A = it.get_value()
+        print("+++++:", value2.a, value2.b)
+        assert value2.a() == 3u64 and value2.b == 'bob'

@@ -1,0 +1,35 @@
+site_name: Python Smart Contracts Development Cook Book
+repo_url: https://github.com/learnforpractice/pscdk-book
+plugins:
+    - i18n:
+        default_language: en
+        languages:
+            en:
+                name: English
+                build: true
+            zh:
+                name: 中文
+                build: true
+    - chat:
+        docs_chat_endpoint: "https://docs.uuos.io:8443/chat"
+nav:
+    - 'prelude.md'
+    - 'env.md'
+    - 'helloworld.md'
+    - 'deploy.md'
+    - 'ui.md'
+    - 'action.md'
+    - 'notify.md'
+    - 'database.md'
+    - 'crypto.md'
+    - 'common.md'
+    - 'abi.md'
+    - 'callc.md'
+    - 'codon.md'
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+theme:
+  name: material
+  custom_dir: overrides

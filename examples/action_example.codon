@@ -1,0 +1,51 @@
+# Description: This example shows how to use Action class to send action to other contract.
+
+from packer import pack
+from chain.action import Action, PermissionLevel
+from chain.contract import Contract
+
+@packer
+class Person:
+    name: str
+    height: u64
+    def __init__(self, name: str, height: u64):
+        self.name = name
+        self.height = height
+
+@contract(main=True)
+class MyContract(Contract):
+
+    def __init__(self):
+        super().__init__()
+
+    @action('test')
+    def test(self):
+        a = Action(n'hello', n'test2')
+        print('++++send test2 action')
+        a.send("1 alice")
+
+        a = Action(n'hello', n'test2', n'hello')
+        print('++++send test2 action')
+        a.send("2 alice")
+
+        a = Action(n'hello', n'test2', n'hello', n'active')
+        print('++++send test2 action')
+        a.send("3 alice")
+
+        a = Action(n'hello', n'test2', [PermissionLevel(n"hello", n"active")])
+        print('++++send test2 action')
+        a.send("4 alice")
+
+        a = Action(n'hello', n'test3')
+        print('++++send test3 action')
+        a.send(Person("alice", 175u64))
+        return
+
+    @action('test2')
+    def test2(self, name: str):
+        print('++++=name:', name)
+
+    @action('test3')
+    def test3(self, name: str, height: u64):
+        print('++++=name:', name, 'height:', height)
+
