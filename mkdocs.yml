@@ -10,8 +10,8 @@ plugins:
             zh:
                 name: 中文
                 build: true
-    - chat:
-        docs_chat_endpoint: "https://docs.uuos.io:8443/chat"
+    # - chat:
+    #     docs_chat_endpoint: "https://docs.uuos.io:8443/chat"
 nav:
     - 'prelude.md'
     - 'env.md'
