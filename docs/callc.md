@@ -2,7 +2,7 @@
 comments: true
 ---
 
-# Calling C/C++ Code in Codon
+# Calling C/C++ Code in Rust
 
 First, use the following command to install `eoscdt` for compiling C or C++ code:
 
@@ -10,9 +10,11 @@ First, use the following command to install `eoscdt` for compiling C or C++ code
 python3 -m pip install -U eoscdt
 ```
 
-Next, let's compile the `say_hello` function as an example to demonstrate how to compile code:
+## Compile C/C++ Code to a Library and Link it to Rust Code
 
-If the source file is in C, for example:
+Next, let's take compiling the `say_hello` function as an example to demonstrate how to compile code:
+
+If the source file is C code, for example:
 
 say_hello.c
 
@@ -29,7 +31,6 @@ Then use the following command to compile:
 ```bash
 cdt-cc -c -o say_hello.o say_hello.c
 ```
-
 
 If the source file is C++ code, for example:
 
@@ -49,97 +50,177 @@ Then use the following command to compile:
 cdt-cpp -c -o say_hello.o say_hello.cpp
 ```
 
-Note that if it is a C++ file, you need to add `extern "C"` before the function, otherwise a link error will occur.
+Please note that if it is a C++ file, you need to add `extern "C"` in front of the function, otherwise an error will occur in the linking process below.
 
-Next, let's see how to use the `say_hello` function in Codon:
-
-test.codon
-
-```python
-from chain.contract import Contract
-
-from C import say_hello(cobj);
-
-@contract(main=True)
-class MyContract(Contract):
-
-    @action("sayhello")
-    def say_hello(self):
-        say_hello("hello, world".c_str())
-```
-
-Here,
-
-```python
-from C import say_hello(cobj);
-```
-tells the Codon compiler to link the say_hello C function. All pointer types in C/C++ correspond to the cobj type in Codon.
-
-The following line of code calls the C function, the value returned by `c_str` is of `cobj` type, equivalent to `const char *` type in C/C++.
-
-```python
-say_hello("abc".c_str())
-```
-
-Next, use the following command to compile:
+After successful compilation, package the `.o` file into a library file ending with `.a`:
 
 ```bash
-python-contract build --linker-flags="say_hello.o" test.codon
+cdt-ar rcs libsay_hello.a say_hello.o
 ```
 
-Here, `--linker-flags="say_hello.o"` tells the compiler to link the `say_hello.o` obj file.
+Next, let's see how to use the `say_hello` function in Rust code:
 
-Next, use the following code to test:
+lib.rs
 
-test.py:
+```rs
 
-```python
-import os
-from ipyeos import eos
-from ipyeos import chaintester
-from ipyeos.chaintester import ChainTester
-from ipyeos import log
-from pyeoskit import eosapi
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
 
-chaintester.chain_config['contracts_console'] = True
-eos.set_log_level("default", 3)
+#[rust_chain::contract]
+mod hello {
+    extern "C" {
+        fn say_hello(name: *const u8);
+    }
 
-logger = log.get_logger(__name__)
+    use rust_chain::{
+        Name,
+    };
 
-dir_name = os.path.dirname(os.path.abspath(__file__))
+    #[chain(main)]
+    pub struct Hello {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-def init_test(contract_name):
-    t = ChainTester(True)
-    wasm_file = os.path.join(dir_name, f'{contract_name}.wasm')
-    with open(wasm_file, 'rb') as f:
-        code = f.read()
+    impl Hello {
 
-    abi_file = os.path.join(dir_name, f'{contract_name}.abi')
-    with open(abi_file, 'r') as f:
-        abi = f.read()
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
 
-    t.deploy_contract('hello', code, abi)
-    t.produce_block()
-    eos.set_log_level("default", 1)
-    return t
-
-def test_say_hello():
-    t = init_test('test')
-    ret = t.push_action('hello', 'sayhello', "", {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+        #[chain(action="test")]
+        pub fn test(&self, name: String) {
+            unsafe {
+                say_hello(name.as_ptr());
+            }
+        }
+    }
+}
 ```
 
-Run the test:
+Where:
+
+```rs
+extern "C" {
+    fn say_hello(name: *const u8);
+}
+```
+
+It declares a function defined in C. Please note that the type corresponding to `const char *` in C++ code here is `*const u8`.
+
+The following code shows how to call the `say_hello` function:
+
+```rs
+#[chain(action="test")]
+pub fn test(&self, name: String) {
+    unsafe {
+        say_hello(name.as_ptr());
+    }
+}
+```
+
+Because it is a C function, it must be called within an `unsafe` code block.
+
+Next, let's see how to link to the `libsay_hello.a` library.
+
+Create a new file `build.rs`, and add the following content:
+
+```rs
+
+use std::env;
+
+fn main() {
+    let target_arch = std::env::var("CARGO_CFG_TARGET_ARCH")
+        .unwrap_or_else(|_| "unknown".to_string());
+    println!("Target architecture: {}", target_arch);
+
+    if target_arch == "wasm32" {
+        println!("cargo:rustc-link-search=./");
+        println!("cargo:rustc-link-lib=static=say_hello");    
+    }
+}
+```
+
+In the above code, the following code specifies linking to `libsay_hello.a` when the target system of compilation is wasm32:
+
+```rust
+println!("cargo:rustc-link-search=./");
+println!("cargo:rustc-link-lib=static=say_hello");    
+```
+
+The complete example code can be found at the following link:
+[Example Code Link 1](https://github.com/uuosio/rscdk/tree/main/tests/testcallcpp)
+
+Use the following command to build and test the code:
+
+build:
+
+```
+./build.sh
+```
+
+test:
+
+```
+./test.sh
+```
+
+## Build C++ Library With Cmake and link to Rust Code
+
+Additionally, you can use CMake to compile C++ code and generate library files. Examples can be found at the following link:
+
+[Example Code Link 2](https://github.com/uuosio/rscdk/tree/main/tests/testcallcpp2)
+
+The content of `build.sh` is as follows:
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_say_hello
+mkdir -p say_hello/build
+pushd say_hello/build
+cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
+make
+popd
+rust-contract build
 ```
 
-You should see the following output:
+The code to compile C++ code into a library file is as follows:
 
-```
-hello, world
+```bash
+cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
 ```
 
-[Full Source Code](https://github.com/learnforpractice/pscdk-book/tree/main/examples/callc)
+Here, you need to specify the CDT toolchain file to compile C++ code into wasm32 library files.
+
+Run `./build.sh` to compile C++ code and Rust code.
+
+Run `./test.sh` to test.
+
+## Appendix
+
+here's a mapping of Rust types to C types. 
+
+| Rust                     | C                             |
+|--------------------------|-------------------------------|
+| bool                     | _Bool                         |
+| char                     | char                          |
+| i8                       | int8_t                        |
+| i16                      | int16_t                       |
+| i32                      | int32_t                       |
+| i64                      | int64_t                       |
+| isize                    | intptr_t                      |
+| u8                       | uint8_t                       |
+| u16                      | uint16_t                      |
+| u32                      | uint32_t                      |
+| u64                      | uint64_t                      |
+| usize                    | uintptr_t                     |
+| f32                      | float                         |
+| f64                      | double                        |
+| *const T                 | const T*                      |
+| *mut T                   | T*                            |
+| &T                       | const T*                      |
+| &mut T                   | T*                            |
