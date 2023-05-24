@@ -1,5 +1,5 @@
-site_name: Python Smart Contracts Development Cook Book
-repo_url: https://github.com/learnforpractice/pscdk-book
+site_name: Rust Smart Contracts Development Cook Book
+repo_url: https://github.com/learnforpractice/rscdk-book
 plugins:
     - i18n:
         default_language: en
@@ -25,7 +25,6 @@ nav:
     - 'common.md'
     - 'abi.md'
     - 'callc.md'
-    - 'codon.md'
 markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:

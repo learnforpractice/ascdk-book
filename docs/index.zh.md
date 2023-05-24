@@ -10,5 +10,4 @@
 * [数据库的操作](database.zh.md)
 * [密码学相关函数](crypto.zh.md)
 * [常用智能合约函数](common.zh.md)
-* [Codon代码里调用C/C++代码](callc.zh.md)
-* [和标准Python的差异](codon.zh.md)
+* [Rust代码里调用C/C++代码](callc.zh.md)
