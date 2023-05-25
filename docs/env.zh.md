@@ -1,6 +1,7 @@
-Here is the translation of the provided Markdown text to Chinese:
+---
+comments: true
+---
 
-```markdown
 # 设置开发环境
 
 ## 安装 Rust
@@ -29,7 +30,7 @@ rustup toolchain install nightly --component rust-src
   * [Arch Linux](https://archlinux.org/packages/community/x86_64/binaryen/): `pacman -S binaryen`
   * Windows: [二进制发布版本可以下载](https://github.com/WebAssembly/binaryen/releases)
 
-## 为测试创建一个虚拟 Python 环境
+## 为测试创建一个虚拟Python环境
 ```bash
 python3 -m venv ~/env
 source ~/env/bin/activate
@@ -42,7 +43,7 @@ python3 -m pip install --upgrade pip
 source ~/env/bin/activate
 ```
 
-## 安装 Eos 测试框架
+## 安装EOS测试框架
 
 安装 ipyeos：
 
@@ -50,20 +51,20 @@ source ~/env/bin/activate
 python3 -m pip install ipyeos
 ```
 
-运行 eosdebugger
+如果你的平台是 Windows 或 MacOSX M1/M2，你也可以下载一个包含ipyeos工具的镜像
 
 ```bash
-eosdebugger
+docker pull ghcr.io/uuosio/scdk:latest
 ```
 
-如果你的平台是 Windows 或 MacOSX M1/M2，你也可以下载一个容器镜像，并从 Docker 中运行 eosdebugger：
+在`scdk`这个docker镜像中，已经包含了如下的工具：
 
-```bash
-docker pull ghcr.io/uuosio/ipyeos:latest
 ```
-
-```bash
-docker run -it --rm -p 9090:9090 -p 9092:9092 -p 9093:9093 -t ghcr.io/uuosio/ipyeos
+ipyeos
+gscdk
+pscdk
+eoscdt
+pyeoskit
 ```
 
 在 macOS 上安装和运行 Docker 的推荐软件是 [OrbStack](https://orbstack.dev/download)。对于其他平台，可以使用 [Docker Desktop](https://www.docker.com/products/docker-desktop)。
@@ -80,7 +81,7 @@ python3 -m pip install rust-contracts-builder
 python3 -m pip install pyeoskit
 ```
 
-pyeoskit 用于部署合约。
+pyeoskit 用于部署合约到主网或者测试网。
 
 ## 检查环境
 
@@ -94,61 +95,71 @@ rust-contract init hello
 
 ```bash
 cd hello
-./build.sh
+rust-contract build
 ```
 
-测试
+测试:
+
+```bash
+ipyeos -m pytest -s -x test.py -k test_hello
+```
+
+如果你的平台不支持直接运行ipyeos，例如在Windows平台或者或 MacOSX M1/M2，或者是其它使用ARM指令集的CPU的平台，你可以使用Docker来运行该命令：
+
+```bash
+docker run --entrypoint ipyeos -it --rm -v "$(pwd)":/develop -w /develop -t ghcr.io/uuosio/scdk -m pytest -s -x test.py -k test_hello
+```
+
+另外，你也可以运行`cargo test`来运行测试：
 
 ```bash
 cargo test
 ```
 
-如果 `eosdebugger` 正在运行，它将输出如下信息：
+这时，运行的是`lib.rs`里面的测试代码：
+
+```rust
+#[test]
+fn test_inc() {
+    let mut tester = ChainTester::new();
+    //uncomment the following line to enable contract debugging.
+    // tester.enable_debug_contract("hello", true).unwrap();
+
+    deploy_contract(&mut tester);
+    update_auth(&mut tester);
+
+    let permissions = r#"
+    {
+        "hello": "active"
+    }
+    "#;
+    tester.push_action("hello", "inc", "".into(), permissions).unwrap();
+    tester.produce_block();
+
+    tester.push_action("hello", "inc", "".into(), permissions).unwrap();
+    tester.produce_block();
+}
+```
+
+需要注意的是，执行`cargo test`之前，必须先执行`eosdebugger`这个在`ipyeos`中的应用，rust测试代码需要连接到`eosdebugger`来运行测试。
+
+如果你的平台不支持直接运行`eosdebugger`，例如在Windows平台或者使用ARM指令集的CPU的平台，你可以使用Docker来运行该命令：
 
 ```bash
-debug 2023-02-20T07:03:09.852 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 41 input dedup list
-debug 2023-02-20T07:03:09.861 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 47 input dedup list
-debug 2023-02-20T07:03:09.887 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 49 input dedup list
-debug 2023-02-20T07:03:09.891 ipyeos    apply_context.cpp:28          print_debug          ]
+docker run -it --rm -p 9090:9090 -p 9092:9092 -p 9093:9093 -t ghcr.io/uuosio/scdk
+```
+
+启动后，运行`cargo test`，即可以运行`eosdebugger`中的控制台中看到如下的输出：
+
+```bash
 [(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
 count is 1
 
 [(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-02-20T07:03:09.894 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list
-debug 2023-02-20T07:03:09.897 ipyeos    apply_context.cpp:28          print_debug          ]
+debug 2023-05-24T09:18:36.315 ipyeos    controller.cpp:2498           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list, pending block time 2018-06-01T12:00:04.000
+debug 2023-05-24T09:18:36.319 ipyeos    apply_context.cpp:40          print_debug          ] 
 [(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
 count is 2
 
 [(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-02-20T07:03:09.899 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 51 input dedup list
-Listening for new connection...
-```
-
-另外，你可以使用下面的命令来运行测试，无需 `eosdebugger` 在后台运行。
-```bash
-ipyeos -m pytest -s -x test.py -k test_hello
-```
-
-也可以在docker中运行上面的命令：
-
-```bash
-docker run --entrypoint ipyeos -it -v$(pwd):/develop -w /develop -t ghcr.io/uuosio/ipyeos -m pytest -s -x test.py
-```
-
-如果你看到以下的输出，那就意味着所有东西都已经成功安装。
-
-```
-test.py debug 2022-07-04T04:01:58.496 ipyeos    apply_context.cpp:36          print_debug          ] 
-[(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
-count is 1
-
-[(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-debug 2022-07-04T04:01:58.498 ipyeos    apply_context.cpp:36          print_debug          ] 
-[(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
-count is 2
-
-[(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-.
-
-============================== 1 passed in 0.90s ===============================
 ```

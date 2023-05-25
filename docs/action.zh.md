@@ -6,193 +6,101 @@ comments: true
 
 在智能合约中也可以发起一个action，这样的action称之为内联action(inline action)。需要注意的是，action是异步的，也就是说，只有在整个代码执行完后，内联action对应的合约代码才会被调用，如果被调用的合约没有定义相关的action或者账号中没有部属合约，那么调用将没有影响，但也不会有异常抛出。像这些空的内联action也不是没有任何作用，例如可以当作链上的日志，以供应用程序来查询。
 
-以下是Action类在`action.codon`中的完整代码：
+下面通过利用inline action来进行EOS转账的列子来说明inline action的用法。
 
-```python
-@packer
-class Action(object):
-    account: Name
-    name: Name
-    authorization: List[PermissionLevel]
-    data: bytes
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
 
-    def __init__(self, account: Name, name: Name, data: bytes=bytes()):
-        self.account = account
-        self.name = name
-        self.authorization = [PermissionLevel(account, n'active')]
-        self.data = data
+#[rust_chain::contract]
+mod inlineaction {
+    use rust_chain::{
+        Name,
+        Action,
+        PermissionLevel,    
+        name,
+        ACTIVE,
+        chain_println,
+        serializer::Packer,
+        Asset,
+        Symbol,
+    };
 
-    def __init__(self, account: Name, name: Name, permission_account: Name, data: bytes=bytes()):
-        self.account = account
-        self.name = name
-        self.authorization = [PermissionLevel(permission_account, n'active')]
-        self.data = data
+    #[chain(packer)]
+    struct Transfer {
+        from: Name,
+        to: Name,
+        quantity: Asset,
+        memo: String
+    }
 
-    def __init__(self, account: Name, name: Name, permission_account: Name, permission_name: Name, data: bytes=bytes()):
-        self.account = account
-        self.name = name
-        self.authorization = [PermissionLevel(permission_account, permission_name)]
-        self.data = data
+    #[chain(main)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-    def __init__(self, account: Name, name: Name, authorization: List[PermissionLevel], data: bytes=bytes()):
-        self.account = account
-        self.name = name
-        self.authorization = authorization
-        self.data = data
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
 
-    def send(self):
-        raw = pack(self)
-        send_inline(raw.ptr, u32(raw.len))
-
-    def send(self, data: T, T: type):
-        self.data = pack(data)
-        raw = pack(self)
-        send_inline(raw.ptr, u32(raw.len))
+        #[chain(action = "testaction")]
+        pub fn test_action(&self) {
+            let transfer = Transfer{
+                from: name!("hello"),
+                to: name!("alice"),
+                quantity: Asset::new(10000, Symbol::new("EOS", 4)),
+                memo: String::from("hello, world")
+            };
+            let perm = PermissionLevel::new(name!("hello"), name!("active"));
+            let action = Action::new(name!("eosio.token"), name!("transfer"), perm, &transfer);
+            action.send();
+        }
+    }
+}
 ```
 
-该类有三个`__init__`函数，请根据需求来使用，使用比较多的应该是下面这个初始化函数：
+在上面的代码中，实现了从`hello`这个账号转账`1.0000 EOS`到`alice`这个账号的功能。`hello`和`alice`这两个账号都是在启动测试的时候创建好的，可以直接使用。
 
-```python
-def __init__(self, account: Name, name: Name, data: bytes=bytes())
-```
-
-这个函数默认使用和account的`active`权限
-
-下面这个初始化函数指定了权限的账号，也是默认使用账号的`active`权限
-
-```python
-def __init__(self, account: Name, name: Name, permission_account: Name, data: bytes=bytes())
-```
-
-如果使用的是其它权限，则可以使用下面的个初始化函数：
-
-```python
-def __init__(self, account: Name, name: Name, permission_account: Name, permission_name: Name, data: bytes=bytes()):
-```
-
-如果账号用了多个权限，则用下个这个初始化函数。
-
-```python
-def __init__(self, account: Name, name: Name, authorization: List[PermissionLevel], data: bytes=bytes()):
-```
-
-示例：
-
-```python
-# action_example.codon
-from packer import pack
-from chain.action import Action, PermissionLevel
-from chain.contract import Contract
-
-@packer
-class Person:
-    name: str
-    height: u64
-    def __init__(self, name: str, height: u64):
-        self.name = name
-        self.height = height
-
-@contract(main=True)
-class MyContract(Contract):
-
-    def __init__(self):
-        super().__init__()
-
-    @action('test')
-    def test(self):
-        a = Action(n'hello', n'test2')
-        print('++++send test2 action')
-        a.send("1 alice")
-
-        a = Action(n'hello', n'test2', n'hello')
-        print('++++send test2 action')
-        a.send("2 alice")
-
-        a = Action(n'hello', n'test2', n'hello', n'active')
-        print('++++send test2 action')
-        a.send("3 alice")
-
-        a = Action(n'hello', n'test2', [PermissionLevel(n"hello", n"active")])
-        print('++++send test2 action')
-        a.send("4 alice")
-
-        a = Action(n'hello', n'test3')
-        print('++++send test3 action')
-        a.send(Person("alice", 175u64))
-        return
-
-    @action('test2')
-    def test2(self, name: str):
-        print('++++=name:', name)
-
-    @action('test3')
-    def test3(self, name: str, height: u64):
-        print('++++=name:', name, 'height:', height)
-```
-                                                                                                    
 测试代码：
 
 ```python
-def test_action():
-    t = init_test('action_example')
-    ret = t.push_action('hello', 'test', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s", ret['elapsed'])
+@chain_test
+def test_inline_action(tester: ChainTester):
+    deploy_contract(tester, 'inlineaction')
+    args = {}
+    r = tester.push_action('hello', 'testaction', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+    logger.info("+++++++%s", tester.get_balance('hello'))
 ```
 
 编译：
-```
-python-contract build action_example.codon
+
+```bash
+cd examples/inlineaction
+rust-contract build
 ```
 
 运行测试：
 
-```
-ipyeos -m pytest -s -x test.py -k test_action
+```bash
+ipyeos -m pytest -s -x test.py -k test_inline_action
 ```
 
 输出：
 
 ```
-debug 2023-03-28T12:35:48.175 thread-0  apply_context.cpp:30          print_debug          ] 
-[(hello,test)->hello]: CONSOLE OUTPUT BEGIN =====================
-++++send test2 action
-++++send test2 action
-++++send test2 action
-++++send test2 action
-++++send test3 action
-
-[(hello,test)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-03-28T12:35:48.175 thread-0  apply_context.cpp:30          print_debug          ] 
-[(hello,test2)->hello]: CONSOLE OUTPUT BEGIN =====================
-++++=name: 1 alice
-
-[(hello,test2)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-03-28T12:35:48.175 thread-0  apply_context.cpp:30          print_debug          ] 
-[(hello,test2)->hello]: CONSOLE OUTPUT BEGIN =====================
-++++=name: 2 alice
-
-[(hello,test2)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-03-28T12:35:48.175 thread-0  apply_context.cpp:30          print_debug          ] 
-[(hello,test2)->hello]: CONSOLE OUTPUT BEGIN =====================
-++++=name: 3 alice
-
-[(hello,test2)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-03-28T12:35:48.175 thread-0  apply_context.cpp:30          print_debug          ] 
-[(hello,test2)->hello]: CONSOLE OUTPUT BEGIN =====================
-++++=name: 4 alice
-
-[(hello,test2)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-03-28T12:35:48.175 thread-0  apply_context.cpp:30          print_debug          ] 
-[(hello,test3)->hello]: CONSOLE OUTPUT BEGIN =====================
-++++=name: alice height: 175
-
-[(hello,test3)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-03-28T12:35:48.177 thread-0  controller.cpp:2444           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list, pending block time 2018-06-01T12:00:04.000
+INFO     test:test.py:74 balance of hello before transfer: 50000000000
+INFO     test:test.py:75 balance of alice before transfer: 50000000000
+INFO     test:test.py:81 balance of hello after transfer: 49999990000
+INFO     test:test.py:82 balance of alice after transfer: 50000010000
 ```
-
-可以看到，这里先调用了`test`这个在Transaction里指定了的action，然后调用了`test2`这个Action，但是`test2`这个action并没有在Transaction里指定，而是在智能合约里发起的。另外，还通过`test3`演示了如何发送带多个参数的action.
-
 
 需要注意的是，为了在合约中能够调用inline action，需要在账号的`active`权限中添加`eosio.code`这个虚拟权限,在测试代码中，通过下面的函数来将`eosio.code`这个虚拟权限添加到`active`权限中。
 
@@ -216,3 +124,9 @@ def update_auth(chain, account):
     }
     chain.push_action('eosio', 'updateauth', a, {account:'active'})
 ```
+
+总结：
+
+在EOS中，除了可以通过在Transaction里包含action来调用合约的代码之外，在合约的代码里，也可以发起一个Action来调用合约的代码，这样的Action称之为Inline Action. 要允许合约代码使用Inline Action，还必须在合约账号的`active`权限中添加`eosio.code`这个虚拟权限。
+
+[完整示例](https://github.com/learnforpractice/rscdk-book/tree/master/examples/inlineaction)

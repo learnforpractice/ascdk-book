@@ -4,65 +4,65 @@ comments: true
 
 # Rust代码里调用C/C++代码
 
+这一章介绍下如何在Rust代码中调用C/C++的代码，完整的示例代码可以从下面的链接中获取：
+
+[完整代码](https://github.com/learnforpractice/rscdk-book/tree/master/examples/testcallcpp)
+
 首先，用下面的命令安装`eoscdt`用于编译c或者是c++代码:
 
 ```bash
 python3 -m pip install -U eoscdt
 ```
 
-## 用命令行工具将C/C++代码编译成库并链接进Rust代码
-
-下面以编译`say_hello`函数为例，演示如何编译代码：
-
-如果源文件是c代码，例如：
-
-say_hello.c
-
-```c
-void prints(const char *s);
-
-void say_hello(const char *s) {
-	prints(s);
-}
-```
-
-则用下面的命令编译：
+如果你的平台不支持直接安装，则必须使用docker来安装相关的镜像，然后在docker中运行相关的命令，具体的安装过程在[设置开发环境](./env.zh.md)这章中已经有过介绍。通过下面的命令在docker中运行bash，然后在bash中执行相关的命令。
 
 ```bash
-cdt-cc -c -o say_hello.o say_hello.c
+docker run --entrypoint bash -it --rm -v "$(pwd)":/develop -t ghcr.io/uuosio/scdk
 ```
 
+下面以编译`say_hello`函数为例，演示如何从Rust代码中调用C/C++中的代码：
 
-如果源文件是c++代码，例如：
-
-say_hello.cpp
+先看[say_hello/say_hello.cpp](https://github.com/learnforpractice/rscdk-book/blob/master/examples/testcallcpp/say_hello/say_hello.cpp)中的代码：
 
 ```cpp
-extern "C" void prints(const char *s);
+#include <stdint.h>
+#include <eosio/eosio.hpp>
 
-extern "C" void say_hello(const char *s) {
-	prints(s);
+using namespace eosio;
+
+extern "C" void say_hello(const char *name, size_t size) {
+    print("hello ", std::string(name, size));
 }
 ```
 
-则用下面的命令编译：
+这里需要注意的是，因为是C++文件，则需在函数前面加上`extern "C"`，否则会在链接过程中因找不到函数而出错。
 
-```bash
-cdt-cpp -c -o say_hello.o say_hello.cpp
+再看[say_hello/CMakeLists.txt](https://github.com/learnforpractice/rscdk-book/blob/master/examples/testcallcpp/say_hello/CMakeLists.txt)中的关键内容：
+
+```cmake
+add_library(say_hello
+    say_hello.cpp
+)
+
+target_include_directories(say_hello PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 ```
 
-这里需要注意的是，如果是C++文件，则需在函数前面加上`extern "C"`，否则会在下面的链接过程中出错。
+这里把`say_hello`相关的代码编译成一个`say_hello`这个库。
 
-编译成功后，把`.o`文件打包成以`.a`结尾的库文件：
+接下来编译这个库：
 
 ```bash
-cdt-ar rcs libsay_hello.a say_hello.o
+mkdir -p say_hello/build
+cd say_hello/build
+cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
+make
 ```
 
+会在`say_hello/build`目录下生成`libsay_hello.a`这个库文件。
 
-接下来看下如何在rust代码中使用`say_hello`这个函数：
-
-lib.rs
+接下来看下[lib.rs](https://github.com/learnforpractice/rscdk-book/blob/master/examples/testcallcpp/lib.rs)中的代码：
 
 ```rs
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -71,7 +71,7 @@ lib.rs
 #[rust_chain::contract]
 mod hello {
     extern "C" {
-        fn say_hello(name: *const u8);
+        fn say_hello(name: *const u8, size: usize);
     }
 
     use rust_chain::{
@@ -98,7 +98,7 @@ mod hello {
         #[chain(action="test")]
         pub fn test(&self, name: String) {
             unsafe {
-                say_hello(name.as_ptr());
+                say_hello(name.as_ptr(), name.len());
             }
         }
     }
@@ -109,11 +109,11 @@ mod hello {
 
 ```rs
 extern "C" {
-    fn say_hello(name: *const u8);
+    fn say_hello(name: *const u8, size: usize);
 }
 ```
 
-声明一个定义在C中的函数，注意这里与C++代码中的`const char *`类型对应的类型为`*const u8`
+声明一个定义在C/C++中的`say_hello`这个函数，注意这里与C++代码中的`const char *`类型对应的类型为`*const u8`
 
 下面的代码展示了如何调用`say_hello`这个函数：
 
@@ -133,7 +133,7 @@ pub fn test(&self, name: String) {
 新建文件`build.rs`,并且添加下面的内容：
 
 ```rs
-use std::env;
+use std::process::Command;
 
 fn main() {
     let target_arch = std::env::var("CARGO_CFG_TARGET_ARCH")
@@ -141,8 +141,18 @@ fn main() {
     println!("Target architecture: {}", target_arch);
 
     if target_arch == "wasm32" {
-        println!("cargo:rustc-link-search=./");
-        println!("cargo:rustc-link-lib=static=say_hello");    
+        let output = Command::new("cdt-get-root-dir")
+        .output()
+        .expect("Failed to execute command");
+
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        println!("{}", stdout);
+
+        println!("cargo:rustc-link-search=./say_hello/build");
+        println!("cargo:rustc-link-lib=static=say_hello");
+
+        println!("cargo:rustc-link-search={}/{}", stdout.trim(), "lib");
+        println!("cargo:rustc-link-lib=static=c++");
     }
 }
 ```
@@ -150,42 +160,16 @@ fn main() {
 在上面的代码里，如下的代码即是指定在编译的目标系统为wasm32时，链接`libsay_hello.a`
 
 ```rust
-println!("cargo:rustc-link-search=./");
-println!("cargo:rustc-link-lib=static=say_hello");    
+println!("cargo:rustc-link-search=./say_hello/build");
+println!("cargo:rustc-link-lib=static=say_hello");  
 ```
 
-完整的示例代码可以从下面的链接中找到：
-[示例代码链接1](https://github.com/uuosio/rscdk/tree/main/tests/testcallcpp)
+如下的代码是链接`libc++.a`这个库，代码的路径是通过运行`cdt-get-root-dir`这个命令来获取的：
 
-## 用Cmake工具编译C++代码为库文件并链接进Rust代码
-
-当然，也可以用cmake来编译C++代码，并生成库文件，可以从下面的链接中找到示例：
-
-[示例代码链接2](https://github.com/uuosio/rscdk/tree/main/tests/testcallcpp2)
-
-其中的`build.sh`中的内容如下：
-
-```bash
-mkdir -p say_hello/build
-pushd say_hello/build
-cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
-make
-popd
-rust-contract build
+```rust
+println!("cargo:rustc-link-search={}/{}", stdout.trim(), "lib");
+println!("cargo:rustc-link-lib=static=c++");
 ```
-
-将C++代码编译成库文件的代码如下：
-
-```bash
-cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
-```
-
-这里需要指定CDT工具链文件来将C++代码编译成wasm32的库文件
-
-运行`./build.sh`来编译C++代码和Rust代码
-
-运行`./test.sh`来测试
-
 
 # 附录:
 
@@ -211,3 +195,4 @@ Rust类型和C类型对照表：
 | *mut T                   | T*                            |
 | &T                       | const T*                      |
 | &mut T                   | T*                            |
+

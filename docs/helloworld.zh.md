@@ -8,20 +8,39 @@ comments: true
 
 以下展示了一个最简单的智能合约代码和测试代码
 
-```python
-# helloworld.codon
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
 
-from chain.contract import Contract
+#[rust_chain::contract]
+mod helloworld {
+    use rust_chain::{
+        Name,
+        chain_println,
+    };
 
-@contract(main=True)
-class MyContract(Contract):
+    #[chain(main)]
+    #[allow(dead_code)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-    def __init__(self):
-        super().__init__()
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
 
-    @action('sayhello')
-    def say_hello(self):
-        print("Hello, World!")
+        #[chain(action = "sayhello")]
+        pub fn say_hello(&self) {
+            chain_println!("hello,world!");
+        }
+    }
+}
 ```
 
 测试代码：

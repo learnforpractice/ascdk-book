@@ -4,3 +4,4 @@ generated.go
 *.wasm
 site
 target
+build
