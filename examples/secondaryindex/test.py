@@ -68,57 +68,52 @@ def deploy_contract(tester, package_name):
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_counter(tester: ChainTester):
-    deploy_contract(tester, 'counter')
-    args = {'account': 'alice'}
-    
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    logger.info('++++++elapsed: %s', r['elapsed'])
-    tester.produce_block()
+def test_secondary(tester):
+    deploy_contract(tester, 'secondaryindex')
 
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    logger.info('++++++elapsed: %s', r['elapsed'])
-    tester.produce_block()
-
-@chain_test
-def test_remove(tester: ChainTester):
-    deploy_contract(tester, 'counter')
-    args = {'account': 'alice'}
-    
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
-
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
-
-    r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
-
-
-@chain_test
-def test_bound(tester: ChainTester):
-    deploy_contract(tester, 'counter')
     args = {}
-    r = tester.push_action('hello', 'testbound', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    args = {
+        'b': 222
+    }
+    r = tester.push_action('hello', 'test2', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
 
 @chain_test
-def test_offchain_find(tester):
-    deploy_contract(tester, 'counter')
+def test_remove(tester):
+    deploy_contract(tester, 'secondaryindex')
 
-    r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
     tester.produce_block()
-
-    r = tester.get_table_rows(False, 'hello', '', 'counter', '', '', 10)
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
     logger.info("+++++++rows: %s", r)
 
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    args = {
+        'b': 222
+    }
+    r = tester.push_action('hello', 'test3', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
     logger.info("+++++++rows: %s", r)
 
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '1', '3', 10)
+@chain_test
+def test_offchain_find(tester: ChainTester):
+    deploy_contract(tester, 'secondaryindex')
+
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '1', '', 10, key_type="i64", index_position="1")
+    logger.info("+++++++rows: %s", r)
+
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '22', '', 10, key_type="i64", index_position="2")
+    logger.info("+++++++rows: %s", r)
+    # 0x14d == 333
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '0x14d', '', 10, key_type="i128", index_position="3")
     logger.info("+++++++rows: %s", r)

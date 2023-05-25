@@ -8,228 +8,166 @@ comments: true
 
 下面结合示例来讲解下EOS的链上的内存数据库的使用。
 
-## Store
+## store/find/update
 
-存储功能是数据库最简单的功能了，下面的代码即演示了该功能。
+存储，查找，更新三个功能是数据库最基本的功能了，下面的代码演示了如何通过这三个功能进行链上的计数。
 
-[db_example1](https://github.com/learnforpractice/gscdk-book/tree/master/examples/db_example1)
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
 
-```go
-package main
+#[rust_chain::contract]
+mod counter {
+    use rust_chain::{
+        Name,
+        chain_println,
+    };
+    
+    #[chain(table="counter")]
+    pub struct Counter {
+        #[chain(primary)]
+        account: Name,
+        count: u64,
+    }
 
-import (
-	"github.com/uuosio/chain"
-)
+    #[chain(main)]
+    #[allow(dead_code)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-// table mytable
-type A struct {
-	a uint64 //primary
-	b string
-}
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
 
-// contract test
-type MyContract struct {
-	Receiver      chain.Name
-	FirstReceiver chain.Name
-	Action        chain.Name
-}
-
-func NewContract(receiver, firstReceiver, action chain.Name) *MyContract {
-	return &MyContract{receiver, firstReceiver, action}
-}
-
-// action teststore
-func (c *MyContract) TestStore(name string) {
-	code := c.Receiver
-	payer := c.Receiver
-	mytable := NewATable(code)
-	data := &A{123, "hello, world"}
-	mytable.Store(data, payer)
+        #[chain(action = "inc")]
+        pub fn inc_count(&self, account: Name) {
+            let db = Counter::new_table(self.receiver);
+            let it = db.find(account.value());
+            let payer = self.receiver;
+            if let Some(mut value) = it.get_value() {
+                value.count += 1;
+                db.update(&it, &value, payer);
+                chain_println!("+++count:", value.count);
+            } else {
+                let value = Counter{account: account, count: 1};
+                db.store(&value, payer);
+                chain_println!("+++count:", value.count);
+            }
+        }
+    }
 }
 ```
 
 解释一下上面的代码：
 
-- `// table mytable`这行注释指引编译器生成表相关的代码，如NewATable即是生成的代码，生成的代码保存在generated.go这个文件里。
-- `// contract test`这行注释表示`MyContract`是一个智能合约类，同样会指引编译器生成额外的代码
-- `// action teststore`表示`TestStore`方法是一个`action`，会通过包含在Transaction中的Action结构来触发
-- `NewATable(code)`指定创建一个表，表保存在`code`指定的账号里，在这个测试例子里是`hello`这个账号。
-- `mytable.Store(data, payer)`这行代码即将数据保存到链上的数据库中。其中的payer用于指定哪个账号支付RAM资源，并且需要在Transaction中已经用账号的`active`权限签名。
+- `#[chain(primary)]`指定了一个主索引成员变量为account, 类型为`Name`，需要注意的是，如果主索引为非`u64`类型，则需要实现`rust_chain::db::PrimaryValueInterface`trait的`get_primary`方法，如`Name`结构实现的代码如下：
+```rust
+impl PrimaryValueInterface for Name {
+    fn get_primary(&self) -> u64 {
+        return self.value();
+    }
+}
+```
+- `counter`模块通过`#[rust_chain::contract]`引用了`rust_chain`这个包中的`contract`宏，这个宏会根据模块中的`chain`属性来生成额外的数据库操作相关和处理action相关的代码。
+- `#[chain(table="counter")]`这行代码利用了`chain`属性来定义一个表，表的名称是`counter`，是一个`name`结构，`table`关键字指引编译器生成表相关的代码，生成的代码会对`rust-chain`代码中的`MultiIndex`结构相关的代码进行封装，以方便开发者进行调用
+- `#[chain(action = "inc")]`表示`inc_count`方法是一个`action`，会通过包含在Transaction中的Action结构来触发
+- `Counter::new_table(self.receiver)`指定创建一个表，`self.receiver`指定的是当前合约的账号名称，表示表是存储在当前合约账号。
+- `let it = db.find(account.value());`用于查找主索引为`1`所在的值，返回的值是`Iterator`类型
+- `let Some(mut value) = it.get_value()`用于获取`Iterator`中的值，如果值不存在，则调用`db.store(&value, payer);`来保存一个新值到数据库中，否则将count加1后调用`db.update(&it, &value, payer);`来更新数据库中的数据。其中的payer用于指定哪个账号支付RAM资源，并且需要在Transaction中已经用该账号的`active`权限签名。
 
 编译：
 
 ```bash
-cd examples/db_example1
-go-contract build .
+cd examples/counter
+rust-contract build
 ```
 
+测试：
+
 ```bash
-ipyeos -m pytest -s -x test.py -k test_store
+ipyeos -m pytest -s -x test.py -k test_counter
 ```
 
 运行的测试代码如下：
 
 ```python
-def test_store():
-    t = init_db_test('db_example1')
-    ret = t.push_action('hello', 'teststore', "", {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-```
-
-注意在这个示例中，如果表中已经存在以`123`类型为`uint64`的主索引的数据，那么该函数会抛出异常。
-
-如将上面的测试用例修改成下面的代码：
-
-```python
-def test_example1():
-    t = init_db_test('db_example1')
-    ret = t.push_action('hello', 'teststore', "", {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-
-    # will raise exception
-    ret = t.push_action('hello', 'teststore', "", {'hello': 'active'})
-    t.produce_block()
-```
-
-用同样的命令运行测试，在第二次调用`push_action`时，该函数就会抛出像下面的异常：
-
-```
-could not insert object, most likely a uniqueness constraint was violated
-```
-
-为了不抛出异常，在要更新表中的数据时，则要用到`Update`方法。
-在调用`Store`之前要先对表中是否存在主索引进行判断，如果已经存在，则不能调用`Store`方法，而必须调用`Update`方法。
-以下的示例展示了用法：
-                                                                                                    
-## Find/Update
-
-这一节演示了数据库的查找和更新功能。
-
-```go
-// db_example1
-
-// action testupdate
-func (c *MyContract) TestUpdate() {
-	code := c.Receiver
-	payer := c.Receiver
-	mytable := NewATable(code)
-	it, data := mytable.GetByKey(123)
-	chain.Check(it.IsOk(), "bad key")
-	chain.Println("+++++++old value:", data.b)
-	data.b = "goodbye world"
-	mytable.Update(it, data, payer)
-	chain.Println("done!")
-}
-
-```
-
-以下为测试代码：
-
-```python
 @chain_test
-def test_update(tester):
-    deploy_contract(tester, 'db_example1')
-
-    r = tester.push_action('hello', 'teststore', b'', {'hello': 'active'})
-    tester.produce_block()
-
-    r = tester.push_action('hello', 'testupdate', b'', {'hello': 'active'})
+def test_counter(tester: ChainTester):
+    deploy_contract(tester, 'counter')
+    args = {}
+    
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-```
 
-编译：
-
-```bash
-cd examples/db_example1
-go-contract build .
-```
-
-用下面的命令来运行测试代码：
-
-```bash
-ipyeos -m pytest -s -x test.py -k test_update
-```
-
-在调用:
-
-```python
-r = tester.push_action('hello', 'testupdate', b'', {'hello': 'active'})
-```
-
-会输出：
-
-```
-+++++++old value: hello, world
-```
-
-可以看出，上面的代码稍微有点复杂，首先要调用`GetByKey`获取`Iterator`和存储的值，通过`it.IsOk()`判断和主索引对应的值存不存在，再调用`Update`更新数据。其中的payer用于指定哪个账号支持RAM资源，并且需要在Transaction中已经用账号的`active`权限签名。需要注意的是，在更新的过程中，**主索引的值是不能变的**，否则会抛出异常。
-
-可以试着将update的代码修改成：
-
-```go
-data.a = 1
-data.b = "goodbye world"
-```
-
-你将会看到到智能合约里抛出的有如下指示的异常:
-
-```
-mi.Update: Can not change primary key during update
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
 ```
                                                                                                     
 ## Remove
 
 下面的代码演示了如何去删除数据库中的一项数据。
 
-```go
-// db_example1
-// action testremove
-func (c *MyContract) TestRemove() {
-	code := c.Receiver
-	mytable := NewATable(code)
-	it := mytable.Find(123)
-	chain.Check(it.IsOk(), "key 123 does not exists!")
-
-	mytable.Remove(it)
-
-	it = mytable.Find(123)
-	chain.Check(!it.IsOk(), "something went wrong")
-	chain.Println("+++++done!")
+```rust
+#[chain(action = "testremove")]
+pub fn test_remove(&self, account: Name) {
+    let db = Counter::new_table(self.receiver);
+    let it = db.find(account.value());
+    check(it.is_ok(), "key not found");
+    db.remove(&it);
 }
 ```
 
-上面的代码先调用`mytable.Find(123)`方法来查找指定的数据，然后再调用`Remove`删除，调用`it.IsOk()`以检查指定的索引所在的数据存不存在。
+上面的代码先调用`let it = db.find(account.value());`方法来查找指定的数据，然后再调用`remove`删除，调用`it.is_ok()`以检查指定的索引所在的数据存不存在。
 
 **注意：**
 
-这里的`Remove`并不需要调用`Store`或者`Update`所指定的payer账号的权限即可删除数据，所以，在实际的应用中，需要通过调用`chain.RequireAuth`来确保指定账号的权限才可以删除数据，例如：
-```go
-	chain.RequireAuth(chain.NewName("hello"))
+这里的`remove`并不需要调用`store`或者`update`所指定的`payer`账号的权限即可删除数据，所以，在实际的应用中，需要通过调用`rust_chain.require_auth`来确保指定账号的权限才可以删除数据，例如：
+
+```rust
+require_auth(name!("hello"))
 ```
 
 测试代码：
 
 ```python
 @chain_test
-def test_remove(tester):
-    deploy_contract(tester, 'db_example1')
-
-    r = tester.push_action('hello', 'teststore', b'', {'hello': 'active'})
+def test_remove(tester: ChainTester):
+    deploy_contract(tester, 'counter')
+    args = {'account': 'alice'}
+    
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
     tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++++table rows: %s", r)
 
-    r = tester.push_action('hello', 'testremove', b'', {'hello': 'active'})
-    logger.info('++++++elapsed: %s', r['elapsed'])
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
     tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++++table rows: %s", r)
+
+    r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++++table rows: %s", r)
 ```
+
+这里，先调用`inc`这个action来保证数据库中有存储数据，然后调用`testremove`来删除指定的数据，并且通过`get_table_rows`来确定数据是否已经添加或者被修改或者被删除，相关的`get_table_rows`的用法将在下面介绍。
 
 编译：
 
 ```bash
-cd examples/db_example1
-go-contract build .
+cd examples/counter
+rust-contract build .
 ```
 
 测试：
@@ -237,30 +175,20 @@ go-contract build .
 ```bash
 ipyeos -m pytest -s -x test.py -k test_remove
 ```
+输出：
+
+```
+NFO     test:test.py:90 +++++++++table rows: {'rows': [{'account': 'alice', 'count': 1}], 'more': False, 
+INFO     test:test.py:95 +++++++++table rows: {'rows': [{'account': 'alice', 'count': 2}], 'more': False, 'next_key': ''}
+INFO     test:test.py:100 +++++++++table rows: {'rows': [], 'more': False, 'next_key': ''}
+```
                                                                                                     
-## Lowerbound/Upperbound
+## lower_bound/upper_bound
 
-这两个方法也是用来查找表中的元素的，不同于`find`方法，这两个函数用于模糊查找。其中，`lowerbound`方法返回`>=`指定`id`的`Iterator`，`upperbound`方法返回`>`指定`id`的`Iterator`，下面来看下用法：
+这两个方法也是用来查找表中的元素的，不同于`find`方法，这两个函数用于模糊查找。其中，`lower_bound`方法返回`>=`指定`id`第一个元素的`Iterator`，`upper_bound`方法返回`>`指定`id`的第一个元素的`Iterator`，下面来看下用法：
 
-```go
-// examples/db_example1
+```rust
 
-// action testbound
-func (c *MyContract) TestBound() {
-	code := c.Receiver
-	payer := c.Receiver
-
-	mytable := NewATable(code)
-	mytable.Store(&A{1, "1"}, payer)
-	mytable.Store(&A{2, "2"}, payer)
-	mytable.Store(&A{5, "3"}, payer)
-
-	it := mytable.Lowerbound(1)
-	chain.Check(it.IsOk() && it.GetPrimary() == 1, "bad Lowerbound value")
-
-	it = mytable.Upperbound(2)
-	chain.Check(it.IsOk() && it.GetPrimary() == 5, "bad Upperbound value")
-}
 ```
 
 测试代码：
@@ -290,7 +218,8 @@ ipyeos -m pytest -s -x test.py -k test_bound
 输出：
 
 ```
-++++testbound done!
++++++db.lower_bound(1) return primary key: 1
++++++db.upper_bound(3) return primary key: 5
 ```
                                                                                                     
 ## 利用API来对表进行查询
@@ -346,265 +275,235 @@ def get_table_rows(self, _json, code, scope, table,
 ```python
 @chain_test
 def test_offchain_find(tester):
-    deploy_contract(tester, 'db_example1')
+    deploy_contract(tester, 'counter')
 
     r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
     tester.produce_block()
 
-    r = tester.get_table_rows(False, 'hello', '', 'mytable', '', '', 10)
+    r = tester.get_table_rows(False, 'hello', '', 'counter', '', '', 10)
     logger.info("+++++++rows: %s", r)
 
-    r = tester.get_table_rows(True, 'hello', '', 'mytable', '', '', 10)
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
     logger.info("+++++++rows: %s", r)
 
-    r = tester.get_table_rows(True, 'hello', '', 'mytable', '1', '2', 10)
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '1', '3', 10)
     logger.info("+++++++rows: %s", r)
+```
+
+运行测试代码:
+
+```bash
+ipyeos -m pytest -s -x test.py -k test_offchain_find
 ```
 
 输出：
 
 ```
-+++++++rows: {'rows': ['01000000000000000131', '02000000000000000132', '05000000000000000133'], 'more': False, 'next_key': ''}
-+++++++rows: {'rows': [{'a': 1, 'b': '1'}, {'a': 2, 'b': '2'}, {'a': 5, 'b': '3'}], 'more': False, 'next_key': ''}
-+++++++rows: {'rows': [{'a': 1, 'b': '1'}, {'a': 2, 'b': '2'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:118 +++++++rows: {'rows': ['01000000000000000100000000000000', '03000000000000000100000000000000', '05000000000000000100000000000000'], 'more': False, 'next_key': ''}
+INFO     test:test.py:121 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}, {'account': '............5', 'count': 1}], 'more': False, 'next_key': ''}
+INFO     test:test.py:124 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}], 'more': False, 'next_key': ''}
 ```
+
+注意，这里的`account`由于是`name`结构，会将数值转换成字符串，所以输出看起来比较奇怪。
                                                                                                     
-## 二重索引的操作
+## 二重索引的存储，查询和更新
 
 请先看下面的例子：
 
-[db_example2](https://github.com/learnforpractice/gscdk-book/tree/master/examples/db_example2)
+[示例代码](https://github.com/learnforpractice/rscdk-book/tree/master/examples/secondaryindex)
 
-```go
-// db_example2
-package main
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
 
-import (
-	"github.com/uuosio/chain"
-)
+#[rust_chain::contract]
+mod secondaryindex {
+    use rust_chain::{
+        Name,
+        chain_println,
+        check,
+    };
 
-// table mytable
-type A struct {
-	a uint64        //primary
-	b uint64        //secondary
-	c chain.Uint128 //secondary
-	d string
-}
+    #[chain(table="mydata")]
+    pub struct MyData {
+        #[chain(primary)]
+        a: u64,
+        #[chain(secondary)]
+        b: u64,
+        #[chain(secondary)]
+        c: u128,
+    }
 
-// contract db_example2
-type MyContract struct {
-	Receiver      chain.Name
-	FirstReceiver chain.Name
-	Action        chain.Name
-}
+    #[chain(main)]
+    #[allow(dead_code)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-func NewContract(receiver, firstReceiver, action chain.Name) *MyContract {
-	return &MyContract{receiver, firstReceiver, action}
-}
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
 
-// action teststore
-func (c *MyContract) TestStore() {
-	code := c.Receiver
-	payer := c.Receiver
-	mytable := NewATable(code)
-	data := &A{1, 2, chain.NewUint128(3, 0), "1"}
-	mytable.Store(data, payer)
-	chain.Println("++++++++teststore done!")
+        #[chain(action = "test1")]
+        pub fn test1(&self) {
+            let db = MyData::new_table(self.receiver);
+
+            let data = &MyData{a: 1, b: 2, c: 3};
+            db.store(&data, self.receiver);
+
+            let data = &MyData{a: 11, b: 22, c: 33};
+            db.store(&data, self.receiver);
+
+            let data = &MyData{a: 111, b: 222, c: 333};
+            db.store(&data, self.receiver);
+            chain_println!("++++test1 done!");
+        }
+
+        #[chain(action = "test2")]
+        pub fn test2(&self, b: u64) {
+            chain_println!("+++b:", b);
+            let db = MyData::new_table(self.receiver);
+            let idx = db.get_idx_by_b();
+            let (it_secondary, mut secondary_value) = idx.lower_bound(b);
+            if it_secondary.is_ok() {
+                chain_println!("++++primary value", it_secondary.primary, "secondary value:", secondary_value);
+                // update secondary value
+                let payer = self.receiver;
+                secondary_value += 1;
+                db.update_b(&it_secondary, secondary_value, payer);
+            }
+        }
+    }
 }
 ```
 
 在这个例子中，定义了两个二重索引：
 
-```go
-b uint64        //secondary
-c chain.Uint128 //secondary
+```rust
+#[chain(secondary)]
+b: u64,
+#[chain(secondary)]
+c: u128,
 ```
+
+`test1`action调用`store`方法存储了3组数据。
+`test2`action演示了调用二重索引的`lower_bound`来查找二重索引，以及调用`update_b`这个生成的方法来更新二重索引的数据
 
 测试代码：
 
 ```python
-# test.py
 @chain_test
-def test_store(tester):
-    deploy_contract(tester, 'db_example2')
-    r = tester.push_action('hello', 'teststore', b'', {'hello': 'active'})
-    logger.info('++++++elapsed: %s', r['elapsed'])
+def test_secondary(tester):
+    deploy_contract(tester, 'secondaryindex')
+
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
     tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    args = {
+        'b': 222
+    }
+    r = tester.push_action('hello', 'test2', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
 ```
 
 编译：
 
 ```bash
-cd examples/db_example2
-go-contract build .
+cd examples/secondaryindex
+rust-contract build
 ```
 
 运行测试：
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_store
+ipyeos -m pytest -s -x test.py -k test_secondary
 ```
 
-总结：对比主索引的例子，如果一个表中包含二重索引，那么存储所调用的方法是一样的，都是调用的`Store`这个方法
+输出：
+```
+INFO     test:test.py:78 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+[(hello,test2)->hello]: CONSOLE OUTPUT BEGIN =====================
++++b: 222
+++++primary value 111 secondary value: 222
 
-                                                                                                    
-## 二重索引的的更新
-
-在实际的应用中，有时候需要更新二重索引。请先看下面的代码
-
-```go
-// db_example2
-
-// action testupdate
-func (c *MyContract) TestUpdate() {
-	code := c.Receiver
-	payer := c.Receiver
-	mytable := NewATable(code)
-
-    idxb := mytable.GetIdxTableByb()
-	secondaryIt := idxb.Find(2)
-	chain.Check(secondaryIt.IsOk(), "secondary index 2 not found")
-	mytable.Updateb(secondaryIt, 3, payer)
-
-	secondaryIt = idxb.Find(3)
-	chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 1, "secondary index 3 not found")
-	chain.Println("+++++++test update done!")
-}
+[(hello,test2)->hello]: CONSOLE OUTPUT END   =====================
+INFO     test:test.py:86 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 223, 'c': '333'}], 'more': False, 'next_key': ''}
 ```
 
-注意上面代码中的这段代码：
+从输出中的:
 
-```go
-idxb := mytable.GetIdxTableByb()
-secondaryIt := idxb.Find(2)
-chain.Check(secondaryIt.IsOk(), "secondary index 2 not found")
-mytable.Updateb(secondaryIt, 3, payer)
-
-secondaryIt = idxb.Find(3)
-chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 1, "secondary index 3 not found")
-chain.Println("+++++++test update done!")
+```
+{'a': 111, 'b': 223, 'c': '333'}
 ```
 
-简述下过程：
-
-- `idxb := mytable.GetIdxTableByb()` 获取`b`的二重索引，`GetIdxTableByb`是一个自动生成的函数，代码可以在`generated.go`中找到
-- `secondaryIt := idxb.Find(2)`查找二重索引的类型为`uint64`的值`2`，返回的值`secondaryIt`为`SecondaryIterator`类型
-- **`mytable.Updateb(secondaryIt, uint64(3), payer)`** 这行代码即是实现了更新的功能，更新`b`的值为`3`，`Updateb`为自动生成的函数，定义在`generated.go`中
-- `secondaryIt = idxb.Find(3)`查找新的二重索引
-- `chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 1, "secondary index 3 not found")` 用于确认二重索引是否更新成功，注意，这里还会判断主索引是否为`1`
-                                                                                                    
-## 二重索引的查询
-
-二重索引同样支持通过`Find`, `Lowerbound`, `Upperbound`的方式来查询表，以下是示例，在这个示例中，显示了如何查询`b`, `c`这两个二重索引中的值
-
-```go
-// action testbound
-func (c *MyContract) TestBound() {
-	code := c.Receiver
-	payer := c.Receiver
-
-	mytable := NewATable(code)
-	data := &A{1, 2, chain.NewUint128(3, 0), "1"}
-	mytable.Store(data, payer)
-	data = &A{11, 22, chain.NewUint128(33, 0), "11"}
-	mytable.Store(data, payer)
-	data = &A{111, 222, chain.NewUint128(333, 0), "111"}
-	mytable.Store(data, payer)
-
-	{
-		idxb := mytable.GetIdxTableByb()
-		secondaryIt := idxb.Find(2)
-		chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 1, "key 2 not found")
-	}
-
-	{
-		idxb := mytable.GetIdxTableByb()
-		secondaryIt, secondaryValue := idxb.Lowerbound(2)
-		chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 1 && secondaryValue == 2, "bad Lowerbound value")
-
-		secondaryIt, secondaryValue = idxb.Upperbound(22)
-		chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 111 && secondaryValue == 222, "bad Upperbound value")
-	}
-
-	{
-		idxc := mytable.GetIdxTableByc()
-		secondaryIt, secondaryValue := idxc.Lowerbound(chain.NewUint128(3, 0))
-		chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 1 && secondaryValue == chain.NewUint128(3, 0), "bad Lowerbound value")
-
-		secondaryIt, secondaryValue = idxc.Upperbound(chain.NewUint128(33, 0))
-		chain.Check(secondaryIt.IsOk() && secondaryIt.Primary == 111 && secondaryValue == chain.NewUint128(333, 0), "bad Upperbound value")
-		chain.Println("++++testbound done!")
-	}
-}
-```
-
-测试的例子如下：
-
-```python
-@chain_test
-def test_bound(tester):
-    deploy_contract(tester, 'db_example2')
-
-    r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
-    tester.produce_block()
-```
-
-在示例的目录下用下面的命令来运行测试用例：
-
-```bash
-ipyeos -m pytest -s -x test.py -k test_bound
-```
-
+可以知道222已经被改成223了，其它的值保持不变
+                   
 ## 二重索引的删除
 
-```go
-// action testremove
-func (c *MyContract) TestRemove() {
-	code := c.Receiver
-	mytable := NewATable(code)
+```rust
+#[chain(action = "test3")]
+pub fn test3(&self, b: u64) {
+    chain_println!("+++b:", b);
+    let db = MyData::new_table(self.receiver);
+    let idx = db.get_idx_by_b();
+    let it = idx.find(b);
+    check(it.is_ok(), "b not found");
+    
+    let primary_it = db.find(it.primary);
+    check(primary_it.is_ok(), "primary key not found");
+    db.remove(&primary_it);
 
-	idxb := mytable.GetIdxTableByb()
-	secondaryIt := idxb.Find(2)
-
-	it := mytable.Find(secondaryIt.Primary)
-	chain.Check(it.IsOk(), "key does not exists!")
-
-	mytable.Remove(it)
-
-	secondaryIt = idxb.Find(2)
-	chain.Check(!secondaryIt.IsOk(), "something went wrong")
-	chain.Println("+++++testremove done!")
+    let it = idx.find(b);
+    check(!it.is_ok(), "b shoud not exit now");
 }
 ```
 
 解释一下上面的代码：
 
-- `secondaryIt := idxb.Find(2)` 查找二重索引
-- `it := mytable.Find(secondaryIt.Primary)` 通过`SecondaryIterator`获取主索引，再通过主索引返回庆索引的`Iterator`
-- `mytable.Remove(it)` 删除表中的元素，包含主索引和所有二重索引
+- `let it = idx.find(b);` 查找二重索引
+- `let primary_it = db.find(it.primary);` 通过`it.primary`获取主索引，再通过主索引返回主索引的`Iterator`
+- `db.remove(&primary_it);` 删除表中的元素，包含主索引和所有二重索引
 
 从上面的例子中可以看出，二重索引的删除是先通过二重索引找到主索引：，再通过主索引来删除的
 
+测试代码：
 
 ```python
-# test.py
 @chain_test
 def test_remove(tester):
-    deploy_contract(tester, 'db_example2')
+    deploy_contract(tester, 'secondaryindex')
 
-    r = tester.push_action('hello', 'teststore', b'', {'hello': 'active'})
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
     tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
 
-    r = tester.push_action('hello', 'testremove', b'', {'hello': 'active'})
-    logger.info('++++++elapsed: %s', r['elapsed'])
+    args = {
+        'b': 222
+    }
+    r = tester.push_action('hello', 'test3', args, {'hello': 'active'})
     tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
 ```
-
 
 编译：
 
 ```bash
-cd examples/db_example2
+cd examples/secondaryindex
 go-contract build .
 ```
 
@@ -614,24 +513,40 @@ go-contract build .
 ipyeos -m pytest -s -x test.py -k test_remove
 ```
 
+输出：
+
+```
+INFO     test:test.py:96 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+[(hello,test3)->hello]: CONSOLE OUTPUT BEGIN =====================
++++b: 222
+[(hello,test3)->hello]: CONSOLE OUTPUT END   =====================
+INFO     test:test.py:104 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}], 'more': False, 'next_key': ''}
+```
+
+对比两次get_table_rows的返回值，会发现`{'a': 111, 'b': 222, 'c': '333'}`这组数据被删除了
+
 ## 利用API来对表进行二重索引查询
 
-在例子`db_example2`中，定义了两个二重索引，类型分别为`uint64`,`chain.Uint128`，`get_table_rows`API还支持通过二重索引来查找对应的值
+在上面的例子中定义了两个二重索引，类型分别为`u64`,`u128`，`get_table_rows`API还支持通过二重索引来查找对应的值
 
 ```python
 @chain_test
-def test_offchain_find(tester):
-    deploy_contract(tester, 'db_example2')
+def test_offchain_find(tester: ChainTester):
+    deploy_contract(tester, 'secondaryindex')
 
-    r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
-    tester.produce_block()
-
-    r = tester.get_table_rows(True, 'hello', '', 'mytable', '1', '', 10, key_type="i64", index_position="2")
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '1', '', 10, key_type="i64", index_position="1")
     logger.info("+++++++rows: %s", r)
 
-    r = tester.get_table_rows(True, 'hello', '', 'mytable', '3', '', 10, key_type="i128", index_position="3")
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '11', '', 10, key_type="i64", index_position="2")
+    logger.info("+++++++rows: %s", r)
+    # 0x14d == 333
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '0x14d', '', 10, key_type="i128", index_position="3")
     logger.info("+++++++rows: %s", r)
 ```
+
+**注意**, 在查询`c`的时候，由于类型是`u128`，对于超出`u64`类型的范围时，可以用十六进制来表示数据，例如上面的`0x14d`的十进制数据为`333`
 
 运行测试用例：
 
@@ -642,11 +557,14 @@ ipyeos -m pytest -s -x test.py -k test_offchain_find
 上面的测试代码的运行结果如下：
 
 ```
-{'rows': [{'a': 1, 'b': 2, 'c': '3', 'd': '1'}, {'a': 11, 'b': 22, 'c': '33', 'd': '11'}, {'a': 111, 'b': 222, 'c': '333', 'd': '111'}], 'more': False, 'next_key': ''}
-{'rows': [{'a': 1, 'b': 2, 'c': '3', 'd': '1'}, {'a': 11, 'b': 22, 'c': '33', 'd': '11'}, {'a': 111, 'b': 222, 'c': '333', 'd': '111'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:113 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:116 +++++++rows: {'rows': [{'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:119 +++++++rows: {'rows': [{'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
 ```
-                                                                                                    
 
 ## 总结
 
 EOS中的数据存储功能是比较完善的，并且有二重索引表的功能，使数据的查找变得非常的灵活。本章详细讲解了数据库表的增，删，改，查的代码。本章的内容较多，需要花点时间好好消化。可以在示例的基础上作些改动，并且尝试运行以增加对这章知识点的理解。
+
+[示例代码1](https://github.com/learnforpractice/rscdk-book/tree/master/examples/counter)
+[示例代码2](https://github.com/learnforpractice/rscdk-book/tree/master/examples/secondaryindex)
