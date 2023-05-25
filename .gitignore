@@ -3,3 +3,4 @@ generated.go
 *.abi
 *.wasm
 site
+target
