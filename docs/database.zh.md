@@ -188,25 +188,46 @@ INFO     test:test.py:100 +++++++++table rows: {'rows': [], 'more': False, 'next
 这两个方法也是用来查找表中的元素的，不同于`find`方法，这两个函数用于模糊查找。其中，`lower_bound`方法返回`>=`指定`id`第一个元素的`Iterator`，`upper_bound`方法返回`>`指定`id`的第一个元素的`Iterator`，下面来看下用法：
 
 ```rust
+#[chain(action = "testbound")]
+pub fn test_bound(&self) {
+    let payer = self.receiver;
 
+    let db = Counter::new_table(self.receiver);
+    let value = Counter{account: Name{n: 1}, count: 1};
+    db.store(&value, payer);
+
+    let value = Counter{account: Name{n: 3}, count: 1};
+    db.store(&value, payer);
+
+    let value = Counter{account: Name{n: 5}, count: 1};
+    db.store(&value, payer);
+
+    let it = db.lower_bound(1);
+    check(it.is_ok() && it.get_primary() == Some(1), "bad value");
+    chain_println!("+++++db.lower_bound(1) return primary key:", it.get_primary().unwrap());
+
+    let it = db.upper_bound(3);
+    check(it.is_ok() && it.get_primary() == Some(5), "bad value");
+    chain_println!("+++++db.upper_bound(3) return primary key:", it.get_primary().unwrap());
+}
 ```
 
 测试代码：
 
 ```python
 @chain_test
-def test_bound(tester):
-    deploy_contract(tester, 'db_example1')
+def test_bound(tester: ChainTester):
+    deploy_contract(tester, 'counter')
+    args = {}
+    r = tester.push_action('hello', 'testbound', args, {'hello': 'active'})
 
-    r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
-    tester.produce_block()
 ```
 
 编译：
 
 ```bash
-cd examples/db_example1
-go-contract build .
+cd examples/counter
+rust-contract build .
 ```
 
 运行测试：
@@ -261,8 +282,8 @@ def get_table_rows(self, _json, code, scope, table,
 ```json
 "tables": [
     {
-        "name": "mytable",
-        "type": "A",
+        "name": "counter",
+        "type": "Counter",
         "index_type": "i64",
         "key_names": [],
         "key_types": []

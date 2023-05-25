@@ -4,280 +4,233 @@ comments: true
 
 # Database Operations
 
-On-chain data storage and retrieval is a critical feature of smart contracts. EOS implements an in-memory database that allows data to be stored in a table format. Each item in a table has a unique primary index, called a primary key, which is of type `u64`. The raw data stored in the table can be binary data of any length. When the storage function of a smart contract is called, the data is serialized and stored in the table. When reading, the stored data is deserialized back as a class object. Additionally, EOS supports secondary index tables of types `u64`, `u128`, `u256`, `double`, and `long double`, which can be considered special tables with a fixed data length. Primary and secondary index tables can be used together to implement multiple indexes. There can be multiple secondary index tables, and the values in these tables can be repeated, but the primary index in the primary index table must be unique.
+Chain data storage and retrieval are crucial functions of smart contracts. The EOS chain implements a memory database, supporting data storage in table form. Each entry in a table has a unique primary index, also known as a primary key, of the uint64 type. The raw data stored in the table are binary data of any length. When the smart contract invokes the data storage function, it serializes class data and stores it in the table. When reading, it deserializes the raw data back into class objects. It also supports secondary index tables of types uint64, Uint128, Uint256, Float64, Float128, which can be considered special tables with fixed data length. Primary index tables and secondary index tables can work together to implement multi-indexing. A table can have multiple secondary index tables. Secondary index table values can be duplicated, but the primary index of the primary index table must be unique.
 
-The following example demonstrates the usage of EOS's in-memory database.
+Below, we will use an example to explain the use of the EOS chain's in-memory database.
 
-## Store
+## store/find/update
 
-Storage is the simplest function of the database, and the following code demonstrates this functionality.
+Storage, search, and update are the most basic functions of a database. The following code demonstrates how to use these three functions to perform chain counting.
 
-```python
-# db_example1.codon
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
 
-from chain.database import primary
-from chain.contract import Contract
+#[rust_chain::contract]
+mod counter {
+    use rust_chain::{
+        Name,
+        chain_println,
+    };
+    
+    #[chain(table="counter")]
+    pub struct Counter {
+        #[chain(primary)]
+        account: Name,
+        count: u64,
+    }
 
-@table("mytable")
-class A(object):
-    a: primary[u64]
-    b: str
-    def __init__(self, a: u64, b: str):
-        self.a = primary[u64](a)
-        self.b = b
+    #[chain(main)]
+    #[allow(dead_code)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-@contract(main=True)
-class MyContract(Contract):
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
 
-    def __init__(self):
-        super().__init__()
-
-    @action('teststore')
-    def test_store(self):
-        print('db_test')
-        item = A(123u64, 'hello, world')
-        table = A.new_table(n'hello', n'')
-        table.store(item, n'hello')
+        #[chain(action = "inc")]
+        pub fn inc_count(&self, account: Name) {
+            let db = Counter::new_table(self.receiver);
+            let it = db.find(account.value());
+            let payer = self.receiver;
+            if let Some(mut value) = it.get_value() {
+                value.count += 1;
+                db.update(&it, &value, payer);
+                chain_println!("+++count:", value.count);
+            } else {
+                let value = Counter{account: account, count: 1};
+                db.store(&value, payer);
+                chain_println!("+++count:", value.count);
+            }
+        }
+    }
+}
 ```
 
-Compile:
+Explanation of the code above:
 
+- `#[chain(primary)]` specifies a primary index member variable as account, of type `Name`. Note that if the primary index is not of `u64` type, you need to implement the `get_primary` method of the `rust_chain::db::PrimaryValueInterface` trait, as the `Name` structure has implemented:
+```rust
+impl PrimaryValueInterface for Name {
+    fn get_primary(&self) -> u64 {
+        return self.value();
+    }
+}
 ```
-python-contract build db_example/db_example1.codon
-```
+- The `counter` module uses the `#[rust_chain::contract]` to reference the `contract` macro from the `rust_chain` package. This macro generates additional code related to database operations and action processing based on the `chain` attributes in the module.
+- `#[chain(table="counter")]` uses the `chain` attribute to define a table named `counter`, which is a `name` structure. The `table` keyword instructs the compiler to generate table-related code, wrapping the `MultiIndex` structure related code in `rust-chain` to make it easier for developers to call.
+- `#[chain(action = "inc")]` indicates that the `inc_count` method is an `action`, triggered by the Action structure included in the Transaction.
+- `Counter::new_table(self.receiver)` creates a table, where `self.receiver` specifies the name of the current contract account, indicating that the table is stored in the current contract account.
+- `let it = db.find(account.value());` is used to find the value located at the primary index `1`, and the returned value is of type `Iterator`.
+- `let Some(mut value) = it.get_value()` is used to obtain the value in `Iterator`. If the value doesn't exist, `db.store(&value, payer);` is used to save a new value to the database. Otherwise, after incrementing count by 1, `db.update(&it, &value, payer);` is used to update the data in the database. The payer specifies which account pays for the RAM resources and needs to have signed with the `active` permission of that account in the Transaction.
+
+Compilation:
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_store
+cd examples/counter
+rust-contract build
 ```
 
-The test code you are running is as follows:
-
-```python
-def test_store():
-    t = init_db_test('db_example1')
-    ret = t.push_action('hello', 'teststore', "", {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-```
-
-**Note**:
-
-In this example, if there is already data with the primary key `123u64` in the table, an exception will be thrown when the function is called.
-
-To modify the above test case to the following code:
-
-```python
-def test_example1():
-    t = init_db_test('db_example1')
-    ret = t.push_action('hello', 'test', "", {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-
-    # will raise exception
-    ret = t.push_action('hello', 'test', "", {'hello': 'active'})
-    t.produce_block()
-```
-
-When running the test with the same command, if the `push_action` is called for the second time, the function will throw an exception similar to the following:
-
-```
-could not insert object, most likely a uniqueness constraint was violated
-```
-
-To avoid such exceptions, the `update` method must be used when updating data in the table. Before calling `store`, it is necessary to check whether the primary index already exists in the table. If it does, `store` method cannot be called, and `update` method must be used instead. The following example demonstrates how to use it:
-                                                                                                    
-## find/update
-
-This section demonstrates the lookup and update functionality of the database.
-
-```python
-# db_example1.codon
-
-...
-
-@contract(main=True)
-class MyContract(Contract):
-
-...
-
-    @action('testupdate')
-    def test_update(self, value: str):
-        print('db_test')
-        table = A.new_table(n'hello', n'')
-        key = 123u64
-        it = table.find(key)
-        if it.is_ok():
-            print('+++++update value:', value)
-            item = A(key, value)
-            table.update(it, item, n'hello')
-        else:
-            print('+++++store value:', value)
-            item = A(key, value)
-            table.store(item, n'hello')
-```
-
-The following is the test code:
-
-```python
-def test_update():
-    t = init_db_test('db_example1')
-    ret = t.push_action('hello', 'testupdate', {'value': 'hello, bob'}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-
-    ret = t.push_action('hello', 'testupdate', {'value': 'hello, alice'}, {'hello': 'active'})
-    t.produce_block()
-```
-
-Compile using the following command:
-
-```
-python-contract build db_example/db_example1.codon
-```
-
-Execute the test code with the following command:
+Testing:
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_update
+ipyeos -m pytest -s -x test.py -k test_counter
 ```
 
-When calling
-```python
-t.push_action('hello', 'testupdate', {'value': 'hello, bob'}, {'hello': 'active'})
-```
-
-it will output:
-
-```
-+++++store value: hello, bob
-```
-
-When calling `testupdate` action again:
-```python
-t.push_action('hello', 'testupdate', {'value': 'hello, alice'}, {'hello': 'active'})
-```
-
-it will output:
-
-```
-+++++update value: hello, alice
-```
-
-As you can see, the above code is a bit complicated. First, it needs to call `find` to determine whether the value corresponding to the primary index exists, and then decide whether to call `store` or `update`. It should be noted that, during the update process, **the value of the primary index cannot be changed**, otherwise an exception will be thrown.
-
-You can try to modify the update code to:
+Test code to run is as follows:
 
 ```python
-item = A(key+1u64, value)
-table.update(it, item, n'hello')
+@chain_test
+def test_counter(tester: ChainTester):
+    deploy_contract(tester, 'counter')
+    args = {}
+    
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
 ```
 
-You will see an exception thrown in the smart contract.
-                                                                                                    
-## Remove
+## Removal
 
-The following code demonstrates how to remove an item from the database.
+The code below demonstrates how to delete a piece of data from the database.
 
-```python
-# db_example/db_example1.codon
+```rust
+#[chain(action = "testremove")]
+pub fn test_remove(&self, account: Name) {
+    let db = Counter::new_table(self.receiver);
+    let it = db.find(account.value());
+    check(it.is_ok(), "key not found");
+    db.remove(&it);
+}
+```
 
-@action('testremove')
-def test_remove(self):
-    print('test remove')
-    item = A(123u64, 'hello, world')
-    table = A.new_table(n'hello', n'')
-    table.store(item, n'hello')
+The code above first calls the `let it = db.find(account.value());` method to find the specified data, then calls `remove` to delete it, and checks if the specified index's data exists by calling `it.is_ok()`.
 
-    it = table.find(123u64)
-    assert it.is_ok()
-    table.remove(it)
+**Note:**
 
-    it = table.find(123u64)
-    assert not it.is_ok()
+Here, `remove` doesn't need the `payer` account's permission specified by `store` or `update` to delete data. Therefore, in actual applications, you need to ensure the specified account's permission by calling `rust_chain.require_auth`, for example:
+
+```rust
+require_auth(name!("hello"))
 ```
 
 Test code:
 
 ```python
-def test_remove():
-    t = init_db_test('db_example1')
-    ret = t.push_action('hello', 'testremove', "", {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+@chain_test
+def test_remove(tester: ChainTester):
+    deploy_contract(tester, 'counter')
+    args = {'account': 'alice'}
+    
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++++table rows: %s", r)
+
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++++table rows: %s", r)
+
+    r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++++table rows: %s", r)
 ```
 
-Compile using the following command:
+Here, the `inc` action is called first to ensure that data is stored in the database. Then, `testremove` is called to delete the specified data. The `get_table_rows` function is used to confirm whether the data has been added, modified, or deleted. The usage of `get_table_rows` will be introduced later.
 
-```
-python-contract build db_example/db_example1.codon
+Compilation:
+
+```bash
+cd examples/counter
+rust-contract build .
 ```
 
-Test using the following command:
+Testing:
 
 ```bash
 ipyeos -m pytest -s -x test.py -k test_remove
 ```
 
-The above code first calls the `store` method to store the data with index `123u64` in the database, then calls `remove` to delete it, and uses `assert` to check the result. If everything is normal, the program will not throw any exceptions.
+Output:
 
-## Lowerbound/Upperbound
+```
+INFO     test:test.py:90 +++++++++table rows: {'rows': [{'account': 'alice', 'count': 1}], 'more': False, 
+INFO     test:test.py:95 +++++++++table rows: {'rows': [{'account': 'alice', 'count': 2}], 'more': False, 'next_key': ''}
+INFO     test:test.py:100 +++++++++table rows: {'rows': [], 'more': False, 'next_key': ''}
+```
 
-These two methods are also used to search for elements in the database. Unlike the `find` method, these two functions are used for fuzzy searching. Among them, the `lowerbound` method returns an `Iterator` whose `id` is `>=` the specified `id`, and the `upperbound` method returns an `Iterator` whose `id` is `>` the specified `id`. Let's take a look at the usage below:
+## lower_bound/upper_bound
 
+These two methods are also used to find elements in the table. Unlike the `find` method, these two functions are used for fuzzy searches. The `lower_bound` method returns the `Iterator` of the first element `>=` the specified `id`, and the `upper_bound` method returns the `Iterator` of the first element `>` the specified `id`. The usage is as follows:
 
-```python
-# db_example/db_example1.codon
+```rust
+#[chain(action = "testbound")]
+pub fn test_bound(&self) {
+    let payer = self.receiver;
 
-...
+    let db = Counter::new_table(self.receiver);
+    let value = Counter{account: Name{n: 1}, count: 1};
+    db.store(&value, payer);
 
-@contract(main=True)
-class MyContract(Contract):
+    let value = Counter{account: Name{n: 3}, count: 1};
+    db.store(&value, payer);
 
-...
+    let value = Counter{account: Name{n: 5}, count: 1};
+    db.store(&value, payer);
 
-    @action('testbound')
-    def test_bound(self):
-        print('db_test')
-        table = A.new_table(n'hello', n'')
-        payer = n'hello'
+    let it = db.lower_bound(1);
+    check(it.is_ok() && it.get_primary() == Some(1), "bad value");
+    chain_println!("+++++db.lower_bound(1) return primary key:", it.get_primary().unwrap());
 
-        value = A(1u64, "alice")
-        table.store(value, payer)
-
-        value = A(3u64, "bob")
-        table.store(value, payer)
-
-        value = A(5u64, "john")
-        table.store(value, payer)
-
-        it = table.lowerbound(1u64)
-        value2: A = it.get_value()
-        print("+++++:", value2.a, value2.b)
-        assert value2.a == 1u64 and value2.b == 'alice'
-
-        it = table.upperbound(1u64)
-        value2: A = it.get_value()
-        print("+++++:", value2.a, value2.b)
-        assert value2.a == 3u64 and value2.b == 'bob'
+    let it = db.upper_bound(3);
+    check(it.is_ok() && it.get_primary() == Some(5), "bad value");
+    chain_println!("+++++db.upper_bound(3) return primary key:", it.get_primary().unwrap());
+}
 ```
 
 Test code:
 
 ```python
-def test_bound():
-    t = init_db_test('db_example4')
-    ret = t.push_action('hello', 'testbound', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+@chain_test
+def test_bound(tester: ChainTester):
+    deploy_contract(tester, 'counter')
+    args = {}
+    r = tester.push_action('hello', 'testbound', args, {'hello': 'active'})
 ```
 
-Compile using the following command:
+Compilation:
 
-```
-python-contract build db_example/db_example1.codon
+```bash
+cd examples/counter
+rust-contract build
 ```
 
-Run the test using the following command:
+Running the test:
 
 ```bash
 ipyeos -m pytest -s -x test.py -k test_bound
@@ -286,15 +239,15 @@ ipyeos -m pytest -s -x test.py -k test_bound
 Output:
 
 ```
-+++++: 1 alice
-+++++: 3 bob
++++++db.lower_bound(1) return primary key: 1
++++++db.upper_bound(3) return primary key: 5
 ```
 
-## Querying the Primary Index of a Table Using API
+## Using the API to Query the Table
 
-The above examples are all about how to operate the database table on the chain through the smart contract. In fact, by using the `get_table_rows` API provided by EOS off the chain, you can also query the table on the chain.
+The above examples are all about how to operate the on-chain database's tables through smart contracts. In fact, the off-chain `get_table_rows` API interface provided by EOS can also be used to query the tables on the chain. In the `ipyeos`'s `ChainTester` class and `pyeoskit`'s `ChainApiAsync` and `ChainApi` classes, the `get_table_rows` interface is provided to facilitate table query operations.
 
-In the test code, the definition of `get_table_rows` is as follows:
+In Python code, the definition of `get_table_rows` is as follows:
 
 ```python
 def get_table_rows(self, _json, code, scope, table,
@@ -310,566 +263,329 @@ def get_table_rows(self, _json, code, scope, table,
     """
 ```
 
-First of all, to query a table using `get_table_rows`, the structure of the table must be visible in the ABI description. You can use the following code to describe the table in the corresponding generated ABI file:
+Explanation of this interface's parameters:
 
-```python
-# db_example5.codon
+- `_json`: True to return data in JSON format, False to return raw data represented in hexadecimal
+- `code`: The account where the table is located
+- `scope`: Usually set as an empty string, when there are the same `code` and `table`, different `scope` can be used to distinguish different tables
+- `table`: The name of the data table to be queried
+- `lower_bound`: The starting primary key for the query, either string type or numerical type. When it's a string type, it can represent a `name` type. If it starts with a hexadecimal string '0x', it represents a numerical type. If it's empty, it means starting the query from the beginning.
+- `upper_bound`: The ending primary key for the query, either string type or numerical type. When it's a string type, it can represent a `name` type. If it starts with a hexadecimal string '0x', it represents a numerical type. If it's empty, it means there's no upper limit set, and all values `>=` `lower_bound` will be returned.
+- `limit`: Used to limit the number of returned values
+- `key_type`: Used to specify the type of index, by default it's a 64-bit unsigned integer type
+- `index_position`: Used to specify the relative position of the index. Empty or '1' indicates the main index, from '2' and above indicates the position of the secondary index
+- `reverse`: Specifies whether to return data in reverse order
+- `show_payer`: Specifies whether to show the account paying for RAM resources
 
-from chain.database import primary
-from chain.contract import Contract
+To query the table through `get_table_rows`, the structure of the table must be visible in the ABI description. In the `db_example1` example, the generated `test.abi` includes the following information, which is the description of the table:
 
-@table("mytable")
-class A(object):
-    a: primary[u64]
-    b: str
-    def __init__(self, a: u64, b: str):
-        self.a = primary[u64](a)
-        self.b = b
-
-@contract(main=True)
-class MyContract(Contract):
-
-    def __init__(self):
-        super().__init__()
-
-    @action('test')
-    def test(self):
-        print('db_test')
-        table = A.new_table(n'hello', n'')
-        payer = n'hello'
-
-        value = A(1u64, "alice")
-        table.store(value, payer)
-
-        value = A(3u64, "bob")
-        table.store(value, payer)
-
-        value = A(5u64, "john")
-        table.store(value, payer)
-
-        it = table.lowerbound(1u64)
-        value2: A = it.get_value()
-        print("+++++:", value2.a, value2.b)
-        assert value2.a() == 1u64 and value2.b == 'alice'
-
-        it = table.upperbound(1u64)
-        value2: A = it.get_value()
-        print("+++++:", value2.a, value2.b)
-        assert value2.a() == 3u64 and value2.b == 'bob'
-```
-
-Here, the `table` decorator is used to make the compiler include the structure of the table in the ABI.
-
-After adding this `table` to the class, the compiler will automatically add the `get_primary` and `new_table` functions to the class.
-
-At the same time, the member variables of the class must also meet certain requirements: first, a primary index variable must be declared, and the type must be `database.primary`. The implementation of the `primary` class is as follows:
-
-```python
-class primary[T](object):
-    value: T
-    def __init__(self, value: T):
-        self.value = value
-
-    def get_primary(self) -> u64:
-        if isinstance(self.value, u64):
-            return self.value
-        return self.value.get_primary()
-
-    def __pack__(self, enc: Encoder):
-        self.value.__pack__(enc)
-
-    def __unpack__(dec: Decoder) -> primary[T]:
-        return primary[T](T.__unpack__(dec))
-
-    def __call__(self) -> T:
-        return self.value
-
-    def __size__(self) -> int:
-        return self.value.__size__()
-```
-
-The `primary` class is a template class. If the type of the `value` in `primary` is not of type `u64`, then the type must implement the `get_primary` method. The `primary` class also has a `__call__` method to facilitate access to `value`. In the following discussion of multiple indexes, binary indexes will also be used. The type of the binary index must be `database.secondary`.
-
-Compilation:
-```bash
-python-contract build db_example/db_example5.codon
-```
-
-You will see the following description in the generated `db_example5.abi:`
-```bash
+```json
 "tables": [
-        {
-            "name": "mytable",
-            "type": "A",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        }
-    ]
+    {
+        "name": "counter",
+       "type": "Counter",
+        "index_type": "i64",
+        "key_names": [],
+        "key_types": []
+    }
+]
 ```
-
-Now consider the test code:
-```python
-def test_example5():
-    t = init_db_test('db_example5')
-    ret = t.push_action('hello', 'test', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-    rows = t.get_table_rows(True, 'hello', '', 'mytable', 1, '', 10)
-    logger.info('++++++=rows: %s', rows)
-```
-
-Run the test:
-```bash
-ipyeos -m pytest -s -x test.py -k test_example5
-```
-
-Output:
-```
-++++++=rows: {'rows': [{'a': 1, 'b': 'alice'}, {'a': 3, 'b': 'bob'}, {'a': 5, 'b': 'john'}], 'more': False, 'next_key': ''}
-```
-
-## Operation of the binary index
-
-First, consider the following example:
-
-```python
-# db_example7.codon
-
-from chain.contract import Contract
-from chain.database import primary, secondary
-from chain.database import IdxTable64, IdxTable128, Iterator
-from chain.name import Name
-
-@table("mytable")
-class A(object):
-    a: database.primary[u64]
-    b: secondary[u64]
-    c: secondary[u128]
-
-    def __init__(self, a: u64, b: u64, c: u128):
-        self.a = primary[u64](a)
-        self.b = secondary[u64](b)
-        self.c = secondary[u128](c)
-
-@contract(main=True)
-class MyContract(Contract):
-
-    def __init__(self):
-        super().__init__()
-
-    @action('test')
-    def test(self):
-        payer = n"hello"
-        table = A.new_table(n"hello", n"")
-        item = A(1u64, 2u64, 3u128)
-        table.store(item, payer)
-
-        idx_table_b = table.get_idx_table_by_b()
-        it = idx_table_b.find(2u64)
-        print("++++++it.primary:", it.primary)
-        assert it.primary == 1u64
-
-        idx_table_c = table.get_idx_table_by_c()
-        it = idx_table_c.find(3u128)
-        print("++++++it.primary:", it.primary)
-        assert it.primary == 1u64
-```
-
-In this example, two binary indexes are defined:
-
-```python
-b: secondary[u64]
-c: secondary[u128]
-```
-
-In the code, `get_idx_table_by_b` and `get_idx_table_by_c` are used to obtain the tables of the binary indexes, and the returned object types are `IdxTable64` and `IdxTable128`, respectively. The tables of binary indexes have similar method names as the tables of the primary index, and can also perform the function of binary index lookup.
 
 Test code:
 
 ```python
-# test.py
-def test_example7():
-    t = init_db_test('db_example7')
-    ret = t.push_action('hello', 'test', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+@chain_test
+def test_offchain_find(tester):
+    deploy_contract(tester, 'counter')
+
+    r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
+    tester.produce_block()
+
+    r = tester.get_table_rows(False, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '1', '3', 10)
+    logger.info("+++++++rows: %s", r)
+```
+
+Running the test code:
+
+```bash
+ipyeos -m pytest -s -x test.py -k test_offchain_find
+```
+
+Output:
+
+```
+INFO     test:test.py:118 +++++++rows: {'rows': ['01000000000000000100000000000000', '03000000000000000100000000000000', '05000000000000000100000000000000'], 'more': False, 'next_key': ''}
+INFO     test:test.py:121 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}, {'account': '............5', 'count': 1}], 'more': False, 'next_key': ''}
+INFO     test:test.py:124 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}], 'more': False, 'next_key': ''}
+```
+
+Note that the `account` here is of the `name` structure, which converts the numerical value to a string, so the output may appear somewhat odd.
+
+## Storage, Querying, and Updating of Secondary Indexes
+
+First, let's look at the following example:
+
+[Example Code](https://github.com/learnforpractice/rscdk-book/tree/master/examples/secondaryindex)
+
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
+
+#[rust_chain::contract]
+mod secondaryindex {
+    use rust_chain::{
+        Name,
+        chain_println,
+        check,
+    };
+
+    #[chain(table="mydata")]
+    pub struct MyData {
+        #[chain(primary)]
+        a: u64,
+        #[chain(secondary)]
+        b: u64,
+        #[chain(secondary)]
+        c: u128,
+    }
+
+    #[chain(main)]
+    #[allow(dead_code)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
+
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
+
+        #[chain(action = "test1")]
+        pub fn test1(&self) {
+            let db = MyData::new_table(self.receiver);
+
+            let data = &MyData{a: 1, b: 2, c: 3};
+            db.store(&data, self.receiver);
+
+            let data = &MyData{a: 11, b: 22, c: 33};
+            db.store(&data, self.receiver);
+
+            let data = &MyData{a: 111, b: 222, c: 333};
+            db.store(&data, self.receiver);
+            chain_println!("++++test1 done!");
+        }
+
+        #[chain(action = "test2")]
+        pub fn test2(&self, b: u64) {
+            chain_println!("+++b:", b);
+            let db = MyData::new_table(self.receiver);
+            let idx = db.get_idx_by_b();
+            let (it_secondary, mut secondary_value) = idx.lower_bound(b);
+            if it_secondary.is_ok() {
+                chain_println!("++++primary value", it_secondary.primary, "secondary value:", secondary_value);
+                // update secondary value
+                let payer = self.receiver;
+                secondary_value += 1;
+                db.update_b(&it_secondary, secondary_value, payer);
+            }
+        }
+    }
+}
+```
+
+In this example, two secondary indexes are defined:
+
+```rust
+#[chain(secondary)]
+b: u64,
+#[chain(secondary)]
+c: u128,
+```
+
+The `test1` action calls the `store` method to store 3 sets of data. The `test2` action demonstrates the use of `lower_bound` to search for secondary indexes, as well as the use of the generated `update_b` method to update secondary index data.
+
+Test code:
+
+```python
+@chain_test
+def test_secondary(tester):
+    deploy_contract(tester, 'secondaryindex')
+
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    args = {
+        'b': 222
+    }
+    r = tester.push_action('hello', 'test2', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
 ```
 
 Compile:
 
-```
-python-contract build db_example/db_example7.codon
+```bash
+cd examples/secondaryindex
+rust-contract build
 ```
 
 Run the test:
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_example7
+ipyeos -m pytest -s -x test.py -k test_secondary
 ```
 
 Output:
-```
-++++++it.primary: 1
-++++++it.primary: 1
-```
-
-## Updating the binary index
-
-In practical applications, sometimes it is necessary to update the binary index. Please first look at the following code:
-
-```python
-# db_example8.codon
-from chain.contract import Contract
-from chain.database import primary, secondary
-from chain.database import IdxTable64, IdxTable128, Iterator
-from chain.name import Name
-
-@table("mytable")
-class A(object):
-    a: database.primary[u64]
-    b: secondary[u64]
-    c: secondary[u128]
-
-    def __init__(self, a: u64, b: u64, c: u128):
-        self.a = primary[u64](a)
-        self.b = secondary[u64](b)
-        self.c = secondary[u128](c)
-
-@contract(main=True)
-class MyContract(Contract):
-
-    def __init__(self):
-        super().__init__()
-
-    @action('test')
-    def test(self):
-        payer = n"hello"
-        table = A.new_table(n"hello", n"")
-        item = A(1u64, 2u64, 3u128)
-        table.store(item, payer)
-        item = A(111u64, 222u64, 333u128)
-        table.store(item, payer)
-
-        idx_table_b = table.get_idx_table_by_b()
-        it_sec = idx_table_b.find(2u64)
-        print("++++++it.primary:", it_sec.primary)
-        assert it_sec.primary == 1u64
-        
-        table.update_b(it_sec, 22u64, payer)
-
-        it_sec = idx_table_b.find(22u64)
-        assert it_sec.is_ok()
-        print("++++++it.primary:", it_sec.primary)
-        assert it_sec.primary == 1u64
-```
-
-Note the following code in the above code:
-
-```python
-idx_table_b = table.get_idx_table_by_b()
-it_sec = idx_table_b.find(2u64)
-print("++++++it.primary:", it_sec.primary)
-assert it_sec.primary == 1u64
-
-table.update_b(it_sec, 22u64, payer)
-
-it_sec = idx_table_b.find(22u64)
-assert it_sec.is_ok()
-print("++++++it.primary:", it_sec.primary)
-assert it_sec.primary == 1u64
-```
-
-Brief description of the process:
-
-- `it_sec = idx_table_b.find(2u64)`: Looks up the value `2u64` in the binary index and returns the `SecondaryIterator` type result `it_sec`.
-- `table.update_b(it_sec, 22u64, payer)`: This line of code implements the update function and updates the value of `b` to `22u64`.
-- `it_sec = idx_table_b.find(22u64)`: Looks up the new binary index.
-- `assert assert it_sec.is_ok()`: Used to confirm whether the binary index has been updated successfully.
-- `assert it_sec.primary == 1u64`: Used to confirm whether the primary index is correct.
-
-The `update_b` code is generated by the compiler and is shown below:
-
-```python
-def update_b(self, it: SecondaryIterator, b: u64, payer: Name) -> None:
-    # 更新`b`的二级索引
-    self.idx_b.update(it, b, payer)
-    # 查找主索引
-    it_primary = self.table.find(it.primary)
-    check(it_primary.is_ok(), "primary iterator not found")
-    # 获取主索引对应的值
-    value: A = it_primary.get_value()
-    # 更新主索引对应的值
-    value.b = secondary[u64](b)
-    self.table.update(it_primary, value, payer)
-```
-
-From the code, it is apparent that when updating the binary index, the corresponding value in the primary index will also be updated.
-
-## Deleting the secondary index
-
-```python
-@action('testremove')
-def test_remove(self):
-    payer = n"hello"
-    table = A.new_table(n"hello", n"")
-    item = A(1u64, 2u64, 3u128)
-    table.store(item, payer)
-
-    idx_table_b = table.get_idx_table_by_b()
-    it_sec = idx_table_b.find(2u64)
-    assert it_sec.primary == 1u64
-    it = table.find(it_sec.primary)
-    table.remove(it)
-
-    it_sec = idx_table_b.find(2u64)
-    assert not it_sec.is_ok()
-    print('done!')
-```
-
-In this example, first call `store` to store an object A with the primary index of `1u64` and the first secondary index value of `2u64`. Then query `2u64` and confirm that `it_sec.primary == 1u64`. Next, call `remove` to delete the data with the primary index of `1u64`. Finally, query `2u64` again and confirm that the element has been deleted.
-
-```python
-# test.py
-def test_remove_secondary():
-    t = init_db_test('db_example8')
-    ret = t.push_action('hello', 'testremove', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-```
-
-
-Compilation:
-
-```bash
-python-contract build db_example/db_example8.codon
-```
-
-Running the test:
-
-```bash
-ipyeos -m pytest -s -x test.py -k test_remove_secondary
-```
-
-## Using the API to perform secondary index queries on a table
-
-In the `db_example8.codon` example, two binary indexes are defined, with the types `u64` and `u128`, respectively. The `get_table_rows` API also supports finding corresponding values through binary indexes.
-
-```python
-def test_example9():
-    t = init_db_test('db_example8')
-    ret = t.push_action('hello', 'test', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
-
-    # find by secondary u64
-    rows = t.get_table_rows(True, 'hello', '', 'mytable', 22, '', 10, 'i64', '2')
-    logger.info("++++++++++%s", rows['rows'])
-    assert rows['rows'][0]['b'] == 22
-
-    # find by secondary u128
-    rows = t.get_table_rows(True, 'hello', '', 'mytable', '3', '', 10, 'i128', '3')
-    logger.info("++++++++++%s", rows['rows'])
-    assert rows['rows'][0]['c'] == '3'
-```
-
-Explanation of the code below:
-
-To find the value in the table through the second index `b`:
-
-```python
-rows = t.get_table_rows(True, 'hello', '', 'mytable', 22, '', 10, 'i64', '2')
-```
-
-Here, `i64` is the index type of `b`, and `2` is zero-based index corresponding to the index.
-
-To find the value in the table through the second index `c`:
-
-```python
-rows = t.get_table_rows(True, 'hello', '', 'mytable', '3', '', 10, 'i128', '3')
-```
-
-Here, `i128` is the index type of `c`. Note that the value `3` in the `lowerbound` parameter is the value of the binary index. Since `u128` has exceeded the range of 64-bit integers, a numeric string is used to represent it. Finally, the last parameter `3` is the corresponding index number.
-
-The results of running the above test code are as follows:
 
 ```
-++++++++++[{'a': 1, 'b': 22, 'c': '3'}, {'a': 111, 'b': 222, 'c': '333'}]
-++++++++++[{'a': 1, 'b': 22, 'c': '3'}, {'a': 111, 'b': 222, 'c': '333'}]
+INFO     test:test.py:78 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+[(hello,test2)->hello]: CONSOLE OUTPUT BEGIN =====================
++++b: 222
+++++primary value 111 secondary value: 222
+
+[(hello,test2)->hello]: CONSOLE OUTPUT END   =====================
+INFO     test:test.py:86 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 223, 'c': '333'}], 'more': False, 'next_key': ''}
 ```
 
-## Implementation principles of the database
+From the output:
 
-The above code demonstrates the basic operations of the database. However, during the compilation process, some methods and classes are generated by the compiler. The following code displays the code generated by the compiler.
-
-```python
-# db_example6.codon
-from chain.contract import Contract
-from chain.database import primary, secondary
-from chain.database import IdxTable64, IdxTable128, Iterator
-from chain.mi import MultiIndexBase
-from chain.name import Name
-
-@packer
-class A(object):
-    a: database.primary[u64]
-    b: secondary[u64]
-    c: secondary[u128]
-
-    def __init__(self, a: u64, b: u64, c: u128):
-        self.a = primary[u64](a)
-        self.b = secondary[u64](b)
-        self.c = secondary[u128](c)
-
-    def get_primary(self) -> u64:
-        return self.a()
-
-class MultiIndexA(MultiIndexBase[A]):
-    idx_b: IdxTable64
-    idx_c: IdxTable128
-
-    def __init__(self, code: Name, scope: Name, table: Name):
-        MultiIndexBase[A].__init__(code, scope, table)
-        idx_table_base = table.value & 0xfffffffffffffff0u64
-        self.idx_b = IdxTable64(0, code, scope, Name(idx_table_base | u64(0)))
-        self.idx_c = IdxTable128(1, code, scope, Name(idx_table_base | u64(1)))
-
-    def store(self, item: A, payer: Name) -> Iterator[A]:
-        id: u64 = item.get_primary()
-        it = self.table.store(item, payer)
-        self.idx_b.store(id, item.b(), payer)
-
-        self.idx_c.store(id, item.c(), payer)
-
-        return it
-
-    def update(self, it: Iterator[A], item: A, payer: Name):
-        self.table.update(it, item, payer)
-
-        primary = item.get_primary()
-        secondary = item.b()
-        it_secondary, old_secondary = self.idx_b.find_by_primary(primary)
-        if not secondary == old_secondary:
-            self.idx_b.update(it_secondary, secondary, payer)
-
-        secondary = item.c()
-        it_secondary, old_secondary = self.idx_c.find_by_primary(primary)
-        if not secondary == old_secondary:
-            self.idx_c.update(it_secondary, secondary, payer)
-
-    def remove(self, it: Iterator[A]):
-        sec_it, _ = self.idx_b.find_by_primary(it.get_primary())
-        self.idx_b.remove(sec_it)
-
-        sec_it, _ = self.idx_c.find_by_primary(it.get_primary())
-        self.idx_c.remove(sec_it)
-
-        self.table.remove(it)
-
-    def remove(self, primary: u64):
-        it = self.table.find(primary)
-        if it.is_ok():
-            self.remove(it)
-
-    def get_idx_table_by_b(self) -> IdxTable64:
-        return self.idx_b
-
-    def get_idx_table_by_c(self) -> IdxTable128:
-        return self.idx_c
-
-    def update_b(self, it: SecondaryIterator, b: u64, payer: Name) -> None:
-        self.idx_b.update(it, b, payer)
-        it_primary = self.table.find(it.primary)
-        check(it_primary.is_ok(), "primary iterator not found")
-        value: A = it_primary.get_value()
-        value.b = secondary[u64](b)
-        self.table.update(it_primary, value, payer)
-
-    def update_c(self, it: SecondaryIterator, c: u128, payer: Name) -> None:
-        self.idx_c.update(it, c, payer)
-        it_primary = self.table.find(it.primary)
-        check(it_primary.is_ok(), "primary iterator not found")
-        value: A = it_primary.get_value()
-        value.c = secondary[u128](c)
-        self.table.update(it_primary, value, payer)
-
-@extend
-class A:
-    def new_table(code: Name, scope: Name):
-        return MultiIndexA(code, scope, n"mytable")
-
-@contract(main=True)
-class MyContract(Contract):
-
-    def __init__(self):
-        super().__init__()
-
-    @action('test')
-    def test(self):
-        payer = n"hello"
-        table = A.new_table(n"hello", n"")
-        item = A(1u64, 2u64, 3u128)
-        table.store(item, payer)
-
-        idx_table_b = table.get_idx_table_by_b()
-        it = idx_table_b.find(2u64)
-        print("++++++it.primary:", it.primary)
-        assert it.primary == 1u64
-
-        idx_table_c = table.get_idx_table_by_c()
-        it = idx_table_c.find(3u128)
-        print("++++++it.primary:", it.primary)
-        assert it.primary == 1u64
+```
+{'a': 111, 'b': 223, 'c': '333'}
 ```
 
-This example demonstrates a scenario where there are two binary indexes. Only the name `table` was changed to `packer`. In this case, the compiler will not generate any code related to the database.
+It can be seen that 222 has been changed to 223, while other values remain unchanged.
+  
+## Deletion of Secondary Indexes
 
-By comparison, it is apparent that the compiler generates a class named `MultiIndexA`, which inherits from the `MultiIndexBase` class defined in `mi.codon`. This class has the following methods:
+```rust
+#[chain(action = "test3")]
+pub fn test3(&self, b: u64) {
+    chain_println!("+++b:", b);
+    let db = MyData::new_table(self.receiver);
+    let idx = db.get_idx_by_b();
+    let it = idx.find(b);
+    check(it.is_ok(), "b not found");
+    
+    let primary_it = db.find(it.primary);
+    check(primary_it.is_ok(), "primary key not found");
+    db.remove(&primary_it);
 
-- def store(self, item: A, payer: Name) -> Iterator[A]
-- def update(self, it: Iterator[A], item: A, payer: Name)
-- def remove(self, it: Iterator[A])
-- def get_idx_table_by_b(self) -> IdxTable64:
-- def get_idx_table_by_c(self) -> IdxTable128:
-- def update_b(self, it: SecondaryIterator, b: u64, payer: Name) -> None:
-- def update_c(self, it: SecondaryIterator, c: u128, payer: Name) -> None:
+    let it = idx.find(b);
+    check(!it.is_ok(), "b shoud not exit now");
+}
+```
 
-In addition, the class `A` is generated, along with the following additional methods:
+The code above can be explained as follows:
 
-- `get_primary`: retrieves the primary index
-- `get_idx_table_by_b`: retrieves the table indexed by `b`, returning an instance of the `IdxTable64` class
-- `get_idx_table_by_c`: retrieves the table indexed by `c`, returning an instance of the `IdxTable128` class
-- `new_table`
+- `let it = idx.find(b);` searches for the secondary index.
+- `let primary_it = db.find(it.primary);` gets the primary index through `it.primary`, and returns the iterator of the primary index.
+- `db.remove(&primary_it);` removes the element from the table, including the primary index and all secondary indexes.
+
+From the example above, it can be seen that the deletion of secondary indexes first finds the primary index through the secondary index, and then deletes it through the primary index.
 
 Test code:
 
 ```python
-def test_example6():
-    t = init_db_test('db_example6')
-    ret = t.push_action('hello', 'test', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+@chain_test
+def test_remove(tester):
+    deploy_contract(tester, 'secondaryindex')
+
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    args = {
+        'b': 222
+    }
+    r = tester.push_action('hello', 'test3', args, {'hello': 'active'})
+    tester.produce_block()
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info("+++++++rows: %s", r)
 ```
 
-Compilation:
-
-```
-python-contract build db_example/db_example6.codon
-```
-
-Running the test:
+Compile:
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_example6
+cd examples/secondaryindex
+go-contract build .
+```
+
+Run the test:
+
+```bash
+ipyeos -m pytest -s -x test.py -k test_remove
 ```
 
 Output:
 
 ```
-++++++it.primary: 1
-++++++it.primary: 1
+INFO     test:test.py:96 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+[(hello,test3)->hello]: CONSOLE OUTPUT BEGIN =====================
++++b: 222
+[(hello,test3)->hello]: CONSOLE OUTPUT END   =====================
+INFO     test:test.py:104 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}], 'more': False, 'next_key': ''}
 ```
 
-## Summary
+Comparing the return values of the two `get_table_rows`, it can be seen that the data set `{'a': 111, 'b': 222, 'c': '333'}` has been deleted.
 
-The data storage functionality in EOS is relatively comprehensive, and the second-level index table function makes data querying very flexible. This chapter provides a detailed explanation of the code for table operations, including adding, deleting, modifying, and querying. This chapter contains a lot of content and requires some time to digest. You can try to modify the examples and run them to gain a better understanding of the content covered in this chapter.
+## Use API to Query Tables with Secondary Indexes
+
+In the examples above, two secondary indexes were defined, of types `u64` and `u128` respectively. The `get_table_rows` API also supports finding corresponding values through secondary indexes.
+
+```python
+@chain_test
+def test_offchain_find(tester: ChainTester):
+    deploy_contract(tester, 'secondaryindex')
+
+    args = {}
+    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '1', '', 10, key_type="i64", index_position="1")
+    logger.info("+++++++rows: %s", r)
+
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '11', '', 10, key_type="i64", index_position="2")
+    logger.info("+++++++rows: %s", r)
+    # 0x14d == 333
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '0x14d', '', 10, key_type="i128", index_position="3")
+    logger.info("+++++++rows: %s", r)
+```
+
+**Note**, when querying `c`, because its type is `u128`, for values beyond the range of `u64` type, you can use hexadecimal to represent the data. For example, the hexadecimal `0x14d` is `333` in decimal.
+
+Run the test case:
+
+```bash
+ipyeos -m pytest -s -x test.py -k test_offchain_find
+```
+
+The output of the test code above is as follows:
+```
+INFO     test:test.py:113 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:116 +++++++rows: {'rows': [{'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:119 +++++++rows: {'rows': [{'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+```
+
+## Conclusion
+
+The data storage function in EOS is quite robust, and it has the feature of secondary index tables, which makes data search very flexible. This chapter provides a detailed explanation of the code for adding, deleting, updating, and querying database tables. This chapter contains a lot of content and will take some time to digest. You can make some changes based on the examples and try to run them to enhance your understanding of the knowledge points in this chapter.
+
+[Example Code 1](https://github.com/learnforpractice/rscdk-book/tree/master/examples/counter)
+[Example Code 2](https://github.com/learnforpractice/rscdk-book/tree/master/examples/secondaryindex)
+
