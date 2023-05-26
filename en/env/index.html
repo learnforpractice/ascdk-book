@@ -571,12 +571,22 @@
 <h2 id="installing-rust">Installing Rust</h2>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--proto<span class="w"> </span><span class="s1">&#39;=https&#39;</span><span class="w"> </span>--tlsv1.2<span class="w"> </span>-sSf<span class="w"> </span>https://sh.rustup.rs<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>-y
 </code></pre></div>
-<p>Activate the new PATH environment variable.</p>
+<p>Activate the new PATH environment variable:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.cargo/env
 </code></pre></div>
 <h2 id="installing-nightly-rust">Installing Nightly Rust</h2>
-<div class="highlight"><pre><span></span><code>rustup<span class="w"> </span>toolchain<span class="w"> </span>install<span class="w"> </span>nightly<span class="w"> </span>--component<span class="w"> </span>rust-src
+<p>Due to issues with compiling contracts using newer versions of Rust nightly, it is necessary to install the <code>nightly-2023-02-07</code> version of Rust:</p>
+<div class="highlight"><pre><span></span><code>rustup install nightly-2023-02-07
+rustup component add rust-src --toolchain nightly-2023-02-07
 </code></pre></div>
+<p>Then, on Linux platform, execute the following command:
+<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
+</code></pre></div></p>
+<p>If you are on macOSX platform, execute the following command:
+<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-apple-darwin
+</code></pre></div></p>
+<p>If you have already installed the default nightly version beforehand, you will need to rename or delete the original directory. Otherwise, it will cause the creation of the symbolic link to fail.</p>
+<p>The additional setup mentioned above will be improved in future versions to allow compiling Rust contracts using the stable version.</p>
 <h2 id="installing-binaryen">Installing Binaryen</h2>
 <ul>
 <li>Install version &gt;= 99 of <code>binaryen</code>:</li>

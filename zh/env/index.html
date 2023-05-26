@@ -571,12 +571,22 @@
 <h2 id="rust">安装 Rust</h2>
 <div class="highlight"><pre><span></span><code>curl --proto &#39;=https&#39; --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 </code></pre></div>
-<p>激活新的 PATH 环境变量。</p>
+<p>激活新的 PATH 环境变量：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.cargo/env
 </code></pre></div>
 <h2 id="nightly-rust">安装 Nightly Rust</h2>
-<div class="highlight"><pre><span></span><code>rustup<span class="w"> </span>toolchain<span class="w"> </span>install<span class="w"> </span>nightly<span class="w"> </span>--component<span class="w"> </span>rust-src
+<p>由于较新的rust nightly版本编译合约会出问题，这里需要额外安装<code>nightly-2023-02-07</code>版本的rust:</p>
+<div class="highlight"><pre><span></span><code>rustup install nightly-2023-02-07
+rustup component add rust-src --toolchain nightly-2023-02-07
 </code></pre></div>
+<p>然后在linux平台下执行：
+<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
+</code></pre></div></p>
+<p>如果是macOSX平台，则执行：
+<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-apple-darwin
+</code></pre></div></p>
+<p>如果事先已经安装过了默认的nightly版本，则需要将原目录重命名或者删除，否则会导致创建链接失败。</p>
+<p>上面的额外设置在未来的版本中会加以改进，以期可以用stable的版本来编译rust合约。</p>
 <h2 id="binaryen">安装 binaryen</h2>
 <ul>
 <li>安装版本 &gt;= 99 的 <code>binaryen</code>:</li>
