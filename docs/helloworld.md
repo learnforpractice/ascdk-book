@@ -4,112 +4,175 @@ comments: true
 
 # HelloWorld
 
-## The First Smart Contract
+## First Smart Contract
 
-The following code shows the simplest smart contract and its testing code:
+Below is the code for the simplest smart contract and its test code.
 
-```python
-# helloworld.codon
+[Complete Example](https://github.com/learnforpractice/rscdk-book/tree/master/examples/helloworld)
 
-from chain.contract import Contract
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
 
-@contract(main=True)
-class MyContract(Contract):
+#[rust_chain::contract]
+mod helloworld {
+    use rust_chain::{
+        Name,
+        chain_println,
+    };
 
-    def __init__(self):
-        super().__init__()
+    #[chain(main)]
+    #[allow(dead_code)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-    @action('sayhello')
-    def say_hello(self):
-        print("Hello, World!")
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
+
+        #[chain(action = "sayhello")]
+        pub fn say_hello(&self) {
+            chain_println!("hello,world!");
+        }
+    }
+}
 ```
 
-Testing code:
+Test code:
 
 ```python
-
 import os
+import sys
+import json
+import struct
+import pytest
+
+test_dir = os.path.dirname(__file__)
+sys.path.append(os.path.join(test_dir, '..'))
+
+from ipyeos import log
+from ipyeos import eos
 from ipyeos import chaintester
 from ipyeos.chaintester import ChainTester
-from ipyeos import log
 
 chaintester.chain_config['contracts_console'] = True
 
 logger = log.get_logger(__name__)
 
-dir_name = os.path.dirname(os.path.abspath(__file__))
+def init_tester():
+    tester = chaintester.ChainTester()
+    return tester
 
-def init_test(contract_name):
-    t = ChainTester(True)
-    wasm_file = os.path.join(dir_name, f'{contract_name}.wasm')
-    with open(wasm_file, 'rb') as f:
+def chain_test(fn):
+    def call():
+        tester = init_tester()
+        ret = fn(tester)
+        tester.free()
+        return ret
+    return call
+
+class NewChainTester():
+    def __init__(self):
+        self.tester = None
+
+    def __enter__(self):
+        self.tester = init_tester()
+        return self.tester
+
+    def __exit__(self, type, value, traceback):
+        self.tester.free()
+
+test_dir = os.path.dirname(__file__)
+def deploy_contract(tester, package_name):
+    with open(f'{test_dir}/target/{package_name}.wasm', 'rb') as f:
         code = f.read()
-
-    abi_file = os.path.join(dir_name, f'{contract_name}.abi')
-    with open(abi_file, 'r') as f:
+    with open(f'{test_dir}/target/{package_name}.abi', 'rb') as f:
         abi = f.read()
+    tester.deploy_contract('hello', code, abi)
 
-    t.deploy_contract('hello', code, abi)
-    t.produce_block()
-    return t
-
-def test():
-    t = init_test('helloworld')
-    ret = t.push_action('hello', 'sayhello', "", {'hello': 'active'})
-    t.produce_block()
+@chain_test
+def test_sayhello(tester):
+    deploy_contract(tester, 'helloworld')
+    ret = tester.push_action('hello', 'sayhello', "", {'hello': 'active'})
+    tester.produce_block()
     logger.info("++++++++++%s\n", ret['elapsed'])
 ```
 
-
 Compile:
 
-```
-python-contract build helloworld.codon
+```bash
+cd examples/helloworld
+rust-contract build
 ```
 
-
-To run the test code:
+Run test code:
 
 ```
-ipyeos -m pytest -s -x testhelloworld.py -k test
+ipyeos -m pytest -s -x test.py -k test_sayhello
 ```
 
 Output:
 
 ```
-Hello, World!
-```
-
-## Create an Initial Project
-
-You can create an initial project using the `python-contract init` command. For example, the following code creates an initial project named `mycontract`:
-
-```
-python-contract init mycontract
-```
-
-After creating the project, you can compile the contract using the following command:
-
-```
-cd mycontract
-./build.sh
-```
-
-After a successful execution, `mycontract.wasm` and `mycontract.abi` files will be generated.
-
-You can run the following command for testing:
-
-```
-./test.sh
-```
-
-The following information will be output:
-
-```
 [(hello,sayhello)->hello]: CONSOLE OUTPUT BEGIN =====================
-hello  alice
+hello,world!
 
 [(hello,sayhello)->hello]: CONSOLE OUTPUT END   =====================
 ```
 
-After confirming that the test was successful, you can proceed with smart contract development based on this existing project.
+## Creating an Initial Project
+
+You can use the `rust-contract init` command to create an initial project. For example, the following command creates an initial project named `mycontract`:
+
+```bash
+rust-contract init mycontract
+```
+
+After creating the project, you can compile the contract using the following command:
+
+```bash
+cd mycontract
+./build.sh
+```
+
+After a successful execution, the `target` directory will contain the `mycontract.wasm` and `mycontract.abi` files.
+
+You can use the following command to run the tests:
+
+```bash
+./test.sh
+```
+
+The output will show the following text in green font:
+
+```
+debug 2023-05-26T01:43:59.121 thread-0  apply_context.cpp:40          print_debug          ] 
+[(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
+count is 1
+
+[(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
+debug 2023-05-26T01:43:59.123 thread-0  controller.cpp:2499           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list, pending block time 2018-06-01T12:00:03.500
+debug 2023-05-26T01:43:59.125 thread-0  apply_context.cpp:40          print_debug          ] 
+[(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
+count is 2
+
+[(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
+```
+
+Please note that the above output is for debugging purposes. If running on the mainnet, the output from the `chain_println!` function will not be visible. To see the debug output in a testnet environment, you need to include the `--contracts-console` parameter when running the `nodeos` command.
+
+In the test code provided, debug information is directly outputted with the following line of code:
+
+```python
+chaintester.chain_config['contracts_console'] = True
+```
+
+Furthermore, in the released version of the code, `chain_println!` statements should not be included to improve the performance of the program.

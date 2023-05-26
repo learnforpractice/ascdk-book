@@ -243,7 +243,7 @@ pub fn test_recover(&self, msg: Vec<u8>, sig: Signature, pub_key: PublicKey) {
 }
 ```
 
-
+`recover_key`的原理和节点检验Transaction中的签名是否有效是一样的，就是通过对digest进行签名，然后再用公钥进行验证。
 在实际的智能合约的应用中，如果要在智能合约里判断某段二进制数据是否是用特定的私钥进行的签名也可以用上面的办法。过程如下：
 
 - 合约中保存用户一个私钥对应的公钥

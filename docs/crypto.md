@@ -2,203 +2,254 @@
 comments: true
 ---
 
-# Cryptographic functions
+# Cryptography Related Functions
 
-Cryptographic functions are defined in `crypto.codon`. They can be imported like the following code:
+Cryptography related functions are defined in `crypto.rs` in the `rust-chain` package, they can be imported as shown below:
 
-```python
-from chain.crypto import sha256
+```rust
+use rust_chain::{
+    sha256,
+};
 ```
 
-Or just import the `crypto` module:
+Or just import the crypto module:
 
-```python
-from chain import crypto
+```rust
+use rust_chain::crypto;
 ```
-
-Then, call internal functions such as `crypto.sha256` using the appropriate format.
 
 ## sha256
 
-Hash function using the sha256 algorithm:
+SHA-256 hash function
 
-```python
-def sha256(data: bytes) -> Checksum256:
+```rust
+pub fn sha256(data: &[u8]) -> Checksum256
 ```
 
-Used for checking if the hash256 value is correct. If not, an exception will be raised:
+Used to check if the SHA-256 hash value is normal, will throw an exception if incorrect.
 
-```python
-def assert_sha256(data: bytes, hash: Checksum256):
+```rust
+pub fn assert_sha256(data: &[u8], hash: &Checksum256)
 ```
 
 ## sha1
 
-Hash function using the sha1 algorithm:
+SHA-1 hash function
 
-```python
-def sha1(data: bytes) -> Checksum160:
+```rust
+pub fn sha1( data: &[u8]) -> Checksum160
 ```
 
-Used for checking if the sha1 hash value is correct. If not, an exception will be raised:
+Used to check if the SHA-1 hash value is normal, will throw an exception if incorrect.
 
-```python
-def assert_sha1(data: bytes, hash: Checksum160):
+```rust
+pub fn assert_sha1(data: &[u8], hash: &Checksum160)
 ```
 
 ## sha512
 
-Hash function using the sha512 algorithm:
+SHA-512 hash function
 
-```python
-def sha512(data: bytes) -> Checksum512:
+```rust
+pub fn sha512( data: &[u8]) -> Checksum512
 ```
 
-Used for checking if the hash512 value is correct. If not, an exception will be raised:
+Used to check if the SHA-512 hash value is normal, will throw an exception if incorrect.
 
-```python
-def assert_sha512(data: bytes, hash: Checksum512):
+```rust
+pub fn assert_sha512(data: &[u8], hash: &Checksum512)
 ```
 
 ## ripemd160
 
-Hash function using the ripemd160 algorithm:
+RIPEMD-160 hash function
 
-```python
-def ripemd160(data: bytes) -> Checksum160:
+```rust
+pub fn ripemd160(data: &[u8]) -> Checksum160
 ```
 
-Used for checking if the ripemd160 algorithm hash value is correct. If not, an exception will be raised:
+Used to check if the RIPEMD-160 hash value is normal, will throw an exception if incorrect.
 
-```python
-def assert_ripemd160(data: bytes, hash: Checksum160):
+```rust
+pub fn assert_ripemd160(data: &[u8], hash: &Checksum160)
 ```
 
 ## recover_key
 
-Used to recover the public key from digest and signature:
+Used to recover the public key from the digest and signature.
 
-```python
-def recover_key(digest: Checksum256, sig: Signature) -> PublicKey:
+```rust
+pub fn recover_key( digest: &Checksum256 , sig: &Signature) -> PublicKey
 ```
 
-Checks if the signature is correct. If not, an exception will be raised:
+Check if the signature is normal, will throw an exception if incorrect.
 
-```python
-def assert_recover_key(digest: Checksum256, sig: Signature, pub: PublicKey):
+```rust
+pub fn assert_recover_key(digest: &Checksum256, sig: &Signature, pubkey: &PublicKey)
 ```
 
 ## Example:
 
-```python
-# crypto_example.codon
-from chain.contract import Contract
-from chain.crypto import sha256, assert_sha256, sha512, assert_sha512, sha1, assert_sha1, ripemd160, assert_ripemd160
-from chain.crypto import recover_key, assert_recover_key
-from chain.crypto import Signature, Checksum256, PublicKey
+[Full Example Code](https://github.com/learnforpractice/rscdk-book/tree/master/examples/cryptotest)
 
-@contract(main=True)
-class MyContract(Contract):
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
 
-    def __init__(self):
-        super().__init__()
+#[rust_chain::contract]
+#[allow(dead_code)]
+mod cryptotest {
+    use rust_chain::{
+        Name,
 
-    @action('testcrypto')
-    def test_crypto(self):
-        assert_sha256(b"hello", sha256(b"hello"))
-        assert_sha1(b"hello", sha1(b"hello"))
-        assert_sha512(b"hello", sha512(b"hello"))
-        assert_ripemd160(b"hello", ripemd160(b"hello"))
+        PublicKey,
+        Signature,
 
-    @action('testrecover')
-    def test_recover(self, msg: bytes, digest: Checksum256, sig: Signature, k1: PublicKey):
-        _digest = sha256(msg)
-        assert _digest == digest
-        _pubkey = recover_key(digest, sig)
-        assert _pubkey == k1, "_pubkey == k1"
-        assert_recover_key(digest, sig, k1)
-        print('done!')
+        sha256,
+        assert_sha256,
+        sha1,
+        assert_sha1,
+        sha512,
+        assert_sha512,
+        ripemd160,
+        assert_ripemd160,
+
+        recover_key,
+        assert_recover_key,
+
+        check,
+        chain_println,
+    };
+
+    #[chain(main)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
+
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
+
+        #[chain(action = "test")]
+        pub fn test(&self) {
+            let data: Vec<u8> =  vec![1, 2, 3, 4, 5, 6, 7];
+            let ret = sha256(&data);
+            assert_sha256(&data, &ret);
+
+            let ret = sha1(&data);
+            assert_sha1(&data, &ret);
+
+            let ret = sha512(&data);
+            assert_sha512(&data, &ret);
+
+            let ret = ripemd160(&data);
+            assert_ripemd160(&data, &ret);
+            chain_println!("done!");
+        }
+
+        #[chain(action="testrecover")]
+        pub fn test_recover(&self, msg: Vec<u8>, sig: Signature, pub_key: PublicKey) {
+            chain_println!("++++++msg:", msg);
+            let digest = sha256(&msg);
+            let _pubkey = recover_key(&digest, &sig);
+            check(_pubkey == pub_key, "_pubkey == k1");
+            assert_recover_key(&digest, &sig, &pub_key);
+        }
+    }
+}
 ```
 
-Testing code:
+Test code:
 
 ```python
-def test_crypto():
-    t = init_test('crypto_example')
-    args = {}
-    ret = t.push_action('hello', 'testcrypto', args, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+@chain_test
+def test_hash(tester):
+    deploy_contract(tester, 'cryptotest')
+    r = tester.push_action('hello', 'testhash', {}, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
 
-def test_recover():
-    t = init_test('crypto_example')
+@chain_test
+def test_recover_key(tester):
+    deploy_contract(tester, 'cryptotest')
+    key = eos.create_key()
+    pub = key['public']
+    priv = key['private']
 
-    msg = b'hello,world'
-    # key pair
-    public_key = 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
-    private_key = '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'
-
+    msg = b'hello, world'
     h = hashlib.sha256()
     h.update(msg)
-    digest = h.hexdigest()
-    logger.info('++++digest: %s', digest)
+    sig = eos.sign_digest(h.hexdigest(), priv)
 
-    #sign with private key
-    sig = eosapi.sign_digest(digest, private_key)
-    logger.info('++++signature: %s', sig)
     args = {
-        "msg": msg.hex(),
-        "digest": digest,
-        "sig": sig,
-        "k1": public_key,
+        'msg': msg.hex(),
+        'sig': sig,
+        'pub_key': pub,
     }
-    ret = t.push_action('hello', 'testrecover', args, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+    r = tester.push_action('hello', 'testrecover', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
 ```
 
-Compilation:
+Compile:
 
-```
-python-contract build crypto_example.codon
-```
-
-Testing:
-
-```
-ipyeos -m pytest -s -x test.py -k test_crypto
-ipyeos -m pytest -s -x test.py -k test_recover
+```bash
+cd examples/cryptotest
+rust-contract build
 ```
 
-In this example code, the usage of commonly used hash functions as well as the usage of `recover_key` and `assert_recover_key` are demonstrated separately. The usage of hash functions is relatively simple; here is an explanation of the test code for `recover_key`:
-`recover_key` takes two parameters, namely `digest` and `signature`. The `digest` is the result of running the sha256 algorithm on a binary data. In the above code, the hash calculation was performed on `hello,world` using the sha256 algorithm.
+Test:
+
+```
+ipyeos -m pytest -s -x test.py -k test_hash
+ipyeos -m pytest -s -x test.py -k test_recover_key
+```
+
+In this example code, we demonstrate the usage of commonly used hash functions and `recover_key` and `assert_recover_key` functions. The usage of hash functions is quite straightforward. Here we explain the test code for `recover_key`.
+
+`recover_key` accepts two parameters, `digest` and `signature`. The digest is the result of applying SHA-256 to some binary data. In the above code, we compute the SHA-256 hash of `hello, world`:
 
 ```python
+msg = b'hello, world'
 h = hashlib.sha256()
-h.update(b'hello,world')
-digest = h.hexdigest()
+h.update(msg)
+sig = eos.sign_digest(h.hexdigest(), priv)
 ```
 
-The computed result is passed as a parameter to the action.
+In the smart contract, the corresponding code is:
 
-Here is an explanation of `testrecover`:
-
-```python
-@action('testrecover')
-def test_recover(self, msg: bytes, digest: Checksum256, sig: Signature, k1: PublicKey):
-    _digest = sha256(msg)
-    assert _digest == digest #判断digest是否对msg进行hash256算法的hash结果
-    _pubkey = recover_key(digest, sig)
-    assert _pubkey == k1, "_pubkey == k1" #判断public key是否正确
-
-    assert_recover_key(digest, sig, k1) #作用相当于上面两行代码
-    print('done!')
+```rust
+let digest = sha256(&msg);
 ```
 
-In the sent transaction, the user's signature on the transaction is also required to indicate that the user has authorized the transaction. Then, in the smart contract, the `require_auth` function can be called to determine whether the transaction has been authorized by a specific user.
+Explanation for `testrecover`:
 
-In actual smart contract applications, the above method can also be used to determine whether a certain section of binary data in the smart contract is signed using a specific private key. The process is as follows:
+```rust
+#[chain(action="testrecover")]
+pub fn test_recover(&self, msg: Vec<u8>, sig: Signature, pub_key: PublicKey) {
+    chain_println!("++++++msg:", msg);
+    let digest = sha256(&msg);
+    let _pubkey = recover_key(&digest, &sig);
+    // Check if the public key is correct
+    check(_pubkey == pub_key, "_pubkey == k1"); 
 
-- Firstly, the user signs the data using his own private key
-- The user passes the data, signature, and public key (note that this is not a private key) to the smart contract
-- The smart contract can then determine whether the data is signed using a particular private key and perform corresponding operations.
+    // The function is equivalent to the above two lines of code
+    assert_recover_key(&digest, &sig, &pub_key); 
+}
+```
+
+The principle of `recover_key` is the same as the node verifying the validity of the signature in the Transaction. It works by signing the digest and then verifying it with the public key.
+
+In practical smart contract applications, if you want to determine in the smart contract whether a piece of binary data has been signed with a specific private key, you can use the method described above. The process is as follows:
+
+- The contract saves the public key corresponding to a user's private key.
+- The user signs the data with their private key.
+- The user sends the data and the corresponding signature to the smart contract.
+- The smart contract can call `RecoverKey` to recover the public key from the user's data and the signature of the data.
+- The smart contract reads the user's public key stored on the chain and compares it with the public key recovered by calling `RecoverKey`. If they are the same, it can be determined that the data is signed by the corresponding user.

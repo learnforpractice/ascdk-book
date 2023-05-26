@@ -2,38 +2,49 @@
 comments: true
 ---
 
-# Explanation of ABI types
+# Detailed Explanation of ABI Types
 
-## Built-in ABI types
+# Built-in ABI Types
 
 Here are the built-in ABI types, a total of 31:
 
 - Basic types: name bytes string
 - Numerical types: bool int8 uint8 int16 uint16 int32 uint32 int64 uint64 int128 uint128 varint32 varuint32 float32 float64 float128
 - Time-related: time_point time_point_sec block_timestamp_type
-- Password-related functions: checksum160 checksum256 checksum512 public_key signature
+- Cryptographic function related: checksum160 checksum256 checksum512 public_key signature
 - Token-related: symbol symbol_code asset extended_asset
 
-The following are the most commonly used:
+The ones commonly used are as follows:
 
 ```
 name bytes string bool uint64 checksum256
 public_key signature symbol asset extended_asset
 ```
+                                                                                                    
+# Table of Corresponding Relations between Built-in Data Types in ABI and Data Types in Rust
 
-## Correspondence table of built-in data types in ABI and data types in Python
+The table below shows the corresponding relations between built-in types in ABI and types in Rust. For the corresponding module, if it is not built-in, it is defined in the related module in the `rust-chain` Rust package. Moreover, these structures have been exported to `lib.rs`, so the corresponding structures can be referred to in the following way:
 
-The table below shows the correspondence between the built-in types in ABI and the types in Python.
-
-It should be noted that although some of these types corresponding to Python belong to different modules, they have all been imported into the global environment in advance. Therefore, developers can directly use these ABI types corresponding to Python without needing to import them in the following way:
-
-```python
-from chain.crypto import PublicKey
+```rust
+use rust_chain::{
+    TimePoint,
+    TimePointSec,
+    Name,
+    Checksum160,
+    Checksum256,
+    Checksum512,
+    PublicKey,
+    Signature,
+    Symbol,
+    SymbolCode,
+    Asset,
+    ExtendedAsset,
+};
 ```
 
-Of course, repeated imports will not have any impact.
+Relation Table:
 
-|         ABI Type     |   Python Type       |      Module    |
+|         ABI Type     |   Rust Type       |      Module    |
 |:--------------------:|:------------------:|:------------------:|
 |         bool         |        bool        |   Built-in    |
 |         int8         |         i8         |   Built-in    |
@@ -45,31 +56,22 @@ Of course, repeated imports will not have any impact.
 |        uint64        |         u64        |   Built-in    |
 |        int128        |        i128        |   Built-in    |
 |        uint128       |        u128        |   Built-in    |
-|       varint32       |      VarInt32      |   Structs |
-|       varuint32      |      VarUint32     |   Structs |
+|       varint32       |                    |                |
+|       varuint32      |      VarUint32     |   varint     |
 |        float32       |     float32        |  Built-in     |
 |        float64       |       float        |  Built-in     |
-|       float128       |      Float128      |  Structs  |
-|      time_point      |      TimePoint     |  Structs  |
-|    time_point_sec    |    TimePointSec    |  Structs  |
-| block_timestamp_type | BlockTimestampType |  Structs  |
-|         name         |        Name        |  Name  |
-|         bytes        |        bytes       |  Built-in  |
-|        string        |        str         |  Built-in  |
-|      checksum160     |     Checksum160    |  Crypto  |
-|      checksum256     |   Checksum256/u256 |  Crypto  |
-|      checksum512     |     Checksum512    |  Crypto  |
-|      public_key      |      PublicKey     |  Crypto  |
-|       signature      |      Signature     |  Crypto  |
-|        symbol        |       Symbol       | Asset   |
-|      symbol_code     |     SymbolCode     | Asset   |
-|         asset        |        Asset       | Asset   |
-|    extended_asset    |    ExtendedAsset   | Asset   |
-
-## Special ABI types
-
-### Optional
-
-### Variant
-
-### Binaryextension
+|       float128       |      Float128      |  structs  |
+|      time_point      |      TimePoint     |  structs  |
+|    time_point_sec    |    TimePointSec    |  structs  |
+| block_timestamp_type | BlockTimestampType |  structs  |
+|         name         |        Name        |  name  |
+|         bytes        |        Vec<u8>     |  Built-in  |
+|        string        |        String      |  Built-in  |
+|      checksum160     |     Checksum160    |  structs  |
+|      checksum256     |   Checksum256/u256 |  structs  |
+|      checksum512     |     Checksum512    |  structs  |
+|      public_key      |      PublicKey     |  structs  |
+|       signature      |      Signature     |  structs  |
+|        symbol        |       Symbol       | asset   |
+|      symbol_code     |     SymbolCode     | asset   |
+|         asset        |        Asset       | asset   |

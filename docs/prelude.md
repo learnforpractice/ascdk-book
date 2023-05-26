@@ -4,13 +4,17 @@ comments: true
 
 # Prerequisite Knowledge
 
+## How to Use This Document
+
+This document uses example code to introduce relevant knowledge points related to smart contracts. The knowledge points involved in smart contracts are relatively few. In order to master the use of smart contracts more quickly, readers need to run the examples while reading the content of this document.
+
 ## What is a Smart Contract
 
 A smart contract is code that can be executed on the blockchain.
 
-## What is a Python Smart Contract
+## What is a Rust Smart Contract
 
-A Python smart contract is code written in Python that can be executed on the blockchain. In the case of the EOS network, Python smart contract code is compiled into a WebAssembly binary file, which can be published to the blockchain and executed, achieving a certain operation effect.
+A Rust smart contract is code written in Rust that can be executed on the blockchain. In the case of the EOS network, Rust smart contract code is compiled into a WebAssembly binary file, which can be published to the blockchain and executed, achieving a certain operation effect.
 
 ## What is EOS
 

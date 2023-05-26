@@ -2,7 +2,11 @@
 comments: true
 ---
 
-# Calling C/C++ Code in Rust
+# Calling C/C++ Code from Rust
+
+This chapter will introduce how to call C/C++ code from Rust. You can get the complete example code from the link below:
+
+[Complete code](https://github.com/learnforpractice/rscdk-book/tree/master/examples/testcallcpp)
 
 First, use the following command to install `eoscdt` for compiling C or C++ code:
 
@@ -10,67 +14,64 @@ First, use the following command to install `eoscdt` for compiling C or C++ code
 python3 -m pip install -U eoscdt
 ```
 
-## Compile C/C++ Code to a Library and Link it to Rust Code
-
-Next, let's take compiling the `say_hello` function as an example to demonstrate how to compile code:
-
-If the source file is C code, for example:
-
-say_hello.c
-
-```c
-void prints(const char *s);
-
-void say_hello(const char *s) {
-	prints(s);
-}
-```
-
-Then use the following command to compile:
+If your platform does not support direct installation, you must install the relevant Docker image, and then run the relevant commands in Docker. The specific installation process has been introduced in the [Setting up the development environment](./env.md) chapter. Run bash in Docker with the following command, and then execute the related commands in bash.
 
 ```bash
-cdt-cc -c -o say_hello.o say_hello.c
+docker run --entrypoint bash -it --rm -v "$(pwd)":/develop -t ghcr.io/uuosio/scdk
 ```
 
-If the source file is C++ code, for example:
+Below, we will compile the `say_hello` function as an example to show how to call code from C/C++ in Rust:
 
-say_hello.cpp
+First, take a look at the code in [say_hello/say_hello.cpp](https://github.com/learnforpractice/rscdk-book/blob/master/examples/testcallcpp/say_hello/say_hello.cpp):
 
 ```cpp
-extern "C" void prints(const char *s);
+#include <stdint.h>
+#include <eosio/eosio.hpp>
 
-extern "C" void say_hello(const char *s) {
-	prints(s);
+using namespace eosio;
+
+extern "C" void say_hello(const char *name, size_t size) {
+    print("hello ", std::string(name, size));
 }
 ```
 
-Then use the following command to compile:
+Here, note that since it is a C++ file, you need to add `extern "C"` before the function. Otherwise, there will be an error in the linking process because the function cannot be found.
 
-```bash
-cdt-cpp -c -o say_hello.o say_hello.cpp
+Then, look at the key content in [say_hello/CMakeLists.txt](https://github.com/learnforpractice/rscdk-book/blob/master/examples/testcallcpp/say_hello/CMakeLists.txt):
+
+```cmake
+add_library(say_hello
+    say_hello.cpp
+)
+
+target_include_directories(say_hello PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 ```
 
-Please note that if it is a C++ file, you need to add `extern "C"` in front of the function, otherwise an error will occur in the linking process below.
+This compiles the `say_hello` related code into a library called `say_hello`.
 
-After successful compilation, package the `.o` file into a library file ending with `.a`:
+Next, compile this library:
 
 ```bash
-cdt-ar rcs libsay_hello.a say_hello.o
+mkdir -p say_hello/build
+cd say_hello/build
+cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
+make
 ```
 
-Next, let's see how to use the `say_hello` function in Rust code:
+This will generate the `libsay_hello.a` library file in the `say_hello/build` directory.
 
-lib.rs
+Next, take a look at the code in [lib.rs](https://github.com/learnforpractice/rscdk-book/blob/master/examples/testcallcpp/lib.rs):
 
 ```rs
-
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "std", allow(warnings))]
 
 #[rust_chain::contract]
 mod hello {
     extern "C" {
-        fn say_hello(name: *const u8);
+        fn say_hello(name: *const u8, size: usize);
     }
 
     use rust_chain::{
@@ -97,22 +98,22 @@ mod hello {
         #[chain(action="test")]
         pub fn test(&self, name: String) {
             unsafe {
-                say_hello(name.as_ptr());
+                say_hello(name.as_ptr(), name.len());
             }
         }
     }
 }
 ```
 
-Where:
+Here:
 
 ```rs
 extern "C" {
-    fn say_hello(name: *const u8);
+    fn say_hello(name: *const u8, size: usize);
 }
 ```
 
-It declares a function defined in C. Please note that the type corresponding to `const char *` in C++ code here is `*const u8`.
+It declares a `say_hello` function defined in C/C++. Note that the type corresponding to the `const char *` type in the C++ code is `*const u8`.
 
 The following code shows how to call the `say_hello` function:
 
@@ -120,20 +121,19 @@ The following code shows how to call the `say_hello` function:
 #[chain(action="test")]
 pub fn test(&self, name: String) {
     unsafe {
-        say_hello(name.as_ptr());
+        say_hello(name.as_ptr(), name.len());
     }
 }
 ```
 
-Because it is a C function, it must be called within an `unsafe` code block.
+Since it's a C function, it must be called within an `unsafe` block.
 
-Next, let's see how to link to the `libsay_hello.a` library.
+Next, let's see how to link the `libsay_hello.a` library.
 
-Create a new file `build.rs`, and add the following content:
+Create a new `build.rs` file and add the following content:
 
 ```rs
-
-use std::env;
+use std::process::Command;
 
 fn main() {
     let target_arch = std::env::var("CARGO_CFG_TARGET_ARCH")
@@ -141,68 +141,39 @@ fn main() {
     println!("Target architecture: {}", target_arch);
 
     if target_arch == "wasm32" {
-        println!("cargo:rustc-link-search=./");
-        println!("cargo:rustc-link-lib=static=say_hello");    
+        let output = Command::new("cdt-get-root-dir")
+        .output()
+        .expect("Failed to execute command");
+
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        println!("{}", stdout);
+
+        println!("cargo:rustc-link-search=./say_hello/build");
+        println!("cargo:rustc-link-lib=static=say_hello");
+
+        println!("cargo:rustc-link-search={}/{}", stdout.trim(), "lib");
+        println!("cargo:rustc-link-lib=static=c++");
     }
 }
 ```
 
-In the above code, the following code specifies linking to `libsay_hello.a` when the target system of compilation is wasm32:
+In the above code, the following code specifies that when the target system for compilation is wasm32, it links `libsay_hello.a`:
 
 ```rust
-println!("cargo:rustc-link-search=./");
-println!("cargo:rustc-link-lib=static=say_hello");    
+println!("cargo:rustc-link-search=./say_hello/build");
+println!("cargo:rustc-link-lib=static=say_hello");  
 ```
 
-The complete example code can be found at the following link:
-[Example Code Link 1](https://github.com/uuosio/rscdk/tree/main/tests/testcallcpp)
+The following code links the `libc++.a` library, and the code path is obtained by running the `cdt-get-root-dir` command:
 
-Use the following command to build and test the code:
-
-build:
-
-```
-./build.sh
+```rust
+println!("cargo:rustc-link-search={}/{}", stdout.trim(), "lib");
+println!("cargo:rustc-link-lib=static=c++");
 ```
 
-test:
+# Appendix:
 
-```
-./test.sh
-```
-
-## Build C++ Library With Cmake and link to Rust Code
-
-Additionally, you can use CMake to compile C++ code and generate library files. Examples can be found at the following link:
-
-[Example Code Link 2](https://github.com/uuosio/rscdk/tree/main/tests/testcallcpp2)
-
-The content of `build.sh` is as follows:
-
-```bash
-mkdir -p say_hello/build
-pushd say_hello/build
-cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
-make
-popd
-rust-contract build
-```
-
-The code to compile C++ code into a library file is as follows:
-
-```bash
-cmake -DCMAKE_TOOLCHAIN_FILE=`cdt-get-dir`/CDTWasmToolchain.cmake ..
-```
-
-Here, you need to specify the CDT toolchain file to compile C++ code into wasm32 library files.
-
-Run `./build.sh` to compile C++ code and Rust code.
-
-Run `./test.sh` to test.
-
-## Appendix
-
-here's a mapping of Rust types to C types. 
+Rust type and C type comparison table:
 
 | Rust                     | C                             |
 |--------------------------|-------------------------------|

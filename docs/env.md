@@ -1,152 +1,162 @@
-# Setup Development Environment
+# Setting Up the Development Environment
 
-## Install Rust
+## Installing Rust
 
-```
+```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ```
 
-Activate the new PATH environment.
+Activate the new PATH environment variable.
 
 ```bash
 source $HOME/.cargo/env
 ```
 
-## Install Nightly Rust
+## Installing Nightly Rust
 
 ```bash
 rustup toolchain install nightly --component rust-src
 ```
 
-## Install binaryen
+## Installing Binaryen
 
-* Install `binaryen` in a version >= 99:
+* Install version >= 99 of `binaryen`:
   * [Debian/Ubuntu](https://tracker.debian.org/pkg/binaryen): `apt-get install binaryen`
   * [Homebrew](https://formulae.brew.sh/formula/binaryen): `brew install binaryen`
   * [Arch Linux](https://archlinux.org/packages/community/x86_64/binaryen/): `pacman -S binaryen`
-  * Windows: [binary releases are available](https://github.com/WebAssembly/binaryen/releases)
+  * Windows: [Binary releases can be downloaded](https://github.com/WebAssembly/binaryen/releases)
 
-## Create a Virtual Python Env for Testing
+## Creating a Virtual Python Environment for Testing
+
 ```bash
 python3 -m venv ~/env
 source ~/env/bin/activate
 python3 -m pip install --upgrade pip
 ```
 
-Next time you want to use the test environment, just run the following command again.
+The next time you want to use the test environment, simply run the following command again.
 
-```
+```bash
 source ~/env/bin/activate
 ```
 
-## Install Eos Test Framework
+## Installing the EOS Testing Framework
 
-instal ipyeos:
+Install ipyeos:
 
 ```bash
 python3 -m pip install ipyeos
 ```
 
-run eosdebugger
+If your platform is Windows or MacOSX M1/M2, you can also download an image that includes the ipyeos tool:
 
 ```bash
-eosdebugger
+docker pull ghcr.io/uuosio/scdk:latest
 ```
 
-You can also download a container image and run the eosdebugger from the docker if your platform is Windows or MacOSX M1/M2:
+The `scdk` Docker image already includes the following tools:
 
-```bash
-docker pull ghcr.io/uuosio/ipyeos:latest
+```
+ipyeos
+gscdk
+pscdk
+eoscdt
+pyeoskit
 ```
 
-```bash
-docker run -it --rm -p 9090:9090 -p 9092:9092 -p 9093:9093 -t ghcr.io/uuosio/ipyeos
-```
+On macOS, the recommended software for installing and running Docker is [OrbStack](https://orbstack.dev/download). For other platforms, you can use [Docker Desktop](https://www.docker.com/products/docker-desktop).
 
-The recommended software for installing and running Docker on macOS is [OrbStack](https://orbstack.dev/download). For other platforms, you can use [Docker Desktop](https://www.docker.com/products/docker-desktop).
-
-## Install Rust Smart Contracts Builder 
+## Installing the Rust Smart Contract Builder
 
 ```bash
 python3 -m pip install rust-contracts-builder
 ```
 
-## Install Python Toolkit for EOS 
+## Installing the EOS Python Toolkit
 
 ```bash
 python3 -m pip install pyeoskit
 ```
 
-pyeoskit is used to deploy contracts.
+pyeoskit is used for deploying contracts to the mainnet or testnet.
 
-## Checking Environment
+## Checking the Environment
 
-Create a new rust contract project:
+Create a new Rust contract project:
 
 ```bash
 rust-contract init hello
 ```
 
-Build
+Build:
 
 ```bash
 cd hello
-./build.sh
+rust-contract build
 ```
 
-Test
-
-```bash
-cargo test
-```
-
-If `eosdebugger` is running, it will output information like the following:
-
-```bash
-debug 2023-02-20T07:03:09.852 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 41 input dedup list
-debug 2023-02-20T07:03:09.861 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 47 input dedup list
-debug 2023-02-20T07:03:09.887 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 49 input dedup list
-debug 2023-02-20T07:03:09.891 ipyeos    apply_context.cpp:28          print_debug          ]
-[(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
-count is 1
-
-[(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-02-20T07:03:09.894 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list
-debug 2023-02-20T07:03:09.897 ipyeos    apply_context.cpp:28          print_debug          ]
-[(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
-count is 2
-
-[(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-02-20T07:03:09.899 ipyeos    controller.cpp:2406           clear_expired_input_ ] removed 0 expired transactions of the 51 input dedup list
-Listening for new connection...
-```
-
-In addition, you can use the following command to run tests, eliminating the need for `eosdebugger` to be running.
+Test:
 
 ```bash
 ipyeos -m pytest -s -x test.py -k test_hello
 ```
 
-running the above command in docker:
+If your platform does not support running ipyeos directly, such as on Windows or macOS M1/M2, or on other platforms using the ARM instruction set, you can use Docker to run this command:
 
 ```bash
-docker run --entrypoint ipyeos  -v$(pwd):/develop -w /develop -t ghcr.io/uuosio/ipyeos -m pytest -s -x test.py
+docker run --entrypoint ipyeos -it --rm -v "$(pwd)":/develop -w /develop -t ghcr.io/uuosio/scdk -m pytest -s -x test.py -k test_hello
 ```
 
-If you see the following output, that means everything have been installed successfully.
+Alternatively, you can run `cargo test` to run the tests:
 
+```bash
+cargo test
 ```
-test.py debug 2022-07-04T04:01:58.496 ipyeos    apply_context.cpp:36          print_debug          ] 
+
+When running `cargo test`, the tests defined in `lib.rs` will be executed:
+
+```rust
+#[test]
+fn test_inc() {
+    let mut tester = ChainTester::new();
+    //uncomment the following line to enable contract debugging.
+    // tester.enable_debug_contract("hello", true).unwrap();
+
+    deploy_contract(&mut tester);
+    update_auth(&mut tester);
+
+    let permissions = r#"
+    {
+        "hello": "active"
+    }
+    "#;
+    tester.push_action("hello", "inc", "".into(), permissions).unwrap();
+    tester.produce_block();
+
+    tester.push_action("hello", "inc", "".into(), permissions).unwrap();
+    tester.produce_block();
+}
+```
+
+Note that before running `cargo test`, you must first execute the `eosdebugger` application available in `ipyeos`. The Rust test code needs to connect to `eosdebugger` to run the tests.
+
+If your platform does not support running `eosdebugger` directly, such as on Windows or on platforms using the ARM instruction set, you can use Docker to run this command:
+
+```bash
+docker run -it --rm -p 9090:9090 -p 9092:9092 -p 9093:9093 -t ghcr.io/uuosio/scdk
+```
+
+After starting `eosdebugger`, run `cargo test`, and you will see the following output in the `eosdebugger` console:
+
+```bash
 [(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
 count is 1
 
 [(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-debug 2022-07-04T04:01:58.498 ipyeos    apply_context.cpp:36          print_debug          ] 
+debug 2023-05-24T09:18:36.315 ipyeos    controller.cpp:2498           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list, pending block time 2018-06-01T12:00:04.000
+debug 2023-05-24T09:18:36.319 ipyeos    apply_context.cpp:40          print_debug          ] 
 [(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
 count is 2
 
 [(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-.
-
-============================== 1 passed in 0.90s ===============================
 ```
