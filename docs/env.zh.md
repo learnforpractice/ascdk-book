@@ -10,7 +10,7 @@ comments: true
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ```
 
-激活新的 PATH 环境变量。
+激活新的 PATH 环境变量：
 
 ```bash
 source $HOME/.cargo/env
@@ -18,9 +18,27 @@ source $HOME/.cargo/env
 
 ## 安装 Nightly Rust
 
-```bash
-rustup toolchain install nightly --component rust-src
+由于较新的rust nightly版本编译合约会出问题，这里需要额外安装`nightly-2023-02-07`版本的rust:
+
 ```
+rustup install nightly-2023-02-07
+rustup component add rust-src --toolchain nightly-2023-02-07
+```
+
+然后在linux平台下执行：
+```bash
+ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu ~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
+```
+
+如果是macOSX平台，则执行：
+```bash
+ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin ~/.rustup/toolchains/nightly-x86_64-apple-darwin
+```
+
+如果事先已经安装过了默认的nightly版本，则需要将原目录重命名或者删除，否则会导致创建链接失败。
+
+上面的额外设置在未来的版本中会加以改进，以期可以用stable的版本来编译rust合约。
+
 
 ## 安装 binaryen
 

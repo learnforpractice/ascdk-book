@@ -6,7 +6,7 @@
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ```
 
-Activate the new PATH environment variable.
+Activate the new PATH environment variable:
 
 ```bash
 source $HOME/.cargo/env
@@ -14,9 +14,26 @@ source $HOME/.cargo/env
 
 ## Installing Nightly Rust
 
-```bash
-rustup toolchain install nightly --component rust-src
+Due to issues with compiling contracts using newer versions of Rust nightly, it is necessary to install the `nightly-2023-02-07` version of Rust:
+
 ```
+rustup install nightly-2023-02-07
+rustup component add rust-src --toolchain nightly-2023-02-07
+```
+
+Then, on Linux platform, execute the following command:
+```bash
+ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu ~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
+```
+
+If you are on macOSX platform, execute the following command:
+```bash
+ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin ~/.rustup/toolchains/nightly-x86_64-apple-darwin
+```
+
+If you have already installed the default nightly version beforehand, you will need to rename or delete the original directory. Otherwise, it will cause the creation of the symbolic link to fail.
+
+The additional setup mentioned above will be improved in future versions to allow compiling Rust contracts using the stable version.
 
 ## Installing Binaryen
 
