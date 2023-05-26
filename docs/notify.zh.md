@@ -99,7 +99,7 @@ mod hello {
         #[chain(action="test", notify)]
         pub fn test(&self, name: String) {
             chain_println!(self.receiver, self.first_receiver);
-            chain_println!("++++++++int receiver, name:", name);
+            chain_println!("++++++++in receiver, name:", name);
         }
     }
 }
@@ -114,7 +114,7 @@ mod hello {
 #[chain(action="test", notify)]
 pub fn test(&self, name: String) {
     chain_println!(self.receiver, self.first_receiver);
-    chain_println!("++++++++int receiver, name:", name);
+    chain_println!("++++++++in receiver, name:", name);
 }
 ```
 
@@ -161,7 +161,9 @@ alice alice
 debug 2023-05-26T02:42:02.693 thread-0  apply_context.cpp:40          print_debug          ] 
 [(alice,test)->hello]: CONSOLE OUTPUT BEGIN =====================
 hello alice
-++++++++int receiver, name: alice
+++++++++in receiver, name: alice
 
 [(alice,test)->hello]: CONSOLE OUTPUT END   =====================
 ```
+
+[示例代码](https://github.com/learnforpractice/rscdk-book/tree/master/examples/notify)

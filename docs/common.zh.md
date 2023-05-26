@@ -8,9 +8,8 @@ comments: true
 
 声明：
 
-```python
-def is_account(account: Name ) -> bool:
-    ...
+```rust
+pub fn is_account(name: Name) -> bool
 ```
 
 说明：
@@ -21,44 +20,50 @@ def is_account(account: Name ) -> bool:
 
 声明：
 
-```python
-def has_auth(account: Name) -> bool:
-    ...
+```rust
+pub fn has_auth(name: Name) -> bool
 ```
 
 说明：
 
-用来判断是否有指定账号的`active`权限，也就是Transaction是否有用指定账号的`active`权限所对应的私钥进行签名。对应的私钥最少有一个，也可能二个以上。
+用来判断是否有指定账号的`active`权限，也就是Transaction是否有用指定账号的`active`权限所对应的私钥进行签名。用于签名的私钥最少有一个，也可能二个以上。
 
 ## require_auth/require_auth2
 
 声明：
 
-```python
-def require_auth(account: Name):
-    ...
-
-def require_auth2(account: Name, permission: Name):
-    ...
+```rust
+pub fn require_auth(name: Name)
+pub fn require_auth2(account: Name, permission: Name)
 ```
 
 说明：
 
 这两个函数在账号不存在或者没有检测到有指定账号的权限时都会抛出异常，不同的是`require_auth`为检测是否存在`active`权限，而`require_auth2`可以检测指定的权限。
 
-## publication_time/current_time
+## current_time
+
+声明：
+
+```rust
+pub fn current_time() -> TimePoint
+```
+
+说明:
+
+用于获取Transaction所在的区块的时间
 
 ## check
 
 声明：
 
-```python
-def check(test: bool, msg: str) -> None:
+```rust
+pub fn check(test: bool, msg: &str)
 ```
 
 说明：
 
-如果test为False，则会抛出异常。该函数在智能合约中使用比较频繁，可参考`token.codon`中的代码
+如果test为false，则会抛出异常，所有在Transaction中的执行过的action以及本action已经执行的对数据库的操作都将被回滚，Transaction将不会上链。这和以太坊中的`revert`机制有比较大的区别。其结果是导致EOS网络相对比较脆弱，因为出异常的Transaction被回滚后不消耗资源，也就是不造成成本，导致网络比较容易被攻击。但是在正常的合约中，该函数在智能合约中使用也比较频繁，可参考[token](https://github.com/uuosio/rscdk/blob/main/examples/token/lib.rs)中相关的代码
 
 
 ## 示例代码：
