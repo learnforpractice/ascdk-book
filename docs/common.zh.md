@@ -68,54 +68,84 @@ pub fn check(test: bool, msg: &str)
 
 ## 示例代码：
 
-```python
-from chain.action import has_auth, require_auth, require_auth2, is_account
-from chain.contract import Contract
+```rust
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
 
-@contract(main=True)
-class MyContract(Contract):
+#[rust_chain::contract]
+#[allow(dead_code)]
+mod commonfunctions {
+    use rust_chain::{
+        Name,
+        has_auth,
+        require_auth,
+        require_auth2,
+        is_account,
 
-    def __init__(self):
-        super().__init__()
+        name,
+        chain_println,
+    };
 
-    @action('test')
-    def test(self):
-        has_auth(n"hello")
+    #[chain(main)]
+    pub struct Contract {
+        receiver: Name,
+        first_receiver: Name,
+        action: Name,
+    }
 
-        require_auth(n"hello")
-        require_auth2(n"hello", n"active")
+    impl Contract {
+        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
+            Self {
+                receiver: receiver,
+                first_receiver: first_receiver,
+                action: action,
+            }
+        }
 
-        print(is_account(n"hello"))
-        print(is_account(n"hello"))
-        return
+        #[chain(action = "test")]
+        pub fn test(&self) {
+            has_auth(name!("hello"));
+
+            require_auth(name!("hello"));
+            require_auth2(name!("hello"), name!("active"));
+    
+            chain_println!(is_account(name!("hello")));
+            chain_println!(is_account(name!("noexists")));
+        }
+    }
+}
 ```
 
 编译：
-```
-python-contract build common_example.codon
+
+```bash
+cd examples/commonfunctions
+rust-contract build
 ```
 
 测试代码：
 
 ```python
-def test_common():
-    t = init_test('common_example')
-    ret = t.push_action('hello', 'test', {}, {'hello': 'active'})
-    t.produce_block()
-    logger.info("++++++++++%s\n", ret['elapsed'])
+@chain_test
+def test_commonfunctions(tester):
+    deploy_contract(tester, 'commonfunctions')
+    args = {}
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
 ```
 
 测试：
 
 ```
-ipyeos -m pytest -s -x test.py -k test_common
+ipyeos -m pytest -s -x test.py -k test_commonfunctions
 ```
 
 输出：
 ```
 [(hello,test)->hello]: CONSOLE OUTPUT BEGIN =====================
-True
-True
+true
+false
 
 [(hello,test)->hello]: CONSOLE OUTPUT END   =====================
 ```

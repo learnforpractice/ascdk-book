@@ -1,0 +1,23 @@
+[package]
+name = "cryptotest"
+version = "0.1.0"
+authors = [""]
+edition = "2021"
+
+[dependencies]
+rust-chain = { version="0.2", default-features = false }
+
+[lib]
+name = "cryptotest"
+path = "lib.rs"
+crate-type = [
+    "cdylib", 
+    #Used by abigen, DO NOT remove it
+    "rlib"
+]
+
+[features]
+default = ["std"]
+std = [
+    "rust-chain/std",
+]
