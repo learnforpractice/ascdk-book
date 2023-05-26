@@ -1,0 +1,922 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="../env/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.4">
+    
+    
+      
+        <title>预备知识 - Rust Smart Contracts Development Cook Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.240905d7.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rust Smart Contracts Development Cook Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              预备知识
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <div class="md-header__option">
+        <div class="md-select">
+          
+          <button class="md-header__button md-icon" aria-label="选择当前语言">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24Z"/></svg>
+          </button>
+          <div class="md-select__inner">
+            <ul class="md-select__list">
+              
+                <li class="md-select__item">
+                  <a href="../../prelude/" hreflang="en" class="md-select__link">
+                    English
+                  </a>
+                </li>
+              
+                <li class="md-select__item">
+                  <a href="./" hreflang="zh" class="md-select__link">
+                    中文
+                  </a>
+                </li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/learnforpractice/rscdk-book" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Rust Smart Contracts Development Cook Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/learnforpractice/rscdk-book" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          预备知识
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        预备知识
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    如何使用本文档
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    什么是智能合约
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rust" class="md-nav__link">
+    什么是Rust智能合约
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eos" class="md-nav__link">
+    什么是EOS
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#account" class="md-nav__link">
+    账号(Account)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    Name 结构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transaction" class="md-nav__link">
+    Transaction 结构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#action" class="md-nav__link">
+    Action 结构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abiapplication-binary-interface" class="md-nav__link">
+    ABI(Application Binary Interface)
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../env/" class="md-nav__link">
+        设置开发环境
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helloworld/" class="md-nav__link">
+        HelloWorld
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        发布智能合约
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui/" class="md-nav__link">
+        与数字钱包进行交互
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../action/" class="md-nav__link">
+        内联Action在智能合约的使用
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notify/" class="md-nav__link">
+        require_recipient函数
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        数据库的操作
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../crypto/" class="md-nav__link">
+        密码学相关函数
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../common/" class="md-nav__link">
+        常用智能合约函数
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../abi/" class="md-nav__link">
+        ABI类型详解
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../callc/" class="md-nav__link">
+        Rust代码里调用C/C++代码
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    如何使用本文档
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    什么是智能合约
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rust" class="md-nav__link">
+    什么是Rust智能合约
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eos" class="md-nav__link">
+    什么是EOS
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#account" class="md-nav__link">
+    账号(Account)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    Name 结构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transaction" class="md-nav__link">
+    Transaction 结构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#action" class="md-nav__link">
+    Action 结构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abiapplication-binary-interface" class="md-nav__link">
+    ABI(Application Binary Interface)
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="_1">预备知识</h1>
+<h2 id="_2">如何使用本文档</h2>
+<p>本文档采用通过示例代码来介绍相关智能合约的相关的知识点。智能合约涉及到的知识点相对比较少，为了更快速的掌握智能合约的用法，需要读者一边运行示例一边阅读本文档中的内容。</p>
+<h2 id="_3">什么是智能合约</h2>
+<p>智能合约是可以在链上执行的代码</p>
+<h2 id="rust">什么是Rust智能合约</h2>
+<p>Rust智能合约是用Rust语言写的可在链上执行的代码。以EOS网络为例，Rust智能合约的代码会被编译成叫Webassebmly的二进制文件，并且可以发布到链上并被执行，从而达成某种操作效果。</p>
+<h2 id="eos">什么是EOS</h2>
+<p>EOS是一个基于代理权益证明(DPOS - Delegated Proof of Stake)共识算法的区块链网络。主网于2018年的6月8号正式上线。EOS的主网由21个块生产者(Block Producer)控制，块生产者简称为BP，由投票产生，负责将交易(Transaction)打包到区块中。</p>
+<h2 id="account">账号(Account)</h2>
+<p>不同于以太坊的通过地址（公钥）来进行交易，EOS区块链的交易的实体是比地址更复杂的账号。账号的名称是一个name结构，在下一节会讲到。账号在C++代码里表示的结构比较复杂。</p>
+<p>下面是通过EOS的<code>get_account</code>RPC接口返回的信息来分集一下包含在账号里的信息：</p>
+<div class="highlight"><pre><span></span><code><span class="n">eosapi</span><span class="o">.</span><span class="n">get_account</span><span class="p">(</span><span class="s2">&quot;testaccount&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w"> </span><span class="nt">&quot;account_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testaccount&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;head_block_num&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">301601062</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;head_block_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2023-03-28T06:19:09.500&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;privileged&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;last_code_update&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1970-01-01T00:00:00.000&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-06-13T04:43:18.000&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;core_liquid_balance&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.0001 EOS&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;ram_quota&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3052</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;net_weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;cpu_weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;net_limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;available&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;last_usage_update_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-06-13T04:43:18.000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;current_used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="nt">&quot;cpu_limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;available&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;last_usage_update_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2018-06-13T04:43:18.000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;current_used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="nt">&quot;ram_usage&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2996</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;perm_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;parent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;owner&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;required_auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">     </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EOS5eCkKszJt22****Y2YampuDDD8q95w2mF&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;accounts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;waits&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;linked_actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;perm_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;owner&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;parent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;required_auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">     </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EOS5eCkKszJ****q95w2mF&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;accounts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;waits&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;linked_actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w"> </span><span class="p">],</span>
+<span class="w"> </span><span class="nt">&quot;total_resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;helloworld11&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;net_weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.0000 EOS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cpu_weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.0000 EOS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;ram_bytes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3052</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="nt">&quot;self_delegated_bandwidth&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;refund_request&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;voter_info&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;rex_info&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w"> </span><span class="nt">&quot;subjective_cpu_bill_limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;available&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;last_usage_update_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2000-01-01T00:00:00.000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;current_used&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w"> </span><span class="p">},</span>
+<span class="w"> </span><span class="nt">&quot;eosio_any_linked_actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>简单介绍一下主要的字段的意思：</p>
+<ul>
+<li><code>account_name</code>: 账号名，规则在下一节中会讲到</li>
+<li><code>privileged</code>: <code>true</code>表示账号是特权账号，如<code>eosio</code>即是特权账号。<code>false</code>则表示普通账号</li>
+<li><code>last_code_update</code>: 账号中的智能合约的最后一次更新时间</li>
+<li><code>created</code>: 账号的创建时间,</li>
+<li><code>core_liquid_balance</code>: 账号的可用余额,</li>
+<li><code>ram_quota</code>: 账号分配的总内存，由于EOS的数据库是内存数据库，所有的链上数据都是要放到内存中，而内存是有限的，所以将内存作为一种资源来分配给账号。</li>
+<li><code>net_weight</code>: 账号分配到的网络资源的权重</li>
+<li><code>cpu_weight</code>: 账号分配到的CPU资源的权重</li>
+<li><code>net_limit</code>：账号的网络资源的使用情况</li>
+<li><code>cpu_limit</code>CPU资源的使用情况</li>
+<li><code>ram_usage</code>: 已经使用的内存</li>
+<li><code>permissions</code>: 账号的权限，账号的权限包含一个或者多个公钥或者账号的信息，每个公钥和账号的权限又占一定的权重(weight)，在发送交易(transaction)时，必须用公钥对应的私钥对交易进行签名，并且权重要大于等于<code>threshold</code>时，这个交易才能被BP认可。当账号的权限里包含的不是公钥信息，而是指定继承自某个账号的权限信息时，在签名的时候，会从这个账号的权限信息里提取出公钥信息，这通过C++程序的算法来实现。EOS的RPC接口中也有一个<code>get_required_keys</code>接口来获取签名的公钥信息。</li>
+<li><code>total_resources</code>：这里指定账号分配的NET，CPU， RAM等资源的信息</li>
+</ul>
+<h2 id="name">Name 结构</h2>
+<p>name是EOS中的一个最基本的数据结构，在底层用一个64位的无符号整数(uint64_t)表示。</p>
+<p>在C++中的定义如下：</p>
+<p><a href="https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/name.hpp#L42">libraries/chain/include/eosio/chain/name.hpp</a></p>
+<div class="highlight"><pre><span></span><code><span class="w">   </span><span class="k">struct</span><span class="w"> </span><span class="nc">name</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="nf">empty</span><span class="p">()</span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="nf">good</span><span class="p">()</span><span class="k">const</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="n">empty</span><span class="p">();</span><span class="w">   </span><span class="p">}</span>
+
+<span class="w">      </span><span class="n">name</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">str</span><span class="w"> </span><span class="p">)</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="n">set</span><span class="p">(</span><span class="n">str</span><span class="p">);</span><span class="w">           </span><span class="p">}</span><span class="w"> </span>
+<span class="w">      </span><span class="n">name</span><span class="p">(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">str</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">set</span><span class="p">(</span><span class="w"> </span><span class="n">str</span><span class="p">.</span><span class="n">c_str</span><span class="p">()</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">...</span>
+<span class="w">   </span><span class="p">}</span>
+</code></pre></div>
+<p>但是在应用层使用的时候都是以字符串的形式表示的,字符串也只能包含这些字符：".12345abcdefghijklmnopqrstuvwxyz"。字符一共32个，分别用来表示0～31这32个数字，可以把这些字符串看作是32进制的数据，<code>uint64_t</code>中，每5位转换成一个上面的字符，由于<code>uint64_t</code>最多只有64位，所以前60位可以表示12个字符，字符的范围用正则表达式表示为<code>[.1-5a-z]</code>，而最高的4位，只可以用16个字符来表示，这16个字符用正则表达式表示的范围为<code>[.1-5a-j]</code>，</p>
+<p>在具体的使用的过程中，如在创建账号的时候，经常犯的错误就是把<code>6</code>到<code>9</code>，<code>0</code>以及大写的字母都作为有效的字符，还有就是没有把长度限制在12个字符之内。</p>
+<p>总结一下：</p>
+<ul>
+<li>EOS中，name的值在底层其实是一个<code>uint64_t</code>类型，在应用层的时候才用字符串表示，这个字符串最多可以有13个字符</li>
+<li>第13个字符的范围比前12个字符能表示的范围小。</li>
+<li>在用name结构来表示账号（account）名时，最多只有12个字符。</li>
+<li>另外，name结构也用来表示一些其它类型，见下面的C++代码：</li>
+</ul>
+<p><a href="https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/types.hpp#L133">libraries/chain/include/eosio/chain/types.hpp</a></p>
+<div class="highlight"><pre><span></span><code><span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">account_name</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">action_name</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">scope_name</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">permission_name</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">table_name</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+</code></pre></div>
+<p>在这个C++代码中，name结构也用来表示action， table的名称等等，注意的是，不同于账号(account)名，在用字符串表示这些名称时，最多可以有13个字符，但是一般为了方便，习惯上用的时候也是最多用12个字符来表示这些名称。</p>
+<h2 id="transaction">Transaction 结构</h2>
+<p>EOS上基本数据结构称为交易（Transaction），由BP负责将一段时间内收集到的交易打包成一个区块。智能合约开发者必须充分了解Transaction的数据结构。</p>
+<p><a href="https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/transaction.hpp#L30">libraries/chain/include/eosio/chain/transaction.hpp</a>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">transaction_header</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">time_point_sec</span><span class="w">         </span><span class="n">expiration</span><span class="p">;</span><span class="w">   </span><span class="c1">///&lt; the time at which a transaction expires</span>
+<span class="w">      </span><span class="kt">uint16_t</span><span class="w">               </span><span class="n">ref_block_num</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mi">0U</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; specifies a block num in the last 2^16 blocks.</span>
+<span class="w">      </span><span class="kt">uint32_t</span><span class="w">               </span><span class="n">ref_block_prefix</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">0UL</span><span class="p">;</span><span class="w"> </span><span class="c1">///&lt; specifies the lower 32 bits of the blockid at get_ref_blocknum</span>
+<span class="w">      </span><span class="n">fc</span><span class="o">::</span><span class="n">unsigned_int</span><span class="w">       </span><span class="n">max_net_usage_words</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0UL</span><span class="p">;</span><span class="w"> </span><span class="c1">/// upper limit on total network bandwidth (in 8 byte words) billed for this transaction</span>
+<span class="w">      </span><span class="kt">uint8_t</span><span class="w">                </span><span class="n">max_cpu_usage_ms</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">/// upper limit on the total CPU time billed for this transaction</span>
+<span class="w">      </span><span class="n">fc</span><span class="o">::</span><span class="n">unsigned_int</span><span class="w">       </span><span class="n">delay_sec</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="mi">0UL</span><span class="p">;</span><span class="w"> </span><span class="c1">/// number of seconds to delay this transaction for during which it may be canceled.</span>
+
+<span class="p">...</span>
+<span class="w">   </span><span class="p">};</span>
+
+<span class="w">   </span><span class="k">struct</span><span class="w"> </span><span class="nc">transaction</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">transaction_header</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">vector</span><span class="o">&lt;</span><span class="n">action</span><span class="o">&gt;</span><span class="w">         </span><span class="n">context_free_actions</span><span class="p">;</span>
+<span class="w">      </span><span class="n">vector</span><span class="o">&lt;</span><span class="n">action</span><span class="o">&gt;</span><span class="w">         </span><span class="n">actions</span><span class="p">;</span>
+<span class="w">      </span><span class="n">extensions_type</span><span class="w">        </span><span class="n">transaction_extensions</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="w">   </span><span class="p">};</span>
+</code></pre></div></p>
+<p>简单解释下比较重要的字段：</p>
+<ul>
+<li><code>expiration</code>, 设置transaction上链的超时时间，超时将被拒绝加入区块中。</li>
+<li><code>ref_block_num</code>, <code>ref_block_prefix</code> 这两个成员变量是用来防止transaction在fork链上被重新包含进区块而设计的。</li>
+<li><code>actions</code>, 这是一个action的数组结构，action的概念非常重要，每一个action都对应一个链上的智能合约函数，BP在将Transaction包含进区块的时候，都会根据action来调用对应的智能合约函数，这将在下面的一节中详细解释。</li>
+<li><code>context_free_actions</code>, 这同样是一个action的数组，不同的是，当和action相对应的智能合约函数被调用时，执行的代码被禁止调用和链上数据库相关的API。</li>
+</ul>
+<h2 id="action">Action 结构</h2>
+<p>Action结构包含在Transaction结构中。一个action结构在C++代码中的定义如下：</p>
+<p><a href="https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/action.hpp#L60">libraries/chain/include/eosio/chain/action.hpp</a></p>
+<div class="highlight"><pre><span></span><code><span class="w">   </span><span class="k">struct</span><span class="w"> </span><span class="nc">action</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">account_name</span><span class="w">               </span><span class="n">account</span><span class="p">;</span>
+<span class="w">      </span><span class="n">action_name</span><span class="w">                </span><span class="n">name</span><span class="p">;</span>
+<span class="w">      </span><span class="n">vector</span><span class="o">&lt;</span><span class="n">permission_level</span><span class="o">&gt;</span><span class="w">   </span><span class="n">authorization</span><span class="p">;</span>
+<span class="w">      </span><span class="n">bytes</span><span class="w">                      </span><span class="n">data</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="w">   </span><span class="p">}</span>
+</code></pre></div>
+<p>其中，<a href="https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/action.hpp#L12">permission_level</a>的定义如下：</p>
+<p><div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">permission_level</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">account_name</span><span class="w">    </span><span class="n">actor</span><span class="p">;</span>
+<span class="w">    </span><span class="n">permission_name</span><span class="w"> </span><span class="n">permission</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+结构中的成员变量意义解释如下：</p>
+<ul>
+<li><code>account</code>用来指定要被调用的智能合约的账号名</li>
+<li><code>name</code>被调用的action的名称</li>
+<li><code>authorization</code>权限数组</li>
+<li><code>data</code>action所包含的已经被序列化后的原始数据，在被智能合约所调用的时候，会被反序列化成具体的数据结构</li>
+</ul>
+<h2 id="abiapplication-binary-interface">ABI(Application Binary Interface)</h2>
+<p>在开发智能合约的时候，在编译智能合约代码的过程中，正常情况下，在生成的每个智能合约的二进制代码(.wasm)的同时，都会生成一个ABI文件(.abi)。但是要注意这个文件并不是调用链上的智能合约所必须的。它的作用是方便开发者能够获取相关的action的信息，以构造相应的Transaction数据结构，以方便和区块链进行交互。</p>
+<p>一个ABI文件的内容是json格式的数据，像下面这个样子：</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eosio::abi/1.2&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;structs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uint64&quot;</span>
+<span class="w">                </span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uint64&quot;</span>
+<span class="w">                </span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uint128&quot;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;ricardian_contract&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;tables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mytable&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;index_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i64&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;key_names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">            </span><span class="nt">&quot;key_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;ricardian_clauses&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>version</code>用来指定ABI的版本</li>
+<li><code>structs</code>用来指定数据结构，会在<code>actions</code>和<code>tables</code>这两个结构里被用到</li>
+<li><code>actions</code>用来描述可以智能合约中的action，每个action实际上都是对应一个智能合约函数</li>
+<li><code>tables</code>用来描述表的信息，这样，你网页应用程序就可以通过<code>get_table_rows</code>这个RPC API来查询链上的数据库信息</li>
+</ul>
+
+
+
+
+
+  <h2 id="__comments">评论</h2>
+  <!-- Insert generated snippet here -->
+  <script src="https://giscus.app/client.js"
+  data-repo="learnforpractice/rscdk-book"
+  data-repo-id="R_kgDOJjgWNQ"
+  data-category="Q&A"
+  data-category-id="DIC_kwDOJjgWNc4CWwNt"
+  data-mapping="title"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="preferred_color_scheme"
+  data-lang="en"
+  crossorigin="anonymous"
+  async>
+  </script>
+
+  <!-- Synchronize Giscus theme with palette -->
+  <script>
+    var giscus = document.querySelector("script[src*=giscus]")
+
+    /* Set palette on initial load */
+    var palette = __md_get("__palette")
+    if (palette && typeof palette.color === "object") {
+      var theme = palette.color.scheme === "slate" ? "dark" : "light"
+      giscus.setAttribute("data-theme", theme) 
+    }
+
+    /* Register event handlers after documented loaded */
+    // document.addEventListener("DOMContentLoaded", function() {
+    //   var ref = document.querySelector("[data-md-component=palette]")
+    //   ref.addEventListener("change", function() {
+    //     var palette = __md_get("__palette")
+    //     if (palette && typeof palette.color === "object") {
+    //       var theme = palette.color.scheme === "slate" ? "dark" : "light"
+
+    //       /* Instruct Giscus to change theme */
+    //       var frame = document.querySelector(".giscus-frame")
+    //       frame.contentWindow.postMessage(
+    //         { giscus: { setConfig: { theme } } },
+    //         "https://giscus.app"
+    //       )
+    //     }
+    //   })
+    // })
+  </script>
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.19047be9.min.js"></script>
+      
+    
+  </body>
+</html>

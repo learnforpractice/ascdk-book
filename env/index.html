@@ -1,0 +1,717 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../prelude/">
+      
+      
+        <link rel="next" href="../helloworld/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.4">
+    
+    
+      
+        <title>Setting Up the Development Environment - Rust Smart Contracts Development Cook Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.240905d7.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#setting-up-the-development-environment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Rust Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rust Smart Contracts Development Cook Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Setting Up the Development Environment
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <div class="md-header__option">
+        <div class="md-select">
+          
+          <button class="md-header__button md-icon" aria-label="Select language">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24Z"/></svg>
+          </button>
+          <div class="md-select__inner">
+            <ul class="md-select__list">
+              
+                <li class="md-select__item">
+                  <a href="./" hreflang="en" class="md-select__link">
+                    English
+                  </a>
+                </li>
+              
+                <li class="md-select__item">
+                  <a href="../zh/env/" hreflang="zh" class="md-select__link">
+                    中文
+                  </a>
+                </li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/learnforpractice/rscdk-book" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Rust Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Rust Smart Contracts Development Cook Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/learnforpractice/rscdk-book" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prelude/" class="md-nav__link">
+        Prerequisite Knowledge
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Setting Up the Development Environment
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Setting Up the Development Environment
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installing-rust" class="md-nav__link">
+    Installing Rust
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-nightly-rust" class="md-nav__link">
+    Installing Nightly Rust
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-binaryen" class="md-nav__link">
+    Installing Binaryen
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-virtual-python-environment-for-testing" class="md-nav__link">
+    Creating a Virtual Python Environment for Testing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-the-eos-testing-framework" class="md-nav__link">
+    Installing the EOS Testing Framework
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-the-rust-smart-contract-builder" class="md-nav__link">
+    Installing the Rust Smart Contract Builder
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-the-eos-python-toolkit" class="md-nav__link">
+    Installing the EOS Python Toolkit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-the-environment" class="md-nav__link">
+    Checking the Environment
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helloworld/" class="md-nav__link">
+        HelloWorld
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        Deploying a Smart Contract
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui/" class="md-nav__link">
+        Interact with Digital Wallets
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../action/" class="md-nav__link">
+        Use of Inline Actions in Smart Contracts
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../notify/" class="md-nav__link">
+        require_recipient Function
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        Database Operations
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../crypto/" class="md-nav__link">
+        Cryptography Related Functions
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../common/" class="md-nav__link">
+        Common Smart Contract Functions
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../abi/" class="md-nav__link">
+        Detailed Explanation of ABI Types
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../callc/" class="md-nav__link">
+        Calling C/C++ Code from Rust
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installing-rust" class="md-nav__link">
+    Installing Rust
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-nightly-rust" class="md-nav__link">
+    Installing Nightly Rust
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-binaryen" class="md-nav__link">
+    Installing Binaryen
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-virtual-python-environment-for-testing" class="md-nav__link">
+    Creating a Virtual Python Environment for Testing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-the-eos-testing-framework" class="md-nav__link">
+    Installing the EOS Testing Framework
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-the-rust-smart-contract-builder" class="md-nav__link">
+    Installing the Rust Smart Contract Builder
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-the-eos-python-toolkit" class="md-nav__link">
+    Installing the EOS Python Toolkit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-the-environment" class="md-nav__link">
+    Checking the Environment
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="setting-up-the-development-environment">Setting Up the Development Environment</h1>
+<h2 id="installing-rust">Installing Rust</h2>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--proto<span class="w"> </span><span class="s1">&#39;=https&#39;</span><span class="w"> </span>--tlsv1.2<span class="w"> </span>-sSf<span class="w"> </span>https://sh.rustup.rs<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>-y
+</code></pre></div>
+<p>Activate the new PATH environment variable.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.cargo/env
+</code></pre></div>
+<h2 id="installing-nightly-rust">Installing Nightly Rust</h2>
+<div class="highlight"><pre><span></span><code>rustup<span class="w"> </span>toolchain<span class="w"> </span>install<span class="w"> </span>nightly<span class="w"> </span>--component<span class="w"> </span>rust-src
+</code></pre></div>
+<h2 id="installing-binaryen">Installing Binaryen</h2>
+<ul>
+<li>Install version &gt;= 99 of <code>binaryen</code>:</li>
+<li><a href="https://tracker.debian.org/pkg/binaryen">Debian/Ubuntu</a>: <code>apt-get install binaryen</code></li>
+<li><a href="https://formulae.brew.sh/formula/binaryen">Homebrew</a>: <code>brew install binaryen</code></li>
+<li><a href="https://archlinux.org/packages/community/x86_64/binaryen/">Arch Linux</a>: <code>pacman -S binaryen</code></li>
+<li>Windows: <a href="https://github.com/WebAssembly/binaryen/releases">Binary releases can be downloaded</a></li>
+</ul>
+<h2 id="creating-a-virtual-python-environment-for-testing">Creating a Virtual Python Environment for Testing</h2>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/env
+<span class="nb">source</span><span class="w"> </span>~/env/bin/activate
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+</code></pre></div>
+<p>The next time you want to use the test environment, simply run the following command again.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>~/env/bin/activate
+</code></pre></div>
+<h2 id="installing-the-eos-testing-framework">Installing the EOS Testing Framework</h2>
+<p>Install ipyeos:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ipyeos
+</code></pre></div>
+<p>If your platform is Windows or MacOSX M1/M2, you can also download an image that includes the ipyeos tool:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/uuosio/scdk:latest
+</code></pre></div>
+<p>The <code>scdk</code> Docker image already includes the following tools:</p>
+<div class="highlight"><pre><span></span><code>ipyeos
+gscdk
+pscdk
+eoscdt
+pyeoskit
+</code></pre></div>
+<p>On macOS, the recommended software for installing and running Docker is <a href="https://orbstack.dev/download">OrbStack</a>. For other platforms, you can use <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a>.</p>
+<h2 id="installing-the-rust-smart-contract-builder">Installing the Rust Smart Contract Builder</h2>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>rust-contracts-builder
+</code></pre></div>
+<h2 id="installing-the-eos-python-toolkit">Installing the EOS Python Toolkit</h2>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyeoskit
+</code></pre></div>
+<p>pyeoskit is used for deploying contracts to the mainnet or testnet.</p>
+<h2 id="checking-the-environment">Checking the Environment</h2>
+<p>Create a new Rust contract project:</p>
+<div class="highlight"><pre><span></span><code>rust-contract<span class="w"> </span>init<span class="w"> </span>hello
+</code></pre></div>
+<p>Build:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>hello
+rust-contract<span class="w"> </span>build
+</code></pre></div>
+<p>Test:</p>
+<div class="highlight"><pre><span></span><code>ipyeos<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-x<span class="w"> </span>test.py<span class="w"> </span>-k<span class="w"> </span>test_hello
+</code></pre></div>
+<p>If your platform does not support running ipyeos directly, such as on Windows or macOS M1/M2, or on other platforms using the ARM instruction set, you can use Docker to run this command:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--entrypoint<span class="w"> </span>ipyeos<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">&quot;</span>:/develop<span class="w"> </span>-w<span class="w"> </span>/develop<span class="w"> </span>-t<span class="w"> </span>ghcr.io/uuosio/scdk<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-x<span class="w"> </span>test.py<span class="w"> </span>-k<span class="w"> </span>test_hello
+</code></pre></div>
+<p>Alternatively, you can run <code>cargo test</code> to run the tests:</p>
+<div class="highlight"><pre><span></span><code>cargo<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<p>When running <code>cargo test</code>, the tests defined in <code>lib.rs</code> will be executed:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#[test]</span>
+<span class="k">fn</span> <span class="nf">test_inc</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">tester</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChainTester</span>::<span class="n">new</span><span class="p">();</span>
+<span class="w">    </span><span class="c1">//uncomment the following line to enable contract debugging.</span>
+<span class="w">    </span><span class="c1">// tester.enable_debug_contract(&quot;hello&quot;, true).unwrap();</span>
+
+<span class="w">    </span><span class="n">deploy_contract</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">tester</span><span class="p">);</span>
+<span class="w">    </span><span class="n">update_auth</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">tester</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">r#&quot;</span>
+<span class="s">    {</span>
+<span class="s">        &quot;hello&quot;: &quot;active&quot;</span>
+<span class="s">    }</span>
+<span class="s">    &quot;#</span><span class="p">;</span>
+<span class="w">    </span><span class="n">tester</span><span class="p">.</span><span class="n">push_action</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;inc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"> </span><span class="n">permissions</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tester</span><span class="p">.</span><span class="n">produce_block</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">tester</span><span class="p">.</span><span class="n">push_action</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;inc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"> </span><span class="n">permissions</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span>
+<span class="w">    </span><span class="n">tester</span><span class="p">.</span><span class="n">produce_block</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Note that before running <code>cargo test</code>, you must first execute the <code>eosdebugger</code> application available in <code>ipyeos</code>. The Rust test code needs to connect to <code>eosdebugger</code> to run the tests.</p>
+<p>If your platform does not support running <code>eosdebugger</code> directly, such as on Windows or on platforms using the ARM instruction set, you can use Docker to run this command:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>-p<span class="w"> </span><span class="m">9090</span>:9090<span class="w"> </span>-p<span class="w"> </span><span class="m">9092</span>:9092<span class="w"> </span>-p<span class="w"> </span><span class="m">9093</span>:9093<span class="w"> </span>-t<span class="w"> </span>ghcr.io/uuosio/scdk
+</code></pre></div>
+<p>After starting <code>eosdebugger</code>, run <code>cargo test</code>, and you will see the following output in the <code>eosdebugger</code> console:</p>
+<div class="highlight"><pre><span></span><code><span class="o">[(</span>hello,inc<span class="o">)</span>-&gt;hello<span class="o">]</span>:<span class="w"> </span>CONSOLE<span class="w"> </span>OUTPUT<span class="w"> </span><span class="nv">BEGIN</span><span class="w"> </span><span class="o">=====================</span>
+count<span class="w"> </span>is<span class="w"> </span><span class="m">1</span>
+
+<span class="o">[(</span>hello,inc<span class="o">)</span>-&gt;hello<span class="o">]</span>:<span class="w"> </span>CONSOLE<span class="w"> </span>OUTPUT<span class="w"> </span><span class="nv">END</span><span class="w">   </span><span class="o">=====================</span>
+debug<span class="w"> </span><span class="m">2023</span>-05-24T09:18:36.315<span class="w"> </span>ipyeos<span class="w">    </span>controller.cpp:2498<span class="w">           </span>clear_expired_input_<span class="w"> </span><span class="o">]</span><span class="w"> </span>removed<span class="w"> </span><span class="m">0</span><span class="w"> </span>expired<span class="w"> </span>transactions<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span><span class="m">50</span><span class="w"> </span>input<span class="w"> </span>dedup<span class="w"> </span>list,<span class="w"> </span>pending<span class="w"> </span>block<span class="w"> </span><span class="nb">time</span><span class="w"> </span><span class="m">2018</span>-06-01T12:00:04.000
+debug<span class="w"> </span><span class="m">2023</span>-05-24T09:18:36.319<span class="w"> </span>ipyeos<span class="w">    </span>apply_context.cpp:40<span class="w">          </span>print_debug<span class="w">          </span><span class="o">]</span><span class="w"> </span>
+<span class="o">[(</span>hello,inc<span class="o">)</span>-&gt;hello<span class="o">]</span>:<span class="w"> </span>CONSOLE<span class="w"> </span>OUTPUT<span class="w"> </span><span class="nv">BEGIN</span><span class="w"> </span><span class="o">=====================</span>
+count<span class="w"> </span>is<span class="w"> </span><span class="m">2</span>
+
+<span class="o">[(</span>hello,inc<span class="o">)</span>-&gt;hello<span class="o">]</span>:<span class="w"> </span>CONSOLE<span class="w"> </span>OUTPUT<span class="w"> </span><span class="nv">END</span><span class="w">   </span><span class="o">=====================</span>
+</code></pre></div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.19047be9.min.js"></script>
+      
+    
+  </body>
+</html>
