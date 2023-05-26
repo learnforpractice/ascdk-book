@@ -149,3 +149,5 @@ false
 
 [(hello,test)->hello]: CONSOLE OUTPUT END   =====================
 ```
+
+[完整示例代码](https://github.com/learnforpractice/rscdk-book/tree/master/examples/commonfunctions)

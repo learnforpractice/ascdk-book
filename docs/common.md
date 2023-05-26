@@ -153,3 +153,5 @@ This output shows that the `is_account` function returned `true` when checking t
 It is important to understand the use of these functions as they are frequently used in Rust smart contracts. They provide various checks and controls for contract interactions, ensuring the correctness of transactions and contract actions.
 
 This tutorial provides a good overview of how to use these basic functions, but always remember that the use of such functions should be adapted to the specific requirements of your smart contract.
+
+[Example Code](https://github.com/learnforpractice/rscdk-book/tree/master/examples/commonfunctions)
