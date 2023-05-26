@@ -21,21 +21,30 @@ name bytes string bool uint64 checksum256
 public_key signature symbol asset extended_asset
 ```
                                                                                                     
-# ABI中的内置数据类型和Python中的数据类型的对应关系表
+# ABI中的内置数据类型和Rust中的数据类型的对应关系表
 
-下面的这张表显示了ABI中的内置类型和Python中的类型的对应关系.
+下面的这张表显示了ABI中的内置类型和Rust中的类型的对应关系.其中的所属模块，如果是非内置，则是在`rust-chain`这个rust package中相关的模块中定义的，另外，这些结构都已经导出到`lib.rs`，所以可以以下面的方式来引用相应的结构体：
 
-需要说明一下的是，所以这些和Python对应的类型虽然有些属于不同的模块，但是都已经事先import到global的环境中了，所以开发者在使用的过程中，Python中对应的这些ABI类型可以直接用，不用再去用例如下面的方式来import:
-
-```python
-from chain.crypto import PublicKey
+```rust
+use rust_chain::{
+    TimePoint,
+    TimePointSec,
+    Name,
+    Checksum160,
+    Checksum256,
+    Checksum512,
+    PublicKey,
+    Signature,
+    Symbol,
+    SymbolCode,
+    Asset,
+    ExtendedAsset,
+};
 ```
-
-当然，重复import也不会有什么影响
 
 关系表：
 
-|         ABI 类型     |   Python 类型       |      所属模块    |
+|         ABI 类型     |   Rust 类型       |      所属模块    |
 |:--------------------:|:------------------:|:------------------:|
 |         bool         |        bool        |   内置    |
 |         int8         |         i8         |   内置    |
@@ -47,8 +56,8 @@ from chain.crypto import PublicKey
 |        uint64        |         u64        |   内置    |
 |        int128        |        i128        |   内置    |
 |        uint128       |        u128        |   内置    |
-|       varint32       |      VarInt32      |   structs |
-|       varuint32      |      VarUint32     |   structs |
+|       varint32       |                    |          |
+|       varuint32      |      VarUint32     |   varint |
 |        float32       |     float32        |  内置     |
 |        float64       |       float        |  内置     |
 |       float128       |      Float128      |  structs  |
@@ -56,13 +65,13 @@ from chain.crypto import PublicKey
 |    time_point_sec    |    TimePointSec    |  structs  |
 | block_timestamp_type | BlockTimestampType |  structs  |
 |         name         |        Name        |  name  |
-|         bytes        |        bytes       |  内置  |
-|        string        |        str         |  内置  |
-|      checksum160     |     Checksum160    |  crypto  |
-|      checksum256     |   Checksum256/u256 |  crypto  |
-|      checksum512     |     Checksum512    |  crypto  |
-|      public_key      |      PublicKey     |  crypto  |
-|       signature      |      Signature     |  crypto  |
+|         bytes        |        Vec<u8>     |  内置  |
+|        string        |        String      |  内置  |
+|      checksum160     |     Checksum160    |  structs  |
+|      checksum256     |   Checksum256/u256 |  structs  |
+|      checksum512     |     Checksum512    |  structs  |
+|      public_key      |      PublicKey     |  structs  |
+|       signature      |      Signature     |  structs  |
 |        symbol        |       Symbol       | asset   |
 |      symbol_code     |     SymbolCode     | asset   |
 |         asset        |        Asset       | asset   |

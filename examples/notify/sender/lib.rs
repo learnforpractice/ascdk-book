@@ -1,4 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "std", allow(warnings))]
 
 use rust_chain as chain;
 
@@ -34,7 +35,8 @@ mod hello {
         #[chain(action="test")]
         pub fn test(&self, name: String) {
             require_recipient(Name::new("hello"));
-            chain_println!("++++++++sender:", name);
+            chain_println!(self.receiver, self.first_receiver);
+            chain_println!("++++++++in sender, name is:", name);
         }
     }
 }

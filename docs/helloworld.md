@@ -27,7 +27,6 @@ class MyContract(Contract):
 Testing code:
 
 ```python
-# helloworldtest.py
 
 import os
 from ipyeos import chaintester
