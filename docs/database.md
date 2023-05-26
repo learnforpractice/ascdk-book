@@ -80,7 +80,7 @@ impl PrimaryValueInterface for Name {
 - `#[chain(table="counter")]` uses the `chain` attribute to define a table named `counter`, which is a `name` structure. The `table` keyword instructs the compiler to generate table-related code, wrapping the `MultiIndex` structure related code in `rust-chain` to make it easier for developers to call.
 - `#[chain(action = "inc")]` indicates that the `inc_count` method is an `action`, triggered by the Action structure included in the Transaction.
 - `Counter::new_table(self.receiver)` creates a table, where `self.receiver` specifies the name of the current contract account, indicating that the table is stored in the current contract account.
-- `let it = db.find(account.value());` is used to find the value located at the primary index `1`, and the returned value is of type `Iterator`.
+- `let it = db.find(account.value());` is used to find the value located at the primary index, and the returned value is of type `Iterator`.
 - `let Some(mut value) = it.get_value()` is used to obtain the value in `Iterator`. If the value doesn't exist, `db.store(&value, payer);` is used to save a new value to the database. Otherwise, after incrementing count by 1, `db.update(&it, &value, payer);` is used to update the data in the database. The payer specifies which account pays for the RAM resources and needs to have signed with the `active` permission of that account in the Transaction.
 
 Compilation:

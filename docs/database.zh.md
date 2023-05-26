@@ -80,7 +80,7 @@ impl PrimaryValueInterface for Name {
 - `#[chain(table="counter")]`这行代码利用了`chain`属性来定义一个表，表的名称是`counter`，是一个`name`结构，`table`关键字指引编译器生成表相关的代码，生成的代码会对`rust-chain`代码中的`MultiIndex`结构相关的代码进行封装，以方便开发者进行调用
 - `#[chain(action = "inc")]`表示`inc_count`方法是一个`action`，会通过包含在Transaction中的Action结构来触发
 - `Counter::new_table(self.receiver)`指定创建一个表，`self.receiver`指定的是当前合约的账号名称，表示表是存储在当前合约账号。
-- `let it = db.find(account.value());`用于查找主索引为`1`所在的值，返回的值是`Iterator`类型
+- `let it = db.find(account.value());`用于查找主索引所在的值，返回的值是`Iterator`类型
 - `let Some(mut value) = it.get_value()`用于获取`Iterator`中的值，如果值不存在，则调用`db.store(&value, payer);`来保存一个新值到数据库中，否则将count加1后调用`db.update(&it, &value, payer);`来更新数据库中的数据。其中的payer用于指定哪个账号支付RAM资源，并且需要在Transaction中已经用该账号的`active`权限签名。
 
 编译：
