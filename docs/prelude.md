@@ -219,7 +219,7 @@ The Action structure is contained within the Transaction structure. An action st
    }
 ```
 
-其中，[permission_level](https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/action.hpp#L12)的定义如下：
+In which, the definition of [permission_level](https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/action.hpp#L12) is as follows:
 
 ```C++
 struct permission_level {
