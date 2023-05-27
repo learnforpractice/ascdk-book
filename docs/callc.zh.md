@@ -14,11 +14,29 @@ comments: true
 python3 -m pip install -U eoscdt
 ```
 
-如果你的平台不支持直接安装，则必须使用docker来安装相关的镜像，然后在docker中运行相关的命令，具体的安装过程在[设置开发环境](./env.zh.md)这章中已经有过介绍。通过下面的命令在docker中运行bash，然后在bash中执行相关的命令。
+如果你的平台是 Windows 或 MacOSX M1/M2，你也可以下载一个包含ipyeos工具的镜像
+
+```bash
+docker pull ghcr.io/uuosio/scdk:latest
+```
+
+在`scdk`这个docker镜像中，已经包含了如下的工具：
+
+```
+ipyeos
+gscdk
+pscdk
+eoscdt
+pyeoskit
+```
+
+然后通过下面的命令在docker中运行`bash`：
 
 ```bash
 docker run --entrypoint bash -it --rm -v "$(pwd)":/develop -t ghcr.io/uuosio/scdk
 ```
+
+再在bash中执行接下来的编译`say_hello`库的命令。
 
 下面以编译`say_hello`函数为例，演示如何从Rust代码中调用C/C++中的代码：
 
@@ -169,6 +187,18 @@ println!("cargo:rustc-link-lib=static=say_hello");
 ```rust
 println!("cargo:rustc-link-search={}/{}", stdout.trim(), "lib");
 println!("cargo:rustc-link-lib=static=c++");
+```
+
+最后，运行下面的命令来生成合约文件：
+
+```bash
+rust-contract build
+```
+
+再运行下面的命令进行测试：
+
+```bash
+ipyeos -m pytest -s -x test.py -k test_hello
 ```
 
 # 附录:

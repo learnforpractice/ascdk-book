@@ -14,11 +14,30 @@ First, use the following command to install `eoscdt` for compiling C or C++ code
 python3 -m pip install -U eoscdt
 ```
 
-If your platform does not support direct installation, you must install the relevant Docker image, and then run the relevant commands in Docker. The specific installation process has been introduced in the [Setting up the development environment](./env.md) chapter. Run bash in Docker with the following command, and then execute the related commands in bash.
+If your platform is Windows or MacOSX M1/M2, you can also download an image that includes the `eoscdt` tool:
+
+```bash
+docker pull ghcr.io/uuosio/scdk:latest
+```
+
+The `scdk` Docker image already includes the following tools:
+
+```
+ipyeos
+gscdk
+pscdk
+eoscdt
+pyeoskit
+```
+
+Then, run `bash` in Docker with the following command:
 
 ```bash
 docker run --entrypoint bash -it --rm -v "$(pwd)":/develop -t ghcr.io/uuosio/scdk
 ```
+
+Next, execute the following command in bash to compile the `say_hello` library.
+
 
 Below, we will compile the `say_hello` function as an example to show how to call code from C/C++ in Rust:
 
@@ -169,6 +188,18 @@ The following code links the `libc++.a` library, and the code path is obtained b
 ```rust
 println!("cargo:rustc-link-search={}/{}", stdout.trim(), "lib");
 println!("cargo:rustc-link-lib=static=c++");
+```
+
+Finally, run the following command to generate the contract file:
+
+```bash
+rust-contract build
+```
+
+Then run the following command to perform tests:
+
+```bash
+ipyeos -m pytest -s -x test.py -k test_hello
 ```
 
 # Appendix:

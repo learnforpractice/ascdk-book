@@ -51,20 +51,10 @@ source ~/env/bin/activate
 python3 -m pip install -U ipyeos
 ```
 
-如果你的平台是 Windows 或 MacOSX M1/M2，你也可以下载一个包含ipyeos工具的镜像
+如果你的平台是 Windows 或 MacOSX M1/M2，你还需要下载一个包含ipyeos工具的镜像
 
 ```bash
-docker pull ghcr.io/uuosio/scdk:latest
-```
-
-在`scdk`这个docker镜像中，已经包含了如下的工具：
-
-```
-ipyeos
-gscdk
-pscdk
-eoscdt
-pyeoskit
+docker pull ghcr.io/uuosio/ipyeos:latest
 ```
 
 在 macOS 上安装和运行 Docker 的推荐软件是 [OrbStack](https://orbstack.dev/download)。对于其他平台，可以使用 [Docker Desktop](https://www.docker.com/products/docker-desktop)。
@@ -104,11 +94,8 @@ rust-contract build
 ipyeos -m pytest -s -x test.py -k test_hello
 ```
 
-如果你的平台不支持直接运行ipyeos，例如在Windows平台或者或 MacOSX M1/M2，或者是其它使用ARM指令集的CPU的平台，你可以使用Docker来运行该命令：
+在Windows平台或者或 MacOSX M1/M2，运行上面的命令将自动启动docker来运行测试。
 
-```bash
-docker run --entrypoint ipyeos -it --rm -v "$(pwd)":/develop -w /develop -t ghcr.io/uuosio/scdk -m pytest -s -x test.py -k test_hello
-```
 
 另外，你也可以运行`cargo test`来运行测试：
 
@@ -143,11 +130,7 @@ fn test_inc() {
 
 需要注意的是，执行`cargo test`之前，必须先执行`eosdebugger`这个在`ipyeos`中的应用，rust测试代码需要连接到`eosdebugger`来运行测试。
 
-如果你的平台不支持直接运行`eosdebugger`，例如在Windows平台或者使用ARM指令集的CPU的平台，你可以使用Docker来运行该命令：
-
-```bash
-docker run -it --rm -p 9090:9090 -p 9092:9092 -p 9093:9093 -t ghcr.io/uuosio/scdk
-```
+在Windows平台或者使用ARM指令集的CPU的平台，运行该命令将自动通过docker来运行eosdebugger.
 
 启动后，运行`cargo test`，即可以运行`eosdebugger`中的控制台中看到如下的输出：
 

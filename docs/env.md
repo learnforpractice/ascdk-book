@@ -48,20 +48,10 @@ Install ipyeos:
 python3 -m pip install -U ipyeos
 ```
 
-If your platform is Windows or MacOSX M1/M2, you can also download an image that includes the ipyeos tool:
+If your platform is Windows or MacOSX M1/M2, you also need to download an image that includes the ipyeos tool:
 
 ```bash
-docker pull ghcr.io/uuosio/scdk:latest
-```
-
-The `scdk` Docker image already includes the following tools:
-
-```
-ipyeos
-gscdk
-pscdk
-eoscdt
-pyeoskit
+docker pull ghcr.io/uuosio/ipyeos:latest
 ```
 
 On macOS, the recommended software for installing and running Docker is [OrbStack](https://orbstack.dev/download). For other platforms, you can use [Docker Desktop](https://www.docker.com/products/docker-desktop).
@@ -101,11 +91,7 @@ Test:
 ipyeos -m pytest -s -x test.py -k test_hello
 ```
 
-If your platform does not support running ipyeos directly, such as on Windows or macOS M1/M2, or on other platforms using the ARM instruction set, you can use Docker to run this command:
-
-```bash
-docker run --entrypoint ipyeos -it --rm -v "$(pwd)":/develop -w /develop -t ghcr.io/uuosio/scdk -m pytest -s -x test.py -k test_hello
-```
+If your are using Windows or macOS M1/M2, or on other platforms using the ARM instruction set, the above command will run the test in docker.
 
 Alternatively, you can run `cargo test` to run the tests:
 
@@ -140,11 +126,7 @@ fn test_inc() {
 
 Note that before running `cargo test`, you must first execute the `eosdebugger` application available in `ipyeos`. The Rust test code needs to connect to `eosdebugger` to run the tests.
 
-If your platform does not support running `eosdebugger` directly, such as on Windows or on platforms using the ARM instruction set, you can use Docker to run this command:
-
-```bash
-docker run -it --rm -p 9090:9090 -p 9092:9092 -p 9093:9093 -t ghcr.io/uuosio/scdk
-```
+If your are using Windows or on platforms using the ARM instruction set, `eosdebugger` will run in docker.
 
 After starting `eosdebugger`, run `cargo test`, and you will see the following output in the `eosdebugger` console:
 
