@@ -261,13 +261,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installing-nightly-rust" class="md-nav__link">
-    Installing Nightly Rust
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#installing-binaryen" class="md-nav__link">
     Installing Binaryen
   </a>
@@ -501,13 +494,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installing-nightly-rust" class="md-nav__link">
-    Installing Nightly Rust
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#installing-binaryen" class="md-nav__link">
     Installing Binaryen
   </a>
@@ -574,19 +560,6 @@
 <p>Activate the new PATH environment variable:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.cargo/env
 </code></pre></div>
-<h2 id="installing-nightly-rust">Installing Nightly Rust</h2>
-<p>Due to issues with compiling contracts using newer versions of Rust nightly, it is necessary to install the <code>nightly-2023-02-07</code> version of Rust:</p>
-<div class="highlight"><pre><span></span><code>rustup install nightly-2023-02-07
-rustup component add rust-src --toolchain nightly-2023-02-07
-</code></pre></div>
-<p>Then, on Linux platform, execute the following command:
-<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
-</code></pre></div></p>
-<p>If you are on macOSX platform, execute the following command:
-<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-apple-darwin
-</code></pre></div></p>
-<p>If you have already installed the default nightly version beforehand, you will need to rename or delete the original directory. Otherwise, it will cause the creation of the symbolic link to fail.</p>
-<p>The additional setup mentioned above will be improved in future versions to allow compiling Rust contracts using the stable version.</p>
 <h2 id="installing-binaryen">Installing Binaryen</h2>
 <ul>
 <li>Install version &gt;= 99 of <code>binaryen</code>:</li>
@@ -605,7 +578,7 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
 </code></pre></div>
 <h2 id="installing-the-eos-testing-framework">Installing the EOS Testing Framework</h2>
 <p>Install ipyeos:</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ipyeos
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>ipyeos
 </code></pre></div>
 <p>If your platform is Windows or MacOSX M1/M2, you can also download an image that includes the ipyeos tool:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/uuosio/scdk:latest
@@ -619,10 +592,10 @@ pyeoskit
 </code></pre></div>
 <p>On macOS, the recommended software for installing and running Docker is <a href="https://orbstack.dev/download">OrbStack</a>. For other platforms, you can use <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a>.</p>
 <h2 id="installing-the-rust-smart-contract-builder">Installing the Rust Smart Contract Builder</h2>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>rust-contracts-builder
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>rust-contracts-builder
 </code></pre></div>
 <h2 id="installing-the-eos-python-toolkit">Installing the EOS Python Toolkit</h2>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyeoskit
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pyeoskit
 </code></pre></div>
 <p>pyeoskit is used for deploying contracts to the mainnet or testnet.</p>
 <h2 id="checking-the-environment">Checking the Environment</h2>

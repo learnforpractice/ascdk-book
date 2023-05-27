@@ -261,13 +261,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nightly-rust" class="md-nav__link">
-    安装 Nightly Rust
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#binaryen" class="md-nav__link">
     安装 binaryen
   </a>
@@ -501,13 +494,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#nightly-rust" class="md-nav__link">
-    安装 Nightly Rust
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#binaryen" class="md-nav__link">
     安装 binaryen
   </a>
@@ -574,19 +560,6 @@
 <p>激活新的 PATH 环境变量：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span><span class="nv">$HOME</span>/.cargo/env
 </code></pre></div>
-<h2 id="nightly-rust">安装 Nightly Rust</h2>
-<p>由于较新的rust nightly版本编译合约会出问题，这里需要额外安装<code>nightly-2023-02-07</code>版本的rust:</p>
-<div class="highlight"><pre><span></span><code>rustup install nightly-2023-02-07
-rustup component add rust-src --toolchain nightly-2023-02-07
-</code></pre></div>
-<p>然后在linux平台下执行：
-<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
-</code></pre></div></p>
-<p>如果是macOSX平台，则执行：
-<div class="highlight"><pre><span></span><code>ln<span class="w"> </span>-s<span class="w"> </span>~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin<span class="w"> </span>~/.rustup/toolchains/nightly-x86_64-apple-darwin
-</code></pre></div></p>
-<p>如果事先已经安装过了默认的nightly版本，则需要将原目录重命名或者删除，否则会导致创建链接失败。</p>
-<p>上面的额外设置在未来的版本中会加以改进，以期可以用stable的版本来编译rust合约。</p>
 <h2 id="binaryen">安装 binaryen</h2>
 <ul>
 <li>安装版本 &gt;= 99 的 <code>binaryen</code>:</li>
@@ -605,7 +578,7 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
 </code></pre></div>
 <h2 id="eos">安装EOS测试框架</h2>
 <p>安装 ipyeos：</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ipyeos
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>ipyeos
 </code></pre></div>
 <p>如果你的平台是 Windows 或 MacOSX M1/M2，你也可以下载一个包含ipyeos工具的镜像</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/uuosio/scdk:latest
@@ -619,10 +592,10 @@ pyeoskit
 </code></pre></div>
 <p>在 macOS 上安装和运行 Docker 的推荐软件是 <a href="https://orbstack.dev/download">OrbStack</a>。对于其他平台，可以使用 <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a>。</p>
 <h2 id="rust_1">安装 Rust 智能合约构建器</h2>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>rust-contracts-builder
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>rust-contracts-builder
 </code></pre></div>
 <h2 id="eos-python">安装 EOS 的 Python 工具包</h2>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyeoskit
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pyeoskit
 </code></pre></div>
 <p>pyeoskit 用于部署合约到主网或者测试网。</p>
 <h2 id="_2">检查环境</h2>

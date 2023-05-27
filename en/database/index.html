@@ -637,7 +637,7 @@
 <li><code>#[chain(table="counter")]</code> uses the <code>chain</code> attribute to define a table named <code>counter</code>, which is a <code>name</code> structure. The <code>table</code> keyword instructs the compiler to generate table-related code, wrapping the <code>MultiIndex</code> structure related code in <code>rust-chain</code> to make it easier for developers to call.</li>
 <li><code>#[chain(action = "inc")]</code> indicates that the <code>inc_count</code> method is an <code>action</code>, triggered by the Action structure included in the Transaction.</li>
 <li><code>Counter::new_table(self.receiver)</code> creates a table, where <code>self.receiver</code> specifies the name of the current contract account, indicating that the table is stored in the current contract account.</li>
-<li><code>let it = db.find(account.value());</code> is used to find the value located at the primary index <code>1</code>, and the returned value is of type <code>Iterator</code>.</li>
+<li><code>let it = db.find(account.value());</code> is used to find the value located at the primary index, and the returned value is of type <code>Iterator</code>.</li>
 <li><code>let Some(mut value) = it.get_value()</code> is used to obtain the value in <code>Iterator</code>. If the value doesn't exist, <code>db.store(&amp;value, payer);</code> is used to save a new value to the database. Otherwise, after incrementing count by 1, <code>db.update(&amp;it, &amp;value, payer);</code> is used to update the data in the database. The payer specifies which account pays for the RAM resources and needs to have signed with the <code>active</code> permission of that account in the Transaction.</li>
 </ul>
 <p>Compilation:</p>
