@@ -16,6 +16,12 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source $HOME/.cargo/env
 ```
 
+对于Windows平台，可前往下面的的官方下载地址根据提示下载：
+
+```
+https://www.rust-lang.org/tools/install
+```
+
 ## 安装 binaryen
 
 * 安装版本 >= 99 的 `binaryen`:

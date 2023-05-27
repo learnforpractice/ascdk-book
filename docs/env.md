@@ -12,6 +12,12 @@ Activate the new PATH environment variable:
 source $HOME/.cargo/env
 ```
 
+For the Windows platform, you can go to the following official download address and download according to the prompts:
+
+```
+https://www.rust-lang.org/tools/install
+```
+
 ## Installing Binaryen
 
 * Install version >= 99 of `binaryen`:
