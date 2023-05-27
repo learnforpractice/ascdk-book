@@ -12,29 +12,6 @@ Activate the new PATH environment variable:
 source $HOME/.cargo/env
 ```
 
-## Installing Nightly Rust
-
-Due to issues with compiling contracts using newer versions of Rust nightly, it is necessary to install the `nightly-2023-02-07` version of Rust:
-
-```
-rustup install nightly-2023-02-07
-rustup component add rust-src --toolchain nightly-2023-02-07
-```
-
-Then, on Linux platform, execute the following command:
-```bash
-ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu ~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
-```
-
-If you are on macOSX platform, execute the following command:
-```bash
-ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin ~/.rustup/toolchains/nightly-x86_64-apple-darwin
-```
-
-If you have already installed the default nightly version beforehand, you will need to rename or delete the original directory. Otherwise, it will cause the creation of the symbolic link to fail.
-
-The additional setup mentioned above will be improved in future versions to allow compiling Rust contracts using the stable version.
-
 ## Installing Binaryen
 
 * Install version >= 99 of `binaryen`:
@@ -62,7 +39,7 @@ source ~/env/bin/activate
 Install ipyeos:
 
 ```bash
-python3 -m pip install ipyeos
+python3 -m pip install -U ipyeos
 ```
 
 If your platform is Windows or MacOSX M1/M2, you can also download an image that includes the ipyeos tool:
@@ -86,13 +63,13 @@ On macOS, the recommended software for installing and running Docker is [OrbStac
 ## Installing the Rust Smart Contract Builder
 
 ```bash
-python3 -m pip install rust-contracts-builder
+python3 -m pip install -U rust-contracts-builder
 ```
 
 ## Installing the EOS Python Toolkit
 
 ```bash
-python3 -m pip install pyeoskit
+python3 -m pip install -U pyeoskit
 ```
 
 pyeoskit is used for deploying contracts to the mainnet or testnet.

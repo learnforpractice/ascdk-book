@@ -16,30 +16,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source $HOME/.cargo/env
 ```
 
-## 安装 Nightly Rust
-
-由于较新的rust nightly版本编译合约会出问题，这里需要额外安装`nightly-2023-02-07`版本的rust:
-
-```
-rustup install nightly-2023-02-07
-rustup component add rust-src --toolchain nightly-2023-02-07
-```
-
-然后在linux平台下执行：
-```bash
-ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-unknown-linux-gnu ~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
-```
-
-如果是macOSX平台，则执行：
-```bash
-ln -s ~/.rustup/toolchains/nightly-2023-02-07-x86_64-apple-darwin ~/.rustup/toolchains/nightly-x86_64-apple-darwin
-```
-
-如果事先已经安装过了默认的nightly版本，则需要将原目录重命名或者删除，否则会导致创建链接失败。
-
-上面的额外设置在未来的版本中会加以改进，以期可以用stable的版本来编译rust合约。
-
-
 ## 安装 binaryen
 
 * 安装版本 >= 99 的 `binaryen`:
@@ -66,7 +42,7 @@ source ~/env/bin/activate
 安装 ipyeos：
 
 ```bash
-python3 -m pip install ipyeos
+python3 -m pip install -U ipyeos
 ```
 
 如果你的平台是 Windows 或 MacOSX M1/M2，你也可以下载一个包含ipyeos工具的镜像
@@ -90,13 +66,13 @@ pyeoskit
 ## 安装 Rust 智能合约构建器
 
 ```bash
-python3 -m pip install rust-contracts-builder
+python3 -m pip install -U rust-contracts-builder
 ```
 
 ## 安装 EOS 的 Python 工具包
 
 ```bash
-python3 -m pip install pyeoskit
+python3 -m pip install -U pyeoskit
 ```
 
 pyeoskit 用于部署合约到主网或者测试网。
