@@ -40,13 +40,13 @@ mod secondaryindex {
         pub fn test1(&self) {
             let db = MyData::new_table(self.receiver);
 
-            let data = &MyData{a: 1, b: 2, c: 3};
+            let data = MyData{a: 1, b: 2, c: 3};
             db.store(&data, self.receiver);
 
-            let data = &MyData{a: 11, b: 22, c: 33};
+            let data = MyData{a: 11, b: 22, c: 33};
             db.store(&data, self.receiver);
 
-            let data = &MyData{a: 111, b: 222, c: 333};
+            let data = MyData{a: 111, b: 222, c: 333};
             db.store(&data, self.receiver);
             chain_println!("++++test1 done!");
         }
