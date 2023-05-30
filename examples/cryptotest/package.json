@@ -1,5 +1,5 @@
 {
-  "name": "testnotify",
+  "name": "as-template",
   "version": "0.0.1",
   "description": "assemblyscript smart contracts template",
   "author": "learnforpractice <learnforpractice@gmail.com>",
@@ -17,9 +17,8 @@
     "assemblyscript"
   ],
   "scripts": {
-    "pytest": "ipyeos -m pytest -s -x test.py -k test_hello",
-    "test2": "jest --no-cache",
-    "build": "npx asm-contract build ./sender.ts --target release && npx asm-contract build ./receiver.ts --target release"
+    "pytest": "ipyeos -m pytest -s -x test.py",
+    "build": "npx asm-contract build ./assembly/test.ts --target release"
   },
   "jest": {
     "transform": {

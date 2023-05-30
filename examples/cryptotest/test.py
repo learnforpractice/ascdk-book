@@ -1,15 +1,14 @@
 import os
 import sys
+import hashlib
 import json
 import struct
 import pytest
-import hashlib
 
 test_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(test_dir, '..'))
 
-from ipyeos import log
-from ipyeos import eos
+from ipyeos import log, eos
 from ipyeos import chaintester
 from ipyeos.chaintester import ChainTester
 
@@ -62,22 +61,22 @@ class NewChainTester():
 
 test_dir = os.path.dirname(__file__)
 def deploy_contract(tester, package_name):
-    with open(f'{test_dir}/target/{package_name}.wasm', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.wasm', 'rb') as f:
         code = f.read()
-    with open(f'{test_dir}/target/{package_name}.abi', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.abi', 'rb') as f:
         abi = f.read()
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
 def test_hash(tester):
-    deploy_contract(tester, 'cryptotest')
-    r = tester.push_action('hello', 'testhash', {}, {'hello': 'active'})
+    deploy_contract(tester, 'test')
+    r = tester.push_action('hello', 'testhash', {'data': 'aabbccdd112233'}, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
 
 @chain_test
 def test_recover_key(tester):
-    deploy_contract(tester, 'cryptotest')
+    deploy_contract(tester, 'test')
     key = eos.create_key()
     pub = key['public']
     priv = key['private']

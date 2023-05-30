@@ -17,7 +17,7 @@
     "assemblyscript"
   ],
   "scripts": {
-    "test": "ipyeos -m pytest -s -x test.py -k test_hello",
+    "pytest": "ipyeos -m pytest -s -x test.py -k test_hello",
     "build": "npx asm-contract build ./assembly/test.ts --target release"
   },
   "jest": {
