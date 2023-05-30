@@ -8,3 +8,4 @@ build
 .benchmarks
 .pytest_cache
 node_modules
+ascdk-book.code-workspace

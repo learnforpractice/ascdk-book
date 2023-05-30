@@ -1,48 +1,18 @@
-# Setting Up the Development Environment
+Here is the translation of the given Markdown text from Chinese to English:
 
-## Installing Rust
+---
+comments: true
+---
 
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-```
+# Set up the Development Environment
 
-Activate the new PATH environment variable:
-
-```bash
-source $HOME/.cargo/env
-```
-
-For the Windows platform, you can go to the following official download address and download according to the prompts:
+Setting up the environment for AssemblyScript smart contracts is relatively simple. All you need to install are `nodejs` and `ipyeos`, just like developing a webpage using react or vue.js. You can download and install nodejs from the link below:
 
 ```
-https://www.rust-lang.org/tools/install
+https://nodejs.org/
 ```
 
-## Installing Binaryen
-
-* Install version >= 99 of `binaryen`:
-  * [Debian/Ubuntu](https://tracker.debian.org/pkg/binaryen): `apt-get install binaryen`
-  * [Homebrew](https://formulae.brew.sh/formula/binaryen): `brew install binaryen`
-  * [Arch Linux](https://archlinux.org/packages/community/x86_64/binaryen/): `pacman -S binaryen`
-  * Windows: [Binary releases can be downloaded](https://github.com/WebAssembly/binaryen/releases)
-
-## Creating a Virtual Python Environment for Testing
-
-```bash
-python3 -m venv ~/env
-source ~/env/bin/activate
-python3 -m pip install --upgrade pip
-```
-
-The next time you want to use the test environment, simply run the following command again.
-
-```bash
-source ~/env/bin/activate
-```
-
-## Installing the EOS Testing Framework
-
-Install ipyeos:
+Next, install `ipyeos`, which is a python package:
 
 ```bash
 python3 -m pip install -U ipyeos
@@ -54,91 +24,69 @@ If your platform is Windows or MacOSX M1/M2, you also need to download an image 
 docker pull ghcr.io/uuosio/ipyeos:latest
 ```
 
-On macOS, the recommended software for installing and running Docker is [OrbStack](https://orbstack.dev/download). For other platforms, you can use [Docker Desktop](https://www.docker.com/products/docker-desktop).
+The recommended software for installing and running Docker on macOS is [OrbStack](https://orbstack.dev/download). For other platforms, you can use [Docker Desktop](https://www.docker.com/products/docker-desktop).
 
-## Installing the Rust Smart Contract Builder
+## Test the Development Environment
 
-```bash
-python3 -m pip install -U rust-contracts-builder
+You can test if your development environment is set up successfully in the following way:
+
+First, download the sample code from the link below:
+
+```
+https://github.com/uuosio/as-template
 ```
 
-## Installing the EOS Python Toolkit
+Then, use the `cd` command to enter the directory and run the following command to compile:
 
 ```bash
-python3 -m pip install -U pyeoskit
+cd as-template
+yarn
+yarn build
 ```
 
-pyeoskit is used for deploying contracts to the mainnet or testnet.
+If two files `counter.wasm` and `counter.abi` are generated in the `assembly/target` directory, it means the compilation was successful.
 
-## Checking the Environment
-
-Create a new Rust contract project:
+Next, run the following command to run the Python test script for testing:
 
 ```bash
-rust-contract init hello
+yarn pytest
 ```
 
-Build:
+You will see the following output:
 
-```bash
-cd hello
-rust-contract build
 ```
-
-Test:
-
-```bash
-ipyeos -m pytest -s -x test.py -k test_hello
-```
-
-If your are using Windows or macOS M1/M2, or on other platforms using the ARM instruction set, the above command will run the test in docker.
-
-Alternatively, you can run `cargo test` to run the tests:
-
-```bash
-cargo test
-```
-
-When running `cargo test`, the tests defined in `lib.rs` will be executed:
-
-```rust
-#[test]
-fn test_inc() {
-    let mut tester = ChainTester::new();
-    //uncomment the following line to enable contract debugging.
-    // tester.enable_debug_contract("hello", true).unwrap();
-
-    deploy_contract(&mut tester);
-    update_auth(&mut tester);
-
-    let permissions = r#"
-    {
-        "hello": "active"
-    }
-    "#;
-    tester.push_action("hello", "inc", "".into(), permissions).unwrap();
-    tester.produce_block();
-
-    tester.push_action("hello", "inc", "".into(), permissions).unwrap();
-    tester.produce_block();
-}
-```
-
-Note that before running `cargo test`, you must first execute the `eosdebugger` application available in `ipyeos`. The Rust test code needs to connect to `eosdebugger` to run the tests.
-
-If your are using Windows or on platforms using the ARM instruction set, `eosdebugger` will run in docker.
-
-After starting `eosdebugger`, run `cargo test`, and you will see the following output in the `eosdebugger` console:
-
-```bash
 [(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
-count is 1
-
+++++++++count:1
 [(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
-debug 2023-05-24T09:18:36.315 ipyeos    controller.cpp:2498           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list, pending block time 2018-06-01T12:00:04.000
-debug 2023-05-24T09:18:36.319 ipyeos    apply_context.cpp:40          print_debug          ] 
 [(hello,inc)->hello]: CONSOLE OUTPUT BEGIN =====================
-count is 2
-
+++++++++count:2
 [(hello,inc)->hello]: CONSOLE OUTPUT END   =====================
 ```
+
+Additionally, you can also use typescript to write test scripts. The test code is in the `tests/test.spec.ts` file.
+
+Before testing, you need to run the `eosdebugger` tool in `ipyeos` in the terminal:
+
+```bash
+eosdebugger
+```
+
+When you see an output similar to the following:
+```
+2023-05-30 16:03:21,259 INFO wasyncore 486 Serving on http://127.0.0.1:9093
+```
+
+It indicates successful operation.
+
+Then use the following command to run the test:
+
+```bash
+yarn test
+```
+
+You will see the same output in `eosdebugger`.
+
+
+Test code link:
+
+[as-template](https://github.com/uuosio/as-template)

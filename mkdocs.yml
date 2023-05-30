@@ -1,5 +1,5 @@
 site_name: Rust Smart Contracts Development Cook Book
-repo_url: https://github.com/learnforpractice/rscdk-book
+repo_url: https://github.com/learnforpractice/ascdk-book
 plugins:
     - i18n:
         default_language: en
