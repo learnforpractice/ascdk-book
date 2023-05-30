@@ -60,15 +60,15 @@ class NewChainTester():
 
 test_dir = os.path.dirname(__file__)
 def deploy_contract(tester, package_name):
-    with open(f'{test_dir}/target/{package_name}.wasm', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.wasm', 'rb') as f:
         code = f.read()
-    with open(f'{test_dir}/target/{package_name}.abi', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.abi', 'rb') as f:
         abi = f.read()
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_commonfunctions(tester):
-    deploy_contract(tester, 'commonfunctions')
+def test_hello(tester):
+    deploy_contract(tester, 'test')
     args = {}
     r = tester.push_action('hello', 'test', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
