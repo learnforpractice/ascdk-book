@@ -7,7 +7,10 @@ import {
     requireAuth2,
     hasAuth,
     isAccount,
+    currentTime,
+
     print,
+    check
 } from "asm-chain";
 
 @contract
@@ -23,8 +26,9 @@ class MyContract extends Contract {
         ret = isAccount(this.receiver);
         print(`+++isAccount(this.receiver): ${ret}\n`);
 
-        print(`hasAuth: ${hasAuth(this.receiver)}`);
+        print(`hasAuth: ${hasAuth(this.receiver)}\n`);
         requireAuth(this.receiver);
         requireAuth2(new PermissionLevel(this.receiver, Name.fromString("active")));
+        print(`current time: ${currentTime()}\n`);
     }
 }

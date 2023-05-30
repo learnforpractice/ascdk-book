@@ -12,9 +12,9 @@ comments: true
 
 智能合约是可以在链上执行的代码
 
-## 什么是Rust智能合约
+## 什么是 AssemblyScript 智能合约
 
-Rust智能合约是用Rust语言写的可在链上执行的代码。以EOS网络为例，Rust智能合约的代码会被编译成叫Webassebmly的二进制文件，并且可以发布到链上并被执行，从而达成某种操作效果。
+AssemblyScript 智能合约是用 AssemblyScript 语言(一种语法和 Typescript 兼容的语言)写的可在链上执行的代码。以EOS网络为例，AssemblyScript智能合约的代码会被编译成叫 Webassebmly 的二进制文件，并且可以发布到链上并被执行，从而达成某种操作效果。
 
 ## 什么是EOS
 EOS是一个基于代理权益证明(DPOS - Delegated Proof of Stake)共识算法的区块链网络。主网于2018年的6月8号正式上线。EOS的主网由21个块生产者(Block Producer)控制，块生产者简称为BP，由投票产生，负责将交易(Transaction)打包到区块中。

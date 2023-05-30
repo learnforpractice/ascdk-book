@@ -12,9 +12,9 @@ This document uses example code to introduce relevant knowledge points related t
 
 A smart contract is code that can be executed on the blockchain.
 
-## What is a Rust Smart Contract
+## What is an AssemblyScript Smart Contract
 
-A Rust smart contract is code written in Rust that can be executed on the blockchain. In the case of the EOS network, Rust smart contract code is compiled into a WebAssembly binary file, which can be published to the blockchain and executed, achieving a certain operation effect.
+An AssemblyScript smart contract is a code that can be executed on-chain, written in the AssemblyScript language (a language syntax compatible with TypeScript). Using the EOS network as an example, the code for an AssemblyScript smart contract would be compiled into a binary file called WebAssembly, and it can be published and executed on-chain, thus achieving a certain operational effect.
 
 ## What is EOS
 
