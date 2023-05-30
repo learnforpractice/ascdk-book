@@ -1,6 +1,8 @@
 import {
     print,
+    requireAuth,
     requireRecipient,
+
     Name,
     Contract,
 } from "asm-chain";
@@ -8,8 +10,9 @@ import {
 @contract
 class MyContract extends Contract {
     @action("sayhello")
-    sayHello(name: string): void {
+    sayHello(name: Name): void {
         print(`hello ${name}!`);
-        requireRecipient(Name.fromString('alice'));
+        requireAuth(name);
+        requireRecipient(Name.fromString('hello'));
     }
 }

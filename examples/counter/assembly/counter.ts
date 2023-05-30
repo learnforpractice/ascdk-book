@@ -1,21 +1,24 @@
 import {
     Name,
     Contract,
+
+    check,
     print,
+    requireAuth,
 } from "asm-chain";
 
 @table("counter")
 class Counter {
-    public key: u64;
+    public account: Name|null;
     public count: u64;
-    constructor(count: u64=0) {
+    constructor(account: Name|null=null, count: u64=0) {
         this.count = count;
-        this.key = Name.fromString("counter").N;
+        this.account = account;
     }
 
     @primary
     get primary(): u64 {
-        return this.key;
+        return this.account!.N;
     }
 }
 
@@ -26,11 +29,13 @@ class MyContract extends Contract {
     }
 
     @action("inc")
-    inc(): void {
-        let mi = Counter.new(this.receiver);
-        let it = mi.find(Name.fromString("counter").N);
+    inc(account: Name): void {
+        requireAuth(account);
+
+        let mi = Counter.new(account);
+        let it = mi.find(account.N);
         let count: u64 = 0;
-        let payer: Name = this.receiver;
+        let payer: Name = account;
 
         if (it.isOk()) {
             let counter = mi.get(it)
@@ -38,10 +43,19 @@ class MyContract extends Contract {
             mi.update(it, counter, payer);
             count = counter.count;
         } else {
-            let counter = new Counter(1);
+            let counter = new Counter(account, 1);
             mi.store(counter, payer);
             count = 1;
         }
         print(`++++++++count:${count}`);
+    }
+
+    @action("testremove")
+    testRemove(account: Name): void {
+        requireAuth(account);
+        let mi = Counter.new(account);
+        let it = mi.find(account.N);
+        check(it.isOk(), "account not found");
+        mi.remove(it);
     }
 }

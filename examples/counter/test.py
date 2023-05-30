@@ -67,14 +67,41 @@ def deploy_contract(tester, package_name):
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_hello(tester):
+def test_inc(tester):
     deploy_contract(tester, 'counter')
-    args = {}
+    args = {'account': 'hello'}
     r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
 
     r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    logger.info("+++++++test done!")
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
+
+@chain_test
+def test_remove(tester):
+    deploy_contract(tester, 'counter')
+    args = {'account': 'hello'}
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
+
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
+
+    args = {'account': 'hello'}
+    r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)

@@ -4,7 +4,7 @@ comments: true
 
 # 数据库的操作
 
-链上数据存储和读取是智能合约的一个重要功能。EOS链实现了一个内存数据库，支持以表的方式来存储数据，其中，每一个表的每一项数据都有唯一的主索引，称之为primary key，类型为uint64，表中存储的原始数据为任意长度的二进制数据，在智能合约调用存储数据的功能时，会将类的数据序列化后存进表中，在读取的时候又会通过反序列化的方式将原始数据转成类对象。并且还支持uint64, Uint128, Uint256, Float64, Float128类型的二重索引表，可以把二重索引表看作数据长度固定的特殊的表。主索引表和二重索引表可以配合起来使用，以实现多重索引的功能。二重索引表可以有多个。二重索引表的值是可以重复的，但是主索引表的主索引必须是唯一的。
+链上数据存储和读取是智能合约的一个重要功能。EOS链实现了一个内存数据库，支持以表的方式来存储数据，其中，每一个表的每一项数据都有唯一的主索引，称之为primary key，类型为uint64，表中存储的原始数据为任意长度的二进制数据，在智能合约调用存储数据的功能时，会将类的数据序列化后存进表中，在读取的时候又会通过反序列化的方式将原始数据转成类对象。并且还支持 u64, u128, u256, f64, Float128 类型的二重索引表，可以把二重索引表看作数据长度固定的特殊的表。主索引表和二重索引表可以配合起来使用，以实现多重索引的功能。二重索引表可以有多个。二重索引表的值是可以重复的，但是主索引表的主索引必须是唯一的。
 
 下面结合示例来讲解下EOS的链上的内存数据库的使用。
 
@@ -12,153 +12,150 @@ comments: true
 
 存储，查找，更新三个功能是数据库最基本的功能了，下面的代码演示了如何通过这三个功能进行链上的计数。
 
-```rust
-#![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "std", allow(warnings))]
+```ts
+import {
+    Name,
+    Contract,
+    print,
+} from "asm-chain";
 
-#[rust_chain::contract]
-mod counter {
-    use rust_chain::{
-        Name,
-        chain_println,
-    };
-    
-    #[chain(table="counter")]
-    pub struct Counter {
-        #[chain(primary)]
-        account: Name,
-        count: u64,
+@table("counter")
+class Counter {
+    public key: u64;
+    public count: u64;
+    constructor(count: u64=0) {
+        this.count = count;
+        this.key = Name.fromString("counter").N;
     }
 
-    #[chain(main)]
-    #[allow(dead_code)]
-    pub struct Contract {
-        receiver: Name,
-        first_receiver: Name,
-        action: Name,
+    @primary
+    get primary(): u64 {
+        return this.key;
+    }
+}
+
+@contract
+class MyContract extends Contract {
+    constructor(receiver: Name, firstReceiver: Name, action: Name) {
+        super(receiver, firstReceiver, action);
     }
 
-    impl Contract {
-        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
-            Self {
-                receiver: receiver,
-                first_receiver: first_receiver,
-                action: action,
-            }
-        }
+    @action("inc")
+    inc(): void {
+        let mi = Counter.new(this.receiver);
+        let it = mi.find(Name.fromString("counter").N);
+        let count: u64 = 0;
+        let payer: Name = this.receiver;
 
-        #[chain(action = "inc")]
-        pub fn inc_count(&self, account: Name) {
-            let db = Counter::new_table(self.receiver);
-            let it = db.find(account.value());
-            let payer = self.receiver;
-            if let Some(mut value) = it.get_value() {
-                value.count += 1;
-                db.update(&it, &value, payer);
-                chain_println!("+++count:", value.count);
-            } else {
-                let value = Counter{account: account, count: 1};
-                db.store(&value, payer);
-                chain_println!("+++count:", value.count);
-            }
+        if (it.isOk()) {
+            let counter = mi.get(it)
+            counter.count += 1;
+            mi.update(it, counter, payer);
+            count = counter.count;
+        } else {
+            let counter = new Counter(1);
+            mi.store(counter, payer);
+            count = 1;
         }
+        print(`++++++++count:${count}`);
     }
 }
 ```
 
 解释一下上面的代码：
 
-- `#[chain(primary)]`指定了一个主索引成员变量为account, 类型为`Name`，需要注意的是，如果主索引为非`u64`类型，则需要实现`rust_chain::db::PrimaryValueInterface`trait的`get_primary`方法，如`Name`结构实现的代码如下：
-```rust
-impl PrimaryValueInterface for Name {
-    fn get_primary(&self) -> u64 {
-        return self.value();
-    }
-}
-```
-- `counter`模块通过`#[rust_chain::contract]`引用了`rust_chain`这个包中的`contract`宏，这个宏会根据模块中的`chain`属性来生成额外的数据库操作相关和处理action相关的代码。
-- `#[chain(table="counter")]`这行代码利用了`chain`属性来定义一个表，表的名称是`counter`，是一个`name`结构，`table`关键字指引编译器生成表相关的代码，生成的代码会对`rust-chain`代码中的`MultiIndex`结构相关的代码进行封装，以方便开发者进行调用
-- `#[chain(action = "inc")]`表示`inc_count`方法是一个`action`，会通过包含在Transaction中的Action结构来触发
-- `Counter::new_table(self.receiver)`指定创建一个表，`self.receiver`指定的是当前合约的账号名称，表示表是存储在当前合约账号。
-- `let it = db.find(account.value());`用于查找主索引所在的值，返回的值是`Iterator`类型
-- `let Some(mut value) = it.get_value()`用于获取`Iterator`中的值，如果值不存在，则调用`db.store(&value, payer);`来保存一个新值到数据库中，否则将count加1后调用`db.update(&it, &value, payer);`来更新数据库中的数据。其中的payer用于指定哪个账号支付RAM资源，并且需要在Transaction中已经用该账号的`active`权限签名。
+- `@primary`指定了一个主索引成员变量为key, 类型为`u64`。
+- `@table("counter")`这行代码定义了一个表，表的名称是`counter`，是一个`name`结构，`table`这个decorator指引编译器生成表相关的代码，生成的代码会对`asm-chain`代码中的`MultiIndex`结构相关的代码进行封装，以方便开发者进行调用
+- `@action("inc")`表示`inc`方法是一个`action`，会通过包含在Transaction中的Action结构来触发
+- `let mi = Counter.new(this.receiver);`指定创建一个表，`self.receiver`指定的是当前合约的账号名称，表示表是存储在当前合约账号。
+- `let it = mi.find(Name.fromString("counter").N);`用于查找主索引所在的值，返回的值是`PrimaryIterator`类型
+- `let counter = mi.get(it)`用于获取`PrimaryIterator`中的值，如果值不存在，则调用`mi.store(counter, payer);`来保存一个新值到数据库中，否则将count加1后调用`mi.update(it, counter, payer);`来更新数据库中的数据。其中的payer用于指定哪个账号支付RAM资源，并且需要在Transaction中已经用该账号的`active`权限签名。
 
 编译：
 
 ```bash
 cd examples/counter
-rust-contract build
+yarn
+yarn build
 ```
 
 测试：
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_counter
+ipyeos -m pytest -s -x test.py -k test_inc
 ```
 
 运行的测试代码如下：
 
 ```python
 @chain_test
-def test_counter(tester: ChainTester):
+def test_inc(tester):
     deploy_contract(tester, 'counter')
-    args = {}
-    
+    args = {'account': 'hello'}
     r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
 
     r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
 ```
                                                                                                     
 ## Remove
 
 下面的代码演示了如何去删除数据库中的一项数据。
 
-```rust
-#[chain(action = "testremove")]
-pub fn test_remove(&self, account: Name) {
-    let db = Counter::new_table(self.receiver);
-    let it = db.find(account.value());
-    check(it.is_ok(), "key not found");
-    db.remove(&it);
+```ts
+@action("testremove")
+testRemove(account: Name): void {
+    requireAuth(account);
+    let mi = Counter.new(account);
+    let it = mi.find(account.N);
+    check(it.isOk(), "account not found");
+    mi.remove(it);
 }
 ```
 
-上面的代码先调用`let it = db.find(account.value());`方法来查找指定的数据，然后再调用`remove`删除，调用`it.is_ok()`以检查指定的索引所在的数据存不存在。
+上面的代码先调用`let it = mi.find(account.N);`方法来查找指定的数据，然后再调用`remove`删除，调用`it.isOk()`以检查指定的索引所在的数据存不存在。
 
 **注意：**
 
-这里的`remove`并不需要调用`store`或者`update`所指定的`payer`账号的权限即可删除数据，所以，在实际的应用中，需要通过调用`rust_chain.require_auth`来确保指定账号的权限才可以删除数据，例如：
+这里的`remove`并不需要调用`store`或者`update`所指定的`payer`账号的权限即可删除数据，所以，在实际的应用中，需要通过调用`asm_chain.requireAuth`来确保指定账号的权限才可以删除数据，例如：
 
-```rust
-require_auth(name!("hello"))
+```ts
+requireAuth(account);
 ```
 
 测试代码：
 
 ```python
 @chain_test
-def test_remove(tester: ChainTester):
+def test_remove(tester):
     deploy_contract(tester, 'counter')
-    args = {'account': 'alice'}
-    
+    args = {'account': 'hello'}
     r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
 
     r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
 
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
+
+    args = {'account': 'hello'}
     r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
+    ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", ret)
 ```
 
 这里，先调用`inc`这个action来保证数据库中有存储数据，然后调用`testremove`来删除指定的数据，并且通过`get_table_rows`来确定数据是否已经添加或者被修改或者被删除，相关的`get_table_rows`的用法将在下面介绍。
@@ -167,7 +164,8 @@ def test_remove(tester: ChainTester):
 
 ```bash
 cd examples/counter
-rust-contract build .
+yarn
+yarn build
 ```
 
 测试：
@@ -178,9 +176,9 @@ ipyeos -m pytest -s -x test.py -k test_remove
 输出：
 
 ```
-NFO     test:test.py:90 +++++++++table rows: {'rows': [{'account': 'alice', 'count': 1}], 'more': False, 
-INFO     test:test.py:95 +++++++++table rows: {'rows': [{'account': 'alice', 'count': 2}], 'more': False, 'next_key': ''}
-INFO     test:test.py:100 +++++++++table rows: {'rows': [], 'more': False, 'next_key': ''}
+INFO     test:test.py:93 +++++++rows: {'rows': [{'account': 'hello', 'count': 1}], 'more': False, 'next_key': ''}
+INFO     test:test.py:100 +++++++rows: {'rows': [{'account': 'hello', 'count': 2}], 'more': False, 'next_key': ''}
+INFO     test:test.py:107 +++++++rows: {'rows': [], 'more': False, 'next_key': ''}
 ```
                                                                                                     
 ## lower_bound/upper_bound

@@ -1,12 +1,14 @@
 import {
-    print,
+    Name,
     Contract,
+
+    print,
 } from "asm-chain";
 
 @contract
 class MyContract extends Contract {
     @action("sayhello", notify)
-    sayHello(name: string): void {
+    sayHello(name: Name): void {
         print(`notify: hello ${name}!`);
     }
 }

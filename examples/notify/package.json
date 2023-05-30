@@ -17,8 +17,8 @@
     "assemblyscript"
   ],
   "scripts": {
-    "pytest": "ipyeos -m pytest -s -x test.py -k test_hello",
-    "test2": "jest --no-cache",
+    "pytest": "ipyeos -m pytest -s -x test.py -k test_notify",
+    "test": "jest --no-cache",
     "build": "npx asm-contract build ./sender.ts --target release && npx asm-contract build ./receiver.ts --target release"
   },
   "jest": {

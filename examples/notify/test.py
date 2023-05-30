@@ -64,19 +64,19 @@ def deploy_contract(tester):
         code = f.read()
     with open(f'{test_dir}/target/sender.abi', 'rb') as f:
         abi = f.read()
-    tester.deploy_contract('hello', code, abi)
+    tester.deploy_contract('alice', code, abi)
 
 
     with open(f'{test_dir}/target/receiver.wasm', 'rb') as f:
         code = f.read()
     with open(f'{test_dir}/target/receiver.abi', 'rb') as f:
         abi = f.read()
-    tester.deploy_contract('alice', code, abi)
+    tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_hello(tester):
+def test_notify(tester):
     deploy_contract(tester)
     args = {'name': 'alice'}
-    r = tester.push_action('hello', 'sayhello', args, {'hello': 'active'})
+    r = tester.push_action('alice', 'sayhello', args, {'alice': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()

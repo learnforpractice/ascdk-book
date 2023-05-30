@@ -10,11 +10,6 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@assemblyscript/loader@^0.19.22":
-  version "0.19.23"
-  resolved "https://registry.yarnpkg.com/@assemblyscript/loader/-/loader-0.19.23.tgz#7fccae28d0a2692869f1d1219d36093bc24d5e72"
-  integrity sha512-ulkCYfFbYj01ie1MDOyxv2F6SpRN1TOj7fQxbP07D6HmeR+gr2JLSmINKjga2emB+b1L2KGrFKBTc+e00p54nw==
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.21.4":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.21.4.tgz#d0fa9e4413aca81f2b23b9442797bda1826edb39"
@@ -787,17 +782,15 @@ array-buffer-byte-length@^1.0.0:
     call-bind "^1.0.2"
     is-array-buffer "^3.0.1"
 
-as-chain@^0.1.2:
-  version "0.0.96"
-  resolved "https://registry.yarnpkg.com/as-chain/-/as-chain-0.0.96.tgz#ec502dacabac7d030bc2ee0aa08e11ce1de57d5c"
-  integrity sha512-XOVVwoqzu2/VnrmiBZOG3KpOGUu6YdlFfhfbTH8w4tgbj3viTcheJKQOyZc7FGPscn9C0ETiQGo1FR/YQzmaPQ==
-  dependencies:
-    "@assemblyscript/loader" "^0.19.22"
+asm-chain@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/asm-chain/-/asm-chain-0.1.3.tgz#b8a5198c89d0ddaaf355b9a27ba62e4c41d9c8f4"
+  integrity sha512-uD6uTw6S6Ef9Cy3ADZq0uhxCDlXPZ6ApLYlC8R5iyW5kE8EYpyqEd9gBfcKqqX+5yspXyWs1tXLJPxySWQqCJA==
 
-as-contract@^0.3.2:
+asm-contract@^0.3.2:
   version "0.3.2"
-  resolved "https://registry.yarnpkg.com/as-contract/-/as-contract-0.3.2.tgz#eff5939669ae0449a7f0b42528ff2ddda2a05f31"
-  integrity sha512-1TjINoNiNDqreKMprQkArKIWCWfpPtk5BKJRJCKhDruEvz19aUYSkVLffMBy0QddPtNyeJ5TGu8lNkPMuQm9hA==
+  resolved "https://registry.yarnpkg.com/asm-contract/-/asm-contract-0.3.2.tgz#080b4b9117a76ecf3766a4c15ec6349575ae0a0a"
+  integrity sha512-J3MhYpNYDXxMm8y6ML1YmMLLQoL+Squd2jNESmWjAjIrcg6jU2kXectSS61NxjvaRQwRl5X990QqazdTPmZb6A==
   dependencies:
     "@types/node" "^18.11.9"
     "@types/typescript" "^2.0.0"
