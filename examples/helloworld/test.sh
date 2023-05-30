@@ -1,1 +1,1 @@
-ipyeos -m pytest -s -x test.py -k test_sayhello
+ipyeos -m pytest -s -x test.py -k test_hello

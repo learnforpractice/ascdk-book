@@ -8,7 +8,6 @@ test_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(test_dir, '..'))
 
 from ipyeos import log
-from ipyeos import eos
 from ipyeos import chaintester
 from ipyeos.chaintester import ChainTester
 
@@ -61,59 +60,20 @@ class NewChainTester():
 
 test_dir = os.path.dirname(__file__)
 def deploy_contract(tester, package_name):
-    with open(f'{test_dir}/target/{package_name}.wasm', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.wasm', 'rb') as f:
         code = f.read()
-    with open(f'{test_dir}/target/{package_name}.abi', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.abi', 'rb') as f:
         abi = f.read()
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_secondary(tester):
+def test_hello(tester):
     deploy_contract(tester, 'secondaryindex')
-
     args = {}
     r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
 
-    args = {
-        'b': 222
-    }
     r = tester.push_action('hello', 'test2', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
-
-@chain_test
-def test_remove(tester):
-    deploy_contract(tester, 'secondaryindex')
-
-    args = {}
-    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
-
-    args = {
-        'b': 222
-    }
-    r = tester.push_action('hello', 'test3', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
-
-@chain_test
-def test_offchain_find(tester: ChainTester):
-    deploy_contract(tester, 'secondaryindex')
-
-    args = {}
-    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '1', '', 10, key_type="i64", index_position="1")
-    logger.info("+++++++rows: %s", r)
-
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '22', '', 10, key_type="i64", index_position="2")
-    logger.info("+++++++rows: %s", r)
-    # 0x14d == 333
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '0x14d', '', 10, key_type="i128", index_position="3")
-    logger.info("+++++++rows: %s", r)

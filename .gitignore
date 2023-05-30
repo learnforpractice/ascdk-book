@@ -5,3 +5,6 @@ generated.go
 site
 target
 build
+.benchmarks
+.pytest_cache
+node_modules

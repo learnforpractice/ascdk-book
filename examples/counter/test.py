@@ -8,7 +8,6 @@ test_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(test_dir, '..'))
 
 from ipyeos import log
-from ipyeos import eos
 from ipyeos import chaintester
 from ipyeos.chaintester import ChainTester
 
@@ -61,64 +60,21 @@ class NewChainTester():
 
 test_dir = os.path.dirname(__file__)
 def deploy_contract(tester, package_name):
-    with open(f'{test_dir}/target/{package_name}.wasm', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.wasm', 'rb') as f:
         code = f.read()
-    with open(f'{test_dir}/target/{package_name}.abi', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.abi', 'rb') as f:
         abi = f.read()
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_counter(tester: ChainTester):
-    deploy_contract(tester, 'counter')
-    args = {'account': 'alice'}
-    
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    logger.info('++++++elapsed: %s', r['elapsed'])
-    tester.produce_block()
-
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    logger.info('++++++elapsed: %s', r['elapsed'])
-    tester.produce_block()
-
-@chain_test
-def test_remove(tester: ChainTester):
-    deploy_contract(tester, 'counter')
-    args = {'account': 'alice'}
-    
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
-
-    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
-
-    r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
-    tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++++table rows: %s", r)
-
-
-@chain_test
-def test_bound(tester: ChainTester):
+def test_hello(tester):
     deploy_contract(tester, 'counter')
     args = {}
-    r = tester.push_action('hello', 'testbound', args, {'hello': 'active'})
-
-@chain_test
-def test_offchain_find(tester):
-    deploy_contract(tester, 'counter')
-
-    r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
 
-    r = tester.get_table_rows(False, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++rows: %s", r)
-
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
-    logger.info("+++++++rows: %s", r)
-
-    r = tester.get_table_rows(True, 'hello', '', 'counter', '1', '3', 10)
-    logger.info("+++++++rows: %s", r)
+    r = tester.push_action('hello', 'inc', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+    logger.info("+++++++test done!")

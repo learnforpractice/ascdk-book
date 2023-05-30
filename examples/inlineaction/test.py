@@ -60,21 +60,21 @@ class NewChainTester():
 
 test_dir = os.path.dirname(__file__)
 def deploy_contract(tester, package_name):
-    with open(f'{test_dir}/target/{package_name}.wasm', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.wasm', 'rb') as f:
         code = f.read()
-    with open(f'{test_dir}/target/{package_name}.abi', 'rb') as f:
+    with open(f'{test_dir}/assembly/target/{package_name}.abi', 'rb') as f:
         abi = f.read()
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_inline_action(tester: ChainTester):
-    deploy_contract(tester, 'inlineaction')
-    args = {}
-    
+def test_hello(tester):
+    deploy_contract(tester, 'test')
+
     logger.info("balance of hello before transfer: %s",  tester.get_balance('hello'))
     logger.info("balance of alice before transfer: %s",  tester.get_balance('alice'))
 
-    r = tester.push_action('hello', 'testaction', args, {'hello': 'active'})
+    args = {}
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
 

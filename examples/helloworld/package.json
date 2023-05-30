@@ -1,0 +1,56 @@
+{
+  "name": "helloworld",
+  "version": "0.0.1",
+  "description": "assemblyscript smart contracts template",
+  "author": "learnforpractice <learnforpractice@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uuosio/as-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uuosio/as-template/issues"
+  },
+  "keywords": [
+    "wasm",
+    "webassembly",
+    "assemblyscript"
+  ],
+  "scripts": {
+    "test": "ipyeos -m pytest -s -x test.py -k test_hello",
+    "test2": "jest --no-cache",
+    "build": "npx asm-contract build ./assembly/helloworld.ts --target release"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  },
+  "dependencies": {
+    "asm-chain": "^0.1.3",
+    "asm-contract": "^0.3.2",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^28.1.6",
+    "chaintester": "^0.1.4",
+    "jest": "^28.1.3",
+    "npm-run-all": "^4.1.5",
+    "ts-jest": "^28.0.7",
+    "typescript": "^4.7.4"
+  },
+  "files": [
+    "assembly/",
+    "build/",
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "yarn.lock"
+  ]
+}
