@@ -24,7 +24,7 @@ https://github.com/greymass/anchor/tags
 
 
 ```
-https://github.com/learnforpractice/pscdk-book/tree/main/examples/frontend
+https://github.com/learnforpractice/ascdk-book/tree/master/examples/frontend
 ```
 
 

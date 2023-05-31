@@ -23,7 +23,7 @@ After downloading, import the private key of your EOS account to use the wallet.
 The following HTML code only relies on anchor.min.js and can be run directly when opened locally. The complete code can be found in the link below, or you can try the following example directly. Make sure you have already installed the Anchor wallet and imported the account private key:
 
 ```
-https://github.com/learnforpractice/pscdk-book/tree/main/examples/frontend
+https://github.com/learnforpractice/ascdk-book/tree/master/examples/frontend
 ```
 
 <style>
