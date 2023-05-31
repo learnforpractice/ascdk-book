@@ -439,15 +439,11 @@
 
 <span class="kd">@packer</span>
 <span class="kd">class</span><span class="w"> </span><span class="nx">Transfer</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">from</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">;</span>
-<span class="w">    </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">;</span>
-<span class="w">    </span><span class="nx">quantity</span><span class="o">:</span><span class="w"> </span><span class="kt">Asset</span><span class="p">;</span>
-<span class="w">    </span><span class="nx">memo</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
-<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">from</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">quantity</span><span class="o">:</span><span class="w"> </span><span class="kt">Asset</span><span class="p">,</span><span class="w"> </span><span class="nx">memo</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">){</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="kr">from</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">from</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">to</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">to</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">quantity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">quantity</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">memo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">memo</span><span class="p">;</span>
+<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span>
+<span class="w">        </span><span class="k">public</span><span class="w"> </span><span class="nx">from</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span>
+<span class="w">        </span><span class="k">public</span><span class="w"> </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span>
+<span class="w">        </span><span class="k">public</span><span class="w"> </span><span class="nx">quantity</span><span class="o">:</span><span class="w"> </span><span class="kt">Asset</span><span class="p">,</span>
+<span class="w">        </span><span class="k">public</span><span class="w"> </span><span class="nx">memo</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">){</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 

@@ -484,16 +484,16 @@
 
 
 <h1 id="_1">与数字钱包进行交互</h1>
-<p>当智能合约写好后，下一个步骤就是如何设计用户界面来与智能合约进行交互。在用户界面要调用链上的智能合约，必须通过数字钱包软件，正面的示例是演示的通过<code>Anchor</code>这个钱包来发送交易。实现的功能是调用<code>eosio.token</code>这个账号里的智能合约的<code>transfer</code>Action。</p>
+<p>当智能合约写好后，下一个步骤就是如何设计用户界面来与智能合约进行交互。在用户界面要调用链上的智能合约，必须通过数字钱包软件，下面的示例是演示的通过<code>Anchor</code>这个钱包来发送交易。实现的功能是调用<code>eosio.token</code>这个账号里的智能合约的<code>transfer</code>Action。</p>
 <h2 id="anchor">下载Anchor钱包</h2>
-<p>桌面版本通过正面的链接下载选择最新版本下载：</p>
+<p>桌面版本通过下面的链接下载选择最新版本下载：</p>
 <div class="highlight"><pre><span></span><code>https://github.com/greymass/anchor/tags
 </code></pre></div>
 <p>手机版本通过应用商店搜索<code>Anchor Wallet</code>进行下载</p>
 <p>下载后导入EOS的账号的私钥即可使用，桌面版本也支持ledger硬件钱包</p>
 <h2 id="_2">网页代码</h2>
 <p>下面这个html代码只依赖于<code>anchor.min.js</code>，可以在本地打开直接运行，完整的代码可以从下面的链接中找到，也可以直接尝试下面这个例子，需要事先安装好anchor钱包并且已经导入了账号私钥：</p>
-<div class="highlight"><pre><span></span><code>https://github.com/learnforpractice/pscdk-book/tree/main/examples/frontend
+<div class="highlight"><pre><span></span><code>https://github.com/learnforpractice/ascdk-book/tree/master/examples/frontend
 </code></pre></div>
 <style>
     form {
@@ -769,7 +769,7 @@ window.wallet = wallet;
 <div class="highlight"><pre><span></span><code><span class="k">await</span><span class="w"> </span><span class="nx">wallet</span><span class="p">.</span><span class="nx">logout</span><span class="p">()</span>
 </code></pre></div>
 <p>注意<code>login</code>和<code>logout</code>两个函数都是异步的</p>
-<p>输入合法的转账账号和转账的数额，然后点<code>Transfer</code>即会在手机或者桌面软件上弹出授权对话框进行授权。请确保界面上描述的Action准确无误后才能确认授权。正面是相关的代码，调用了<code>eosio.token</code>的<code>transfer</code>这个Action。</p>
+<p>输入合法的转账账号和转账的数额，然后点<code>Transfer</code>即会在手机或者桌面软件上弹出授权对话框进行授权。请确保界面上描述的Action准确无误后才能确认授权。下面是相关的代码，调用了<code>eosio.token</code>的<code>transfer</code>这个Action。</p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">wallet</span><span class="p">.</span><span class="nx">users</span><span class="p">[</span><span class="mf">0</span><span class="p">];</span>
 <span class="kd">let</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
@@ -787,7 +787,7 @@ window.wallet = wallet;
 <span class="kd">var</span><span class="w"> </span><span class="nx">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">transact</span><span class="p">(</span><span class="nx">args</span><span class="p">);</span>
 </code></pre></div>
 <p>总结：</p>
-<p>上面的例子中<code>anchor.min.js</code>是用的用到了正面的库经过webpack后生成的代码</p>
+<p>上面的例子中<code>anchor.min.js</code>是用的用到了下面的库经过webpack后生成的代码</p>
 <div class="highlight"><pre><span></span><code>https://github.com/greymass/ual-anchor
 </code></pre></div>
 <p>上面的例子只是演示了一个最简单的例子，在实际的例子中，可能要用到<code>vuejs</code>,<code>react</code>,<code>svelte</code>等应用框架，这些框架都可以直接使用<code>ual-anchor</code>这个库。实现也可以参考一下的示例：</p>
