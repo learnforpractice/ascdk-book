@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "pytest": "ipyeos -m pytest -s -x test.py -k test_hello",
-    "test2": "jest --no-cache",
+    "test": "jest --no-cache",
     "build": "npx asm-contract build ./assembly/helloworld.ts --target release"
   },
   "jest": {

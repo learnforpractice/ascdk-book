@@ -105,3 +105,27 @@ def test_remove(tester):
     tester.produce_block()
     ret = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
     logger.info("+++++++rows: %s", ret)
+
+@chain_test
+def test_bound(tester):
+    deploy_contract(tester, 'counter')
+    args = {}
+    r = tester.push_action('hello', 'testbound', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+
+@chain_test
+def test_offchain_find(tester):
+    deploy_contract(tester, 'counter')
+
+    r = tester.push_action('hello', 'testbound', b'', {'hello': 'active'})
+    tester.produce_block()
+
+    r = tester.get_table_rows(False, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '', '', 10)
+    logger.info("+++++++rows: %s", r)
+
+    r = tester.get_table_rows(True, 'hello', '', 'counter', '1', '3', 10)
+    logger.info("+++++++rows: %s", r)

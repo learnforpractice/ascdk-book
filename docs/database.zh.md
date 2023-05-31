@@ -12,6 +12,8 @@ comments: true
 
 存储，查找，更新三个功能是数据库最基本的功能了，下面的代码演示了如何通过这三个功能进行链上的计数。
 
+[完整代码](https://github.com/learnforpractice/ascdk-book/tree/master/examples/counter)
+
 ```ts
 import {
     Name,
@@ -181,32 +183,32 @@ INFO     test:test.py:100 +++++++rows: {'rows': [{'account': 'hello', 'count': 2
 INFO     test:test.py:107 +++++++rows: {'rows': [], 'more': False, 'next_key': ''}
 ```
                                                                                                     
-## lower_bound/upper_bound
+## lowerBound/upperBound
 
-这两个方法也是用来查找表中的元素的，不同于`find`方法，这两个函数用于模糊查找。其中，`lower_bound`方法返回`>=`指定`id`第一个元素的`Iterator`，`upper_bound`方法返回`>`指定`id`的第一个元素的`Iterator`，下面来看下用法：
+这两个方法也是用来查找表中的元素的，不同于`find`方法，这两个函数用于模糊查找。其中，`lowerBound`方法返回`>=`指定`id`第一个元素的`PrimaryIterator`，`upperBound`方法返回`>`指定`id`的第一个元素的`PrimaryIterator`，下面来看下用法：
 
-```rust
-#[chain(action = "testbound")]
-pub fn test_bound(&self) {
-    let payer = self.receiver;
+```ts
+@action("testbound")
+testBound(): void {
+    let table = Counter.new(this.receiver);
+    let payer = this.receiver;
 
-    let db = Counter::new_table(self.receiver);
-    let value = Counter{account: Name{n: 1}, count: 1};
-    db.store(&value, payer);
+    let value = new Counter(new Name(1), 1);
+    table.store(value, payer);
 
-    let value = Counter{account: Name{n: 3}, count: 1};
-    db.store(&value, payer);
+    value = new Counter(new Name(3), 1);
+    table.store(value, payer);
 
-    let value = Counter{account: Name{n: 5}, count: 1};
-    db.store(&value, payer);
+    value = new Counter(new Name(5), 1);
+    table.store(value, payer);
 
-    let it = db.lower_bound(1);
-    check(it.is_ok() && it.get_primary() == Some(1), "bad value");
-    chain_println!("+++++db.lower_bound(1) return primary key:", it.get_primary().unwrap());
+    let it = table.lowerBound(1);
+    check(it.isOk() && it.primary == 1, "bad value");
+    print(`+++++db.lower_bound(1) return primary key: ${it.primary}\n`);
 
-    let it = db.upper_bound(3);
-    check(it.is_ok() && it.get_primary() == Some(5), "bad value");
-    chain_println!("+++++db.upper_bound(3) return primary key:", it.get_primary().unwrap());
+    it = table.upperBound(3);
+    check(it.isOk() && it.primary == 5, "bad value");
+    print(`+++++db.lower_bound(5) return primary key: ${it.primary}\n`);
 }
 ```
 
@@ -218,14 +220,14 @@ def test_bound(tester: ChainTester):
     deploy_contract(tester, 'counter')
     args = {}
     r = tester.push_action('hello', 'testbound', args, {'hello': 'active'})
-
 ```
 
 编译：
 
 ```bash
 cd examples/counter
-rust-contract build .
+yarn
+yarn build
 ```
 
 运行测试：
@@ -318,9 +320,9 @@ ipyeos -m pytest -s -x test.py -k test_offchain_find
 输出：
 
 ```
-INFO     test:test.py:118 +++++++rows: {'rows': ['01000000000000000100000000000000', '03000000000000000100000000000000', '05000000000000000100000000000000'], 'more': False, 'next_key': ''}
-INFO     test:test.py:121 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}, {'account': '............5', 'count': 1}], 'more': False, 'next_key': ''}
-INFO     test:test.py:124 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}], 'more': False, 'next_key': ''}
+INFO     test:test.py:125 +++++++rows: {'rows': ['01000000000000000100000000000000', '03000000000000000100000000000000', '05000000000000000100000000000000'], 'more': False, 'next_key': ''}
+INFO     test:test.py:128 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}, {'account': '............5', 'count': 1}], 'more': False, 'next_key': ''}
+INFO     test:test.py:131 +++++++rows: {'rows': [{'account': '............1', 'count': 1}, {'account': '............3', 'count': 1}], 'more': False, 'next_key': ''}
 ```
 
 注意，这里的`account`由于是`name`结构，会将数值转换成字符串，所以输出看起来比较奇怪。
@@ -329,136 +331,172 @@ INFO     test:test.py:124 +++++++rows: {'rows': [{'account': '............1', 'c
 
 请先看下面的例子：
 
-[示例代码](https://github.com/learnforpractice/rscdk-book/tree/master/examples/secondaryindex)
+[示例代码](https://github.com/learnforpractice/ascdk-book/tree/master/examples/secondaryindex)
 
-```rust
-#![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "std", allow(warnings))]
+```ts
+import {
+    Name,
+    Table,
+    U128,
+    U256,
+    printString,
+    printHex,
+    check,
+    Contract,
+    print,
+} from "asm-chain";
 
-#[rust_chain::contract]
-mod secondaryindex {
-    use rust_chain::{
-        Name,
-        chain_println,
-        check,
-    };
-
-    #[chain(table="mydata")]
-    pub struct MyData {
-        #[chain(primary)]
-        a: u64,
-        #[chain(secondary)]
-        b: u64,
-        #[chain(secondary)]
-        c: u128,
+@table("mydata")
+class MyData extends Table {
+    constructor(
+        public a: u64=0,
+        public b: u64=0,
+        public c: U128=new U128()
+    ) {
+        super();
     }
 
-    #[chain(main)]
-    #[allow(dead_code)]
-    pub struct Contract {
-        receiver: Name,
-        first_receiver: Name,
-        action: Name,
+    @primary
+    get getPrimary(): u64 {
+        return this.a;
     }
 
-    impl Contract {
-        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
-            Self {
-                receiver: receiver,
-                first_receiver: first_receiver,
-                action: action,
-            }
-        }
+    @secondary
+    get bvalue(): u64 {
+        return this.b;
+    }
 
-        #[chain(action = "test1")]
-        pub fn test1(&self) {
-            let db = MyData::new_table(self.receiver);
+    @secondary
+    set bvalue(value: u64) {
+        this.b = value;
+    }
 
-            let data = MyData{a: 1, b: 2, c: 3};
-            db.store(&data, self.receiver);
+    @secondary
+    get cvalue(): U128 {
+        return this.c;
+    }
 
-            let data = MyData{a: 11, b: 22, c: 33};
-            db.store(&data, self.receiver);
+    @secondary
+    set cvalue(value: U128) {
+        this.c = value;
+    }
+}
 
-            let data = MyData{a: 111, b: 222, c: 333};
-            db.store(&data, self.receiver);
-            chain_println!("++++test1 done!");
-        }
+@contract
+class MyContract extends Contract{
+    @action("test")
+    testSecondary(): void {
+        let mi = MyData.new(this.receiver);
 
-        #[chain(action = "test2")]
-        pub fn test2(&self, b: u64) {
-            chain_println!("+++b:", b);
-            let db = MyData::new_table(self.receiver);
-            let idx = db.get_idx_by_b();
-            let (it_secondary, mut secondary_value) = idx.lower_bound(b);
-            if it_secondary.is_ok() {
-                chain_println!("++++primary value", it_secondary.primary, "secondary value:", secondary_value);
-                // update secondary value
-                let payer = self.receiver;
-                secondary_value += 1;
-                db.update_b(&it_secondary, secondary_value, payer);
-            }
-        }
+        let value = new MyData(1, 2, new U128(3));
+        mi.store(value, this.receiver);
+
+        value = new MyData(11, 22, new U128(33));
+        mi.store(value, this.receiver);
+
+        value = new MyData(111, 222, new U128(333));
+        mi.store(value, this.receiver);
+
+
+        let idx = mi.bvalueDB;    
+        let idxIt = idx.find(2);
+        printString(`+++++++++idx64.find: ${idxIt.i}, ${idxIt.primary}\n`);
+        check(idxIt.primary == 1, "bad value");
+
+        let ret = idx.lowerBound(2);
+        check(ret.primary == 1, "bad value");
+
+        ret = idx.upperBound(22);
+        check(ret.primary == 111, "bad value");
+    }
+
+    @action("testupdate")
+    testSecondaryUpdate(): void {
+        let mi = MyData.new(this.receiver);
+        let idx = mi.bvalueDB;
+        let idxIt = idx.find(222);
+        check(idxIt.isOk(), "value 222 not found");
+        check(idxIt.primary == 111, "bad primary value");
+        mi.updateBvalue(idxIt, 223, this.receiver);
+        let ret = idx.find(22);
+        check(ret.isOk(), "bad scondary value");
+    }
+
+    @action("testremove")
+    testSecondaryRemove(): void {
+        let table = MyData.new(this.receiver);
+        let idx = table.bvalueDB;
+        let idxIt = idx.find(222);
+        check(idxIt.isOk(), "value 222 not found");
+        check(idxIt.primary == 111, "bad primary value");
+        let primaryIt = table.find(idxIt.primary);
+        check(primaryIt.isOk(), "bad primary value");
+        table.remove(primaryIt);
     }
 }
 ```
 
 在这个例子中，定义了两个二重索引：
 
-```rust
-#[chain(secondary)]
-b: u64,
-#[chain(secondary)]
-c: u128,
+```ts
+@secondary
+get bvalue(): u64 {
+    return this.b;
+}
+
+@secondary
+set bvalue(value: u64) {
+    this.b = value;
+}
+
+@secondary
+get cvalue(): U128 {
+    return this.c;
+}
+
+@secondary
+set cvalue(value: U128) {
+    this.c = value;
+}
 ```
 
-`test1`action调用`store`方法存储了3组数据。
-`test2`action演示了调用二重索引的`lower_bound`来查找二重索引，以及调用`update_b`这个生成的方法来更新二重索引的数据
+- `test` action 调用`store`方法存储了3组数据, 并演示了调用二重索引的`lowerBound`来查找二重索引，
+- `testupdate` action 演示了调用`updateBvalue`这个生成的方法来更新二重索引的数据。`updateBvalue`是一个生成的方法，规律是`update` + 二重索引的方法名。
 
 测试代码：
 
 ```python
 @chain_test
-def test_secondary(tester):
+def test_secondary_update(tester: ChainTester):
     deploy_contract(tester, 'secondaryindex')
-
     args = {}
-    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
 
-    args = {
-        'b': 222
-    }
-    r = tester.push_action('hello', 'test2', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'testupdate', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
 ```
 
 编译：
 
 ```bash
 cd examples/secondaryindex
-rust-contract build
+yarn
+yarn build
 ```
 
 运行测试：
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_secondary
+ipyeos -m pytest -s -x test.py -k test_secondary_update
 ```
 
 输出：
 ```
-INFO     test:test.py:78 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
-[(hello,test2)->hello]: CONSOLE OUTPUT BEGIN =====================
-+++b: 222
-++++primary value 111 secondary value: 222
-
-[(hello,test2)->hello]: CONSOLE OUTPUT END   =====================
-INFO     test:test.py:86 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 223, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:85 {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:92 {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 223, 'c': '333'}], 'more': False, 'next_key': ''}
 ```
 
 从输出中的:
@@ -471,75 +509,67 @@ INFO     test:test.py:86 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a'
                    
 ## 二重索引的删除
 
-```rust
-#[chain(action = "test3")]
-pub fn test3(&self, b: u64) {
-    chain_println!("+++b:", b);
-    let db = MyData::new_table(self.receiver);
-    let idx = db.get_idx_by_b();
-    let it = idx.find(b);
-    check(it.is_ok(), "b not found");
-    
-    let primary_it = db.find(it.primary);
-    check(primary_it.is_ok(), "primary key not found");
-    db.remove(&primary_it);
-
-    let it = idx.find(b);
-    check(!it.is_ok(), "b shoud not exit now");
+```ts
+@action("testremove")
+testSecondaryRemove(): void {
+    let table = MyData.new(this.receiver);
+    let idx = table.bvalueDB;
+    let idxIt = idx.find(222);
+    check(idxIt.isOk(), "value 222 not found");
+    check(idxIt.primary == 111, "bad primary value");
+    let primaryIt = table.find(idxIt.primary);
+    check(primaryIt.isOk(), "bad primary value");
+    table.remove(primaryIt);
 }
 ```
 
 解释一下上面的代码：
 
-- `let it = idx.find(b);` 查找二重索引
-- `let primary_it = db.find(it.primary);` 通过`it.primary`获取主索引，再通过主索引返回主索引的`Iterator`
-- `db.remove(&primary_it);` 删除表中的元素，包含主索引和所有二重索引
+- `let idxIt = idx.find(222);` 查找二重索引
+- `let primaryIt = table.find(idxIt.primary);` 通过`idxIt.primary`获取主索引，再通过主索引返回主索引的`PrimaryIterator`
+- `table.remove(primaryIt)` 删除表中的元素，包含主索引和所有二重索引
 
-从上面的例子中可以看出，二重索引的删除是先通过二重索引找到主索引：，再通过主索引来删除的
+从上面的例子中可以看出，二重索引的删除是先通过二重索引找到主索引：，再通过主索引来删除所有包括二重索引的数据的。
 
 测试代码：
 
 ```python
 @chain_test
-def test_remove(tester):
+def test_secondary_remove(tester: ChainTester):
     deploy_contract(tester, 'secondaryindex')
-
     args = {}
-    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
+    ret = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info(ret)
 
-    args = {
-        'b': 222
-    }
-    r = tester.push_action('hello', 'test3', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    r = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
-    logger.info("+++++++rows: %s", r)
+    ret = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info(ret)
 ```
 
 编译：
 
 ```bash
 cd examples/secondaryindex
-go-contract build .
+yarn
+yarn build
 ```
 
 运行测试：
 
 ```bash
-ipyeos -m pytest -s -x test.py -k test_remove
+ipyeos -m pytest -s -x test.py -k test_secondary_remove
 ```
 
 输出：
 
 ```
-INFO     test:test.py:96 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
-[(hello,test3)->hello]: CONSOLE OUTPUT BEGIN =====================
-+++b: 222
-[(hello,test3)->hello]: CONSOLE OUTPUT END   =====================
-INFO     test:test.py:104 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:102 {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:108 {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}], 'more': False, 'next_key': ''}
 ```
 
 对比两次get_table_rows的返回值，会发现`{'a': 111, 'b': 222, 'c': '333'}`这组数据被删除了
@@ -576,14 +606,14 @@ ipyeos -m pytest -s -x test.py -k test_offchain_find
 上面的测试代码的运行结果如下：
 
 ```
-INFO     test:test.py:113 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
-INFO     test:test.py:116 +++++++rows: {'rows': [{'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
-INFO     test:test.py:119 +++++++rows: {'rows': [{'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:117 +++++++rows: {'rows': [{'a': 1, 'b': 2, 'c': '3'}, {'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:120 +++++++rows: {'rows': [{'a': 11, 'b': 22, 'c': '33'}, {'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
+INFO     test:test.py:123 +++++++rows: {'rows': [{'a': 111, 'b': 222, 'c': '333'}], 'more': False, 'next_key': ''}
 ```
 
 ## 总结
 
 EOS中的数据存储功能是比较完善的，并且有二重索引表的功能，使数据的查找变得非常的灵活。本章详细讲解了数据库表的增，删，改，查的代码。本章的内容较多，需要花点时间好好消化。可以在示例的基础上作些改动，并且尝试运行以增加对这章知识点的理解。
 
-[示例代码1](https://github.com/learnforpractice/rscdk-book/tree/master/examples/counter)
-[示例代码2](https://github.com/learnforpractice/rscdk-book/tree/master/examples/secondaryindex)
+[示例代码1](https://github.com/learnforpractice/ascdk-book/tree/master/examples/counter)
+[示例代码2](https://github.com/learnforpractice/ascdk-book/tree/master/examples/secondaryindex)

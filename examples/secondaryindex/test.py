@@ -70,10 +70,54 @@ def deploy_contract(tester, package_name):
 def test_hello(tester):
     deploy_contract(tester, 'secondaryindex')
     args = {}
-    r = tester.push_action('hello', 'test1', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
 
-    r = tester.push_action('hello', 'test2', args, {'hello': 'active'})
+@chain_test
+def test_secondary_update(tester: ChainTester):
+    deploy_contract(tester, 'secondaryindex')
+    args = {}
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info(ret)
+
+    r = tester.push_action('hello', 'testupdate', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+
+    ret = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info(ret)
+
+@chain_test
+def test_secondary_remove(tester: ChainTester):
+    deploy_contract(tester, 'secondaryindex')
+    args = {}
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info(ret)
+
+    r = tester.push_action('hello', 'testremove', args, {'hello': 'active'})
+    logger.info('++++++elapsed: %s', r['elapsed'])
+    tester.produce_block()
+    ret = tester.get_table_rows(True, 'hello', '', 'mydata', '', '', 10)
+    logger.info(ret)
+
+@chain_test
+def test_offchain_find(tester: ChainTester):
+    deploy_contract(tester, 'secondaryindex')
+
+    args = {}
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '1', '', 10, key_type="i64", index_position="1")
+    logger.info("+++++++rows: %s", r)
+
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '11', '', 10, key_type="i64", index_position="2")
+    logger.info("+++++++rows: %s", r)
+    # 0x14d == 333
+    r = tester.get_table_rows(True, 'hello', '', 'mydata', '0x14d', '', 10, key_type="i128", index_position="3")
+    logger.info("+++++++rows: %s", r)

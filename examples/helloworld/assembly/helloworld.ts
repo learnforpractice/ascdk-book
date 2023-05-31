@@ -12,6 +12,6 @@ class MyContract extends Contract {
 
     @action("sayhello")
     say_hello(): void {
-        print("++++++++hello, world");
+        print("++++++++hello, world\n");
     }
 }

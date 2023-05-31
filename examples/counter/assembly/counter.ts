@@ -58,4 +58,27 @@ class MyContract extends Contract {
         check(it.isOk(), "account not found");
         mi.remove(it);
     }
+
+    @action("testbound")
+    testBound(): void {
+        let table = Counter.new(this.receiver);
+        let payer = this.receiver;
+
+        let value = new Counter(new Name(1), 1);
+        table.store(value, payer);
+
+        value = new Counter(new Name(3), 1);
+        table.store(value, payer);
+
+        value = new Counter(new Name(5), 1);
+        table.store(value, payer);
+
+        let it = table.lowerBound(1);
+        check(it.isOk() && it.primary == 1, "bad value");
+        print(`+++++db.lower_bound(1) return primary key: ${it.primary}\n`);
+
+        it = table.upperBound(3);
+        check(it.isOk() && it.primary == 5, "bad value");
+        print(`+++++db.lower_bound(3) return primary key: ${it.primary}\n`);
+    }
 }

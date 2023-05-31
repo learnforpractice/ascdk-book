@@ -782,10 +782,10 @@ array-buffer-byte-length@^1.0.0:
     call-bind "^1.0.2"
     is-array-buffer "^3.0.1"
 
-asm-chain@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/asm-chain/-/asm-chain-0.1.2.tgz#91f37b09d76e9cfe53b79fcaffe9f92f6714603c"
-  integrity sha512-YIHrZ/bhcXFyKRQ/Bo6qHC7owVX7822Ms1yLQaigZ7PICmGzxqGy/qCa+3IF6NAQZcGncBkKwbx8uKQwxglHUA==
+asm-chain@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/asm-chain/-/asm-chain-0.1.3.tgz#b8a5198c89d0ddaaf355b9a27ba62e4c41d9c8f4"
+  integrity sha512-uD6uTw6S6Ef9Cy3ADZq0uhxCDlXPZ6ApLYlC8R5iyW5kE8EYpyqEd9gBfcKqqX+5yspXyWs1tXLJPxySWQqCJA==
 
 asm-contract@^0.3.2:
   version "0.3.2"
