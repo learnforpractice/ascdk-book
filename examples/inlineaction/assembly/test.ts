@@ -11,15 +11,11 @@ import {
 
 @packer
 class Transfer {
-    from: Name;
-    to: Name;
-    quantity: Asset;
-    memo: string;
-    constructor(from: Name, to: Name, quantity: Asset, memo: string){
-        this.from = from;
-        this.to = to;
-        this.quantity = quantity;
-        this.memo = memo;
+    constructor(
+        public from: Name,
+        public to: Name,
+        public quantity: Asset,
+        public memo: string){
     }
 }
 
