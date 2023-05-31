@@ -8,59 +8,55 @@ comments: true
 
 下面通过利用inline action来进行EOS转账的列子来说明inline action的用法。
 
-```rust
-#![cfg_attr(not(feature = "std"), no_std)]
+```ts
+import {
+    Name,
+    Contract,
+    Asset,
+    Symbol,
+    Action,
+    PermissionLevel,
+    print,
+    printString,
+} from "asm-chain";
 
-#[rust_chain::contract]
-mod inlineaction {
-    use rust_chain::{
-        Name,
-        Action,
-        PermissionLevel,    
-        name,
-        ACTIVE,
-        chain_println,
-        serializer::Packer,
-        Asset,
-        Symbol,
-    };
+@packer
+class Transfer {
+    from: Name;
+    to: Name;
+    quantity: Asset;
+    memo: string;
+    constructor(from: Name, to: Name, quantity: Asset, memo: string){
+        this.from = from;
+        this.to = to;
+        this.quantity = quantity;
+        this.memo = memo;
+    }
+}
 
-    #[chain(packer)]
-    struct Transfer {
-        from: Name,
-        to: Name,
-        quantity: Asset,
-        memo: String
+@contract
+class MyContract extends Contract {
+    constructor(receiver: Name, firstReceiver: Name, action: Name) {
+        super(receiver, firstReceiver, action);
     }
 
-    #[chain(main)]
-    pub struct Contract {
-        receiver: Name,
-        first_receiver: Name,
-        action: Name,
-    }
+    @action("test")
+    test(): void {
+        let transfer = new Transfer(
+            this.receiver,
+            Name.fromString("alice"),
+            new Asset(10000, new Symbol("EOS", 4)),
+            "hello"
+        );
 
-    impl Contract {
-        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
-            Self {
-                receiver: receiver,
-                first_receiver: first_receiver,
-                action: action,
-            }
-        }
-
-        #[chain(action = "testaction")]
-        pub fn test_action(&self) {
-            let transfer = Transfer{
-                from: name!("hello"),
-                to: name!("alice"),
-                quantity: Asset::new(10000, Symbol::new("EOS", 4)),
-                memo: String::from("hello, world")
-            };
-            let perm = PermissionLevel::new(name!("hello"), name!("active"));
-            let action = Action::new(name!("eosio.token"), name!("transfer"), perm, &transfer);
-            action.send();
-        }
+        let a = Action.new(
+            Name.fromString("eosio.token"),
+            Name.fromString("transfer"),
+            new PermissionLevel(this.receiver, Name.fromString("active")),
+            transfer,
+        );
+        a.send();
+        printString(`Done!`);
     }
 }
 ```
@@ -71,20 +67,27 @@ mod inlineaction {
 
 ```python
 @chain_test
-def test_inline_action(tester: ChainTester):
-    deploy_contract(tester, 'inlineaction')
+def test_hello(tester):
+    deploy_contract(tester, 'test')
+
+    logger.info("balance of hello before transfer: %s",  tester.get_balance('hello'))
+    logger.info("balance of alice before transfer: %s",  tester.get_balance('alice'))
+
     args = {}
-    r = tester.push_action('hello', 'testaction', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    logger.info("+++++++%s", tester.get_balance('hello'))
+
+    logger.info("balance of hello after transfer: %s",  tester.get_balance('hello'))
+    logger.info("balance of alice after transfer: %s",  tester.get_balance('alice'))
 ```
 
 编译：
 
 ```bash
 cd examples/inlineaction
-rust-contract build
+yarn
+yarn build
 ```
 
 运行测试：
@@ -129,4 +132,4 @@ def update_auth(chain, account):
 
 在EOS中，除了可以通过在Transaction里包含action来调用合约的代码之外，在合约的代码里，也可以发起一个Action来调用合约的代码，这样的Action称之为Inline Action. 要允许合约代码使用Inline Action，还必须在合约账号的`active`权限中添加`eosio.code`这个虚拟权限。
 
-[完整示例](https://github.com/learnforpractice/rscdk-book/tree/master/examples/inlineaction)
+[完整示例](https://github.com/learnforpractice/ascdk-book/tree/master/examples/inlineaction)

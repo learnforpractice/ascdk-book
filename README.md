@@ -1,6 +1,6 @@
-# rscdk-book
+# ascdk-book
 
-[Rust Smart Contracts Development Cook Book](https://learnforpractice.github.io/rscdk-book)
+[AssemblyScript Smart Contracts Development Cook Book](https://learnforpractice.github.io/ascdk-book)
 
 ## Table of Contents
 

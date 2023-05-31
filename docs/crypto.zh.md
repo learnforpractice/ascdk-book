@@ -212,11 +212,6 @@ sig = eos.sign_digest(h.hexdigest(), priv)
 
 其中的`eos.sign_digest`用来对数据进行签名。
 
-在智能合约里，对应的代码是：
-
-```rust
-let digest = sha256(&msg);
-```
 
 下面是对`testrecover`的解释：
 

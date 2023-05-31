@@ -1,4 +1,4 @@
-site_name: Rust Smart Contracts Development Cook Book
+site_name: AssemblyScript Smart Contracts Development Cook Book
 repo_url: https://github.com/learnforpractice/ascdk-book
 plugins:
     - i18n:

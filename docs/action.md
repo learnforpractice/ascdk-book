@@ -2,92 +2,95 @@
 comments: true
 ---
 
-# Use of Inline Actions in Smart Contracts
+# Using Inline Action in Smart Contracts
 
-In smart contracts, an action can also be initiated, which is known as an inline action. It should be noted that actions are asynchronous, that is, the contract code corresponding to the inline action will only be called after the entire code is executed. If the called contract does not define the relevant action or there is no deployed contract in the account, the call will have no effect, but no exception will be thrown. Such empty inline actions are not without any effect, for example, they can be used as on-chain logs for application queries.
+An action can also be initiated within a smart contract, such action is called an inline action. It's important to note that actions are asynchronous, meaning that the contract code corresponding to the inline action will only be called after the entire code has been executed. If the contract being called does not define the related action or if there is no deployed contract in the account, the call will have no effect but no exceptions will be thrown. These empty inline actions are not without purpose, they can be used as on-chain logs for applications to query.
 
-The following example illustrates the use of inline actions through EOS transfers.
+The following example uses an inline action to make an EOS transfer to illustrate the use of inline actions.
 
-```rust
-#![cfg_attr(not(feature = "std"), no_std)]
+```ts
+import {
+    Name,
+    Contract,
+    Asset,
+    Symbol,
+    Action,
+    PermissionLevel,
+    print,
+    printString,
+} from "asm-chain";
 
-#[rust_chain::contract]
-mod inlineaction {
-    use rust_chain::{
-        Name,
-        Action,
-        PermissionLevel,    
-        name,
-        ACTIVE,
-        chain_println,
-        serializer::Packer,
-        Asset,
-        Symbol,
-    };
+@packer
+class Transfer {
+    from: Name;
+    to: Name;
+    quantity: Asset;
+    memo: string;
+    constructor(from: Name, to: Name, quantity: Asset, memo: string){
+        this.from = from;
+        this.to = to;
+        this.quantity = quantity;
+        this.memo = memo;
+    }
+}
 
-    #[chain(packer)]
-    struct Transfer {
-        from: Name,
-        to: Name,
-        quantity: Asset,
-        memo: String
+@contract
+class MyContract extends Contract {
+    constructor(receiver: Name, firstReceiver: Name, action: Name) {
+        super(receiver, firstReceiver, action);
     }
 
-    #[chain(main)]
-    pub struct Contract {
-        receiver: Name,
-        first_receiver: Name,
-        action: Name,
-    }
+    @action("test")
+    test(): void {
+        let transfer = new Transfer(
+            this.receiver,
+            Name.fromString("alice"),
+            new Asset(10000, new Symbol("EOS", 4)),
+            "hello"
+        );
 
-    impl Contract {
-        pub fn new(receiver: Name, first_receiver: Name, action: Name) -> Self {
-            Self {
-                receiver: receiver,
-                first_receiver: first_receiver,
-                action: action,
-            }
-        }
-
-        #[chain(action = "testaction")]
-        pub fn test_action(&self) {
-            let transfer = Transfer{
-                from: name!("hello"),
-                to: name!("alice"),
-                quantity: Asset::new(10000, Symbol::new("EOS", 4)),
-                memo: String::from("hello, world")
-            };
-            let perm = PermissionLevel::new(name!("hello"), name!("active"));
-            let action = Action::new(name!("eosio.token"), name!("transfer"), perm, &transfer);
-            action.send();
-        }
+        let a = Action.new(
+            Name.fromString("eosio.token"),
+            Name.fromString("transfer"),
+            new PermissionLevel(this.receiver, Name.fromString("active")),
+            transfer,
+        );
+        a.send();
+        printString(`Done!`);
     }
 }
 ```
 
-In the above code, it implements the function of transferring `1.0000 EOS` from the account `hello` to the account `alice`. The accounts `hello` and `alice` are both created when starting the test and can be used directly.
+The code above implements a function to transfer `1.0000 EOS` from the `hello` account to the `alice` account. The `hello` and `alice` accounts are both created when the test is started and can be used directly.
 
 Test code:
 
 ```python
 @chain_test
-def test_inline_action(tester: ChainTester):
-    deploy_contract(tester, 'inlineaction')
+def test_hello(tester):
+    deploy_contract(tester, 'test')
+
+    logger.info("balance of hello before transfer: %s",  tester.get_balance('hello'))
+    logger.info("balance of alice before transfer: %s",  tester.get_balance('alice'))
+
     args = {}
-    r = tester.push_action('hello', 'testaction', args, {'hello': 'active'})
+    r = tester.push_action('hello', 'test', args, {'hello': 'active'})
     logger.info('++++++elapsed: %s', r['elapsed'])
     tester.produce_block()
-    logger.info("+++++++%s", tester.get_balance('hello'))
+
+    logger.info("balance of hello after transfer: %s",  tester.get_balance('hello'))
+    logger.info("balance of alice after transfer: %s",  tester.get_balance('alice'))
 ```
 
-Compilation:
+Compile:
 
 ```bash
 cd examples/inlineaction
-rust-contract build
+yarn
+yarn build
 ```
 
-Run test:
+Run the test:
 
 ```bash
 ipyeos -m pytest -s -x test.py -k test_inline_action
@@ -102,7 +105,7 @@ INFO     test:test.py:81 balance of hello after transfer: 49999990000
 INFO     test:test.py:82 balance of alice after transfer: 50000010000
 ```
 
-Note that in order to be able to call inline actions in the contract, you need to add the virtual permission `eosio.code` to the account's `active` permission. In the test code, the virtual permission `eosio.code` is added to the `active` permission through the following function.
+Please note that in order to call an inline action within a contract, you need to add the virtual permission `eosio.code` to the `active` permission of the account. In the test code, the function below is used to add the `eosio.code` virtual permission to the `active` permission.
 
 ```python
 def update_auth(chain, account):
@@ -125,8 +128,8 @@ def update_auth(chain, account):
     chain.push_action('eosio', 'updateauth', a, {account:'active'})
 ```
 
-In conclusion:
+In summary:
 
-In EOS, besides being able to call contract code by including actions in a Transaction, contract code can also initiate an Action to call contract code. Such an Action is known as an Inline Action. To allow contract code to use Inline Actions, you must add the virtual permission `eosio.code` to the `active` permission of the contract account.
+In EOS, in addition to including actions in a Transaction to call contract code, an Action can also be initiated in the contract code to call other contract code. This kind of Action is called an Inline Action. To allow contract code to use Inline Actions, the `eosio.code` virtual permission must be added to the `active` permission of the contract account.
 
-[Complete example](https://github.com/learnforpractice/rscdk-book/tree/master/examples/inlineaction)
+[Complete Example](https://github.com/learnforpractice/ascdk-book/tree/master/examples/inlineaction)

@@ -211,12 +211,6 @@ sig = eos.sign_digest(h.hexdigest(), priv)
 
 `eos.sign_digest` is used to sign the data.
 
-In the smart contract, the corresponding code is:
-
-```rust
-let digest = sha256(&msg);
-```
-
 Here is an explanation for `testrecover`:
 
 ```ts

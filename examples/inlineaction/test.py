@@ -67,7 +67,7 @@ def deploy_contract(tester, package_name):
     tester.deploy_contract('hello', code, abi)
 
 @chain_test
-def test_hello(tester):
+def test_inline_action(tester):
     deploy_contract(tester, 'test')
 
     logger.info("balance of hello before transfer: %s",  tester.get_balance('hello'))
