@@ -14,7 +14,6 @@
 * [Database](docs/database.md)
 * [Crypto Functions](docs/crypto.md)
 * [Commonly Functions](docs/common.md)
-* [Call C/C++ Code](docs/callc.md)
 
 ## 目录
 
@@ -28,7 +27,6 @@
 * [数据库的操作](docs/database.zh.md)
 * [密码学相关函数](docs/crypto.zh.md)
 * [常用智能合约函数](docs/common.zh.md)
-* [Codon代码里调用C/C++代码](docs/callc.zh.md)
 
 ## Examples
 
