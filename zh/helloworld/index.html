@@ -139,7 +139,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/learnforpractice/rscdk-book" title="前往仓库" class="md-source" data-md-component="source">
+        <a href="https://github.com/learnforpractice/ascdk-book" title="前往仓库" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -184,7 +184,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/learnforpractice/rscdk-book" title="前往仓库" class="md-source" data-md-component="source">
+      <a href="https://github.com/learnforpractice/ascdk-book" title="前往仓库" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -275,13 +275,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    创建一个初始项目
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -344,7 +337,7 @@
   
     <li class="md-nav__item">
       <a href="../notify/" class="md-nav__link">
-        require_recipient函数
+        requireRecipient 函数
       </a>
     </li>
   
@@ -418,8 +411,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../callc/" class="md-nav__link">
-        Rust代码里调用C/C++代码
+      <a href="../../callc.md" class="md-nav__link">
+        None
       </a>
     </li>
   
@@ -458,13 +451,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    创建一个初始项目
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -487,37 +473,21 @@
 <h2 id="_1">第一个智能合约</h2>
 <p>以下展示了一个最简单的智能合约代码和测试代码</p>
 <p><a href="https://github.com/learnforpractice/rscdk-book/tree/master/examples/helloworld">完整示例</a></p>
-<div class="highlight"><pre><span></span><code><span class="cp">#![cfg_attr(not(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">), no_std)]</span>
-<span class="cp">#![cfg_attr(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">, allow(warnings))]</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Contract</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">print</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;asm-chain&quot;</span><span class="p">;</span>
 
-<span class="cp">#[rust_chain::contract]</span>
-<span class="k">mod</span> <span class="nn">helloworld</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">rust_chain</span>::<span class="p">{</span>
-<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">chain_println</span><span class="p">,</span>
-<span class="w">    </span><span class="p">};</span>
-
-<span class="w">    </span><span class="cp">#[chain(main)]</span>
-<span class="w">    </span><span class="cp">#[allow(dead_code)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Contract</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">,</span>
+<span class="kd">@contract</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">MyContract</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Contract</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">receiver</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">firstReceiver</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">super</span><span class="p">(</span><span class="nx">receiver</span><span class="p">,</span><span class="w"> </span><span class="nx">firstReceiver</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">Contract</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">receiver</span>: <span class="nc">receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">first_receiver</span>: <span class="nc">first_receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">action</span>: <span class="nc">action</span><span class="p">,</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
-
-<span class="w">        </span><span class="cp">#[chain(action = </span><span class="s">&quot;sayhello&quot;</span><span class="cp">)]</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">say_hello</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">chain_println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;hello,world!&quot;</span><span class="p">);</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">@action</span><span class="p">(</span><span class="s2">&quot;sayhello&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">say_hello</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">print</span><span class="p">(</span><span class="s2">&quot;++++++++hello, world\n&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -532,7 +502,6 @@
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">test_dir</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">))</span>
 
 <span class="kn">from</span> <span class="nn">ipyeos</span> <span class="kn">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">ipyeos</span> <span class="kn">import</span> <span class="n">eos</span>
 <span class="kn">from</span> <span class="nn">ipyeos</span> <span class="kn">import</span> <span class="n">chaintester</span>
 <span class="kn">from</span> <span class="nn">ipyeos.chaintester</span> <span class="kn">import</span> <span class="n">ChainTester</span>
 
@@ -540,8 +509,28 @@
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+<span class="k">def</span> <span class="nf">update_auth</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="n">account</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;account&quot;</span><span class="p">:</span> <span class="n">account</span><span class="p">,</span>
+        <span class="s2">&quot;permission&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="s2">&quot;owner&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;auth&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s1">&#39;EOS6AjF6hvF7GSuSd4sCgfPKq5uWaXvGM2aQtEUCwmEHygQaqxBSV&#39;</span><span class="p">,</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;accounts&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;permission&quot;</span><span class="p">:{</span><span class="s2">&quot;actor&quot;</span><span class="p">:</span><span class="n">account</span><span class="p">,</span><span class="s2">&quot;permission&quot;</span><span class="p">:</span> <span class="s1">&#39;eosio.code&#39;</span><span class="p">},</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">}],</span>
+            <span class="s2">&quot;waits&quot;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;eosio&#39;</span><span class="p">,</span> <span class="s1">&#39;updateauth&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="p">{</span><span class="n">account</span><span class="p">:</span><span class="s1">&#39;active&#39;</span><span class="p">})</span>
+
 <span class="k">def</span> <span class="nf">init_tester</span><span class="p">():</span>
     <span class="n">tester</span> <span class="o">=</span> <span class="n">chaintester</span><span class="o">.</span><span class="n">ChainTester</span><span class="p">()</span>
+    <span class="n">update_auth</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="s1">&#39;hello&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tester</span>
 
 <span class="k">def</span> <span class="nf">chain_test</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
@@ -565,62 +554,42 @@
 
 <span class="n">test_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">deploy_contract</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="n">package_name</span><span class="p">):</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">test_dir</span><span class="si">}</span><span class="s1">/target/</span><span class="si">{</span><span class="n">package_name</span><span class="si">}</span><span class="s1">.wasm&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">test_dir</span><span class="si">}</span><span class="s1">/assembly/target/</span><span class="si">{</span><span class="n">package_name</span><span class="si">}</span><span class="s1">.wasm&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">test_dir</span><span class="si">}</span><span class="s1">/target/</span><span class="si">{</span><span class="n">package_name</span><span class="si">}</span><span class="s1">.abi&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">test_dir</span><span class="si">}</span><span class="s1">/assembly/target/</span><span class="si">{</span><span class="n">package_name</span><span class="si">}</span><span class="s1">.abi&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">abi</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="n">tester</span><span class="o">.</span><span class="n">deploy_contract</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">abi</span><span class="p">)</span>
 
 <span class="nd">@chain_test</span>
-<span class="k">def</span> <span class="nf">test_sayhello</span><span class="p">(</span><span class="n">tester</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">test_hello</span><span class="p">(</span><span class="n">tester</span><span class="p">):</span>
     <span class="n">deploy_contract</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="s1">&#39;helloworld&#39;</span><span class="p">)</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;sayhello&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;sayhello&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;++++++elapsed: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;elapsed&#39;</span><span class="p">])</span>
     <span class="n">tester</span><span class="o">.</span><span class="n">produce_block</span><span class="p">()</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;++++++++++</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;elapsed&#39;</span><span class="p">])</span>
 </code></pre></div>
 <p>编译：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>examples/helloworld
-rust-contract<span class="w"> </span>build
+yarn
+yarn<span class="w"> </span>build
 </code></pre></div>
 <p>运行测试代码：</p>
-<div class="highlight"><pre><span></span><code>ipyeos -m pytest -s -x test.py -k test_sayhello
+<div class="highlight"><pre><span></span><code>ipyeos<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-x<span class="w"> </span>test.py<span class="w"> </span>-k<span class="w"> </span>test_hello
 </code></pre></div>
+<p>或者运行:
+<div class="highlight"><pre><span></span><code>yarn<span class="w"> </span>pytest
+</code></pre></div></p>
 <p>输出：</p>
 <div class="highlight"><pre><span></span><code>[(hello,sayhello)-&gt;hello]: CONSOLE OUTPUT BEGIN =====================
 hello,world!
 
 [(hello,sayhello)-&gt;hello]: CONSOLE OUTPUT END   =====================
 </code></pre></div>
-<h2 id="_2">创建一个初始项目</h2>
-<p>可以用<code>rust-contract init</code>命令来创建一个初始项目，例如下面的代码创建了一个<code>mycontract</code>的初始项目：</p>
-<div class="highlight"><pre><span></span><code>rust-contract<span class="w"> </span>init<span class="w"> </span>mycontract
-</code></pre></div>
-<p>创建完后可以用下面的命令编译合约：</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>mycontract
-./build.sh
-</code></pre></div>
-<p>执行成功后会在<code>target</code>目录生成<code>mycontract.wasm</code>和<code>mycontract.abi</code>这两个文件</p>
-<p>可以运行下面的命令进行测试：</p>
-<div class="highlight"><pre><span></span><code>./test.sh
-</code></pre></div>
-<p>会以绿色字体输出以下的的文字信息：</p>
-<div class="highlight"><pre><span></span><code>debug 2023-05-26T01:43:59.121 thread-0  apply_context.cpp:40          print_debug          ] 
-[(hello,inc)-&gt;hello]: CONSOLE OUTPUT BEGIN =====================
-count is 1
-
-[(hello,inc)-&gt;hello]: CONSOLE OUTPUT END   =====================
-debug 2023-05-26T01:43:59.123 thread-0  controller.cpp:2499           clear_expired_input_ ] removed 0 expired transactions of the 50 input dedup list, pending block time 2018-06-01T12:00:03.500
-debug 2023-05-26T01:43:59.125 thread-0  apply_context.cpp:40          print_debug          ] 
-[(hello,inc)-&gt;hello]: CONSOLE OUTPUT BEGIN =====================
-count is 2
-
-[(hello,inc)-&gt;hello]: CONSOLE OUTPUT END   =====================
-</code></pre></div>
-<p>需要注意的是上面的输出是调用信息，如果是在主网上运行,<code>chain_println!</code>函数输出的内容是看不到的，如果是运行在测试网，则在运行nodeos命令的时候要加上参数<code>--contracts-console</code>才能在返回中看调试输出。</p>
+<p>需要注意的是上面的输出是调试信息，如果是在主网上运行,<code>print</code>函数输出的内容是看不到的，如果是运行在测试网，则在运行nodeos命令的时候要加上参数<code>--contracts-console</code>才能在输出中看调试信息。</p>
 <p>在上面测试代码中，则是直接通过下面的这行代码来输出调试信息：</p>
 <div class="highlight"><pre><span></span><code><span class="n">chaintester</span><span class="o">.</span><span class="n">chain_config</span><span class="p">[</span><span class="s1">&#39;contracts_console&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 </code></pre></div>
-<p>另外，在发布版本的代码中，为了提高程序运行的性能，也不应该包含<code>chain_println!</code>代码。</p>
+<p>另外，在发布版本的代码中，为了提高程序运行的性能，也不应该包含<code>print</code>相关的代码。</p>
 
 
 
@@ -629,19 +598,19 @@ count is 2
   <h2 id="__comments">评论</h2>
   <!-- Insert generated snippet here -->
   <script src="https://giscus.app/client.js"
-  data-repo="learnforpractice/rscdk-book"
-  data-repo-id="R_kgDOJjgWNQ"
-  data-category="Q&A"
-  data-category-id="DIC_kwDOJjgWNc4CWwNt"
-  data-mapping="title"
-  data-strict="0"
-  data-reactions-enabled="1"
-  data-emit-metadata="0"
-  data-input-position="bottom"
-  data-theme="preferred_color_scheme"
-  data-lang="en"
-  crossorigin="anonymous"
-  async>
+        data-repo="learnforpractice/ascdk-book"
+        data-repo-id="R_kgDOJobMJw"
+        data-category="Q&A"
+        data-category-id="DIC_kwDOJobMJ84CW2ZH"
+        data-mapping="title"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
   </script>
 
   <!-- Synchronize Giscus theme with palette -->

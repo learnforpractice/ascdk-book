@@ -137,7 +137,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/learnforpractice/rscdk-book" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/learnforpractice/ascdk-book" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -182,7 +182,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/learnforpractice/rscdk-book" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/learnforpractice/ascdk-book" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -251,8 +251,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-rust-smart-contract" class="md-nav__link">
-    What is a Rust Smart Contract
+  <a href="#what-is-an-assemblyscript-smart-contract" class="md-nav__link">
+    What is an AssemblyScript Smart Contract
   </a>
   
 </li>
@@ -316,7 +316,7 @@
   
     <li class="md-nav__item">
       <a href="../env/" class="md-nav__link">
-        Setting Up the Development Environment
+        Env
       </a>
     </li>
   
@@ -391,7 +391,7 @@
   
     <li class="md-nav__item">
       <a href="../notify/" class="md-nav__link">
-        require_recipient Function
+        requireRecipient Function
       </a>
     </li>
   
@@ -421,7 +421,7 @@
   
     <li class="md-nav__item">
       <a href="../crypto/" class="md-nav__link">
-        Cryptography Related Functions
+        Functions Related to Cryptography
       </a>
     </li>
   
@@ -465,8 +465,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../callc/" class="md-nav__link">
-        Calling C/C++ Code from Rust
+      <a href="../../callc.md" class="md-nav__link">
+        None
       </a>
     </li>
   
@@ -513,8 +513,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-rust-smart-contract" class="md-nav__link">
-    What is a Rust Smart Contract
+  <a href="#what-is-an-assemblyscript-smart-contract" class="md-nav__link">
+    What is an AssemblyScript Smart Contract
   </a>
   
 </li>
@@ -584,8 +584,8 @@
 <p>This document uses example code to introduce relevant knowledge points related to smart contracts. The knowledge points involved in smart contracts are relatively few. In order to master the use of smart contracts more quickly, readers need to run the examples while reading the content of this document.</p>
 <h2 id="what-is-a-smart-contract">What is a Smart Contract</h2>
 <p>A smart contract is code that can be executed on the blockchain.</p>
-<h2 id="what-is-a-rust-smart-contract">What is a Rust Smart Contract</h2>
-<p>A Rust smart contract is code written in Rust that can be executed on the blockchain. In the case of the EOS network, Rust smart contract code is compiled into a WebAssembly binary file, which can be published to the blockchain and executed, achieving a certain operation effect.</p>
+<h2 id="what-is-an-assemblyscript-smart-contract">What is an AssemblyScript Smart Contract</h2>
+<p>An AssemblyScript smart contract is a code that can be executed on-chain, written in the AssemblyScript language (a language syntax compatible with TypeScript). Using the EOS network as an example, the code for an AssemblyScript smart contract would be compiled into a binary file called WebAssembly, and it can be published and executed on-chain, thus achieving a certain operational effect.</p>
 <h2 id="what-is-eos">What is EOS</h2>
 <p>EOS is a blockchain network based on the Delegated Proof of Stake (DPOS) consensus algorithm. The main network was officially launched on June 8, 2018. The EOS mainnet is controlled by 21 Block Producers (BP) who are elected by voting and are responsible for packaging transactions into blocks.</p>
 <h2 id="account">Account</h2>
@@ -759,7 +759,7 @@
 <span class="p">...</span>
 <span class="w">   </span><span class="p">}</span>
 </code></pre></div>
-<p>其中，<a href="https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/action.hpp#L12">permission_level</a>的定义如下：</p>
+<p>In which, the definition of <a href="https://github.com/EOSIO/eos/blob/5082391c60b0fa5e68157c385cd402bf25aea934/libraries/chain/include/eosio/chain/action.hpp#L12">permission_level</a> is as follows:</p>
 <p><div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">permission_level</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">account_name</span><span class="w">    </span><span class="n">actor</span><span class="p">;</span>
 <span class="w">    </span><span class="n">permission_name</span><span class="w"> </span><span class="n">permission</span><span class="p">;</span>
@@ -835,19 +835,19 @@ The meanings of the member variables in the structure are explained as follows:<
   <h2 id="__comments">Comments</h2>
   <!-- Insert generated snippet here -->
   <script src="https://giscus.app/client.js"
-  data-repo="learnforpractice/rscdk-book"
-  data-repo-id="R_kgDOJjgWNQ"
-  data-category="Q&A"
-  data-category-id="DIC_kwDOJjgWNc4CWwNt"
-  data-mapping="title"
-  data-strict="0"
-  data-reactions-enabled="1"
-  data-emit-metadata="0"
-  data-input-position="bottom"
-  data-theme="preferred_color_scheme"
-  data-lang="en"
-  crossorigin="anonymous"
-  async>
+        data-repo="learnforpractice/ascdk-book"
+        data-repo-id="R_kgDOJobMJw"
+        data-category="Q&A"
+        data-category-id="DIC_kwDOJobMJ84CW2ZH"
+        data-mapping="title"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
   </script>
 
   <!-- Synchronize Giscus theme with palette -->

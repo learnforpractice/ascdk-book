@@ -19,7 +19,7 @@
     
     
       
-        <title>require_recipient函数 - Rust Smart Contracts Development Cook Book</title>
+        <title>requireRecipient 函数 - Rust Smart Contracts Development Cook Book</title>
       
     
     
@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#require_recipient" class="md-skip">
+        <a href="#requirerecipient" class="md-skip">
           跳转至
         </a>
       
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              require_recipient函数
+              requireRecipient 函数
             
           </span>
         </div>
@@ -139,7 +139,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/learnforpractice/rscdk-book" title="前往仓库" class="md-source" data-md-component="source">
+        <a href="https://github.com/learnforpractice/ascdk-book" title="前往仓库" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -184,7 +184,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/learnforpractice/rscdk-book" title="前往仓库" class="md-source" data-md-component="source">
+      <a href="https://github.com/learnforpractice/ascdk-book" title="前往仓库" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -305,7 +305,7 @@
       
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        require_recipient函数
+        requireRecipient 函数
       </a>
       
     </li>
@@ -380,8 +380,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../callc/" class="md-nav__link">
-        Rust代码里调用C/C++代码
+      <a href="../../callc.md" class="md-nav__link">
+        None
       </a>
     </li>
   
@@ -423,108 +423,56 @@
   
 
 
-<h1 id="require_recipient">require_recipient函数</h1>
-<p>函数在<code>rust-chain</code>中的<code>vmapi/on_chain/eosio.rs</code>中的声明如下：</p>
-<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">require_recipient</span><span class="p">(</span><span class="n">name</span>: <span class="nc">Name</span><span class="p">)</span>
+<h1 id="requirerecipient">requireRecipient 函数</h1>
+<p>函数在<code>asm-chain</code>中的<code>action.ts</code>中的声明如下：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">requireRecipient</span><span class="p">(</span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span>
 </code></pre></div>
-<p><code>require_recipient</code>函数用来通知其它合约本合约调用了某个action，这个action即是调用<code>require_recipient</code>所在的action. 如果被通知的合约有相同的action，那么这个action将被调用。</p>
+<p><code>requireRecipient</code>函数用来通知其它合约本合约调用了某个action，这个action即是调用<code>requireRecipient</code>所在的action. 如果被通知的合约有相同的action，那么这个action将被调用。</p>
 <p>以下的<code>sender</code>, <code>receiver</code>的代码演示了如何从一个合约发送通知到另一个合约。</p>
 <div class="highlight"><pre><span></span><code><span class="c1">// sender</span>
-<span class="cp">#![cfg_attr(not(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">), no_std)]</span>
-<span class="cp">#![cfg_attr(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">, allow(warnings))]</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">print</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">requireAuth</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">requireRecipient</span><span class="p">,</span>
 
-<span class="k">use</span><span class="w"> </span><span class="n">rust_chain</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">chain</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Contract</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;asm-chain&quot;</span><span class="p">;</span>
 
-<span class="cp">#[chain::contract]</span>
-<span class="k">mod</span> <span class="nn">hello</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">use</span><span class="w"> </span>::<span class="n">rust_chain</span>::<span class="p">{</span>
-<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">chain_println</span><span class="p">,</span>
-<span class="w">        </span><span class="n">require_recipient</span><span class="p">,</span>
-<span class="w">    </span><span class="p">};</span>
-
-<span class="w">    </span><span class="cp">#[chain(packer)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">SayHello</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="n">name</span>: <span class="nb">String</span>
-    <span class="p">}</span>
-
-<span class="w">    </span><span class="cp">#[chain(main)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Hello</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">Hello</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">receiver</span>: <span class="nc">receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">first_receiver</span>: <span class="nc">first_receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">action</span>: <span class="nc">action</span><span class="p">,</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
-
-<span class="w">        </span><span class="cp">#[chain(action=</span><span class="s">&quot;test&quot;</span><span class="cp">)]</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">test</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">require_recipient</span><span class="p">(</span><span class="n">Name</span>::<span class="n">new</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">));</span>
-<span class="w">            </span><span class="n">chain_println</span><span class="o">!</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">receiver</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">first_receiver</span><span class="p">);</span>
-<span class="w">            </span><span class="n">chain_println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;++++++++in sender, name is:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">);</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="kd">@contract</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">MyContract</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Contract</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">@action</span><span class="p">(</span><span class="s2">&quot;sayhello&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">sayHello</span><span class="p">(</span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">print</span><span class="p">(</span><span class="sb">`hello </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">requireAuth</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">requireRecipient</span><span class="p">(</span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">));</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="cp">#![cfg_attr(not(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">), no_std)]</span>
-<span class="cp">#![cfg_attr(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">, allow(warnings))]</span>
+<div class="highlight"><pre><span></span><code><span class="c1">//receiver.ts</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Contract</span><span class="p">,</span>
 
-<span class="k">use</span><span class="w"> </span><span class="n">rust_chain</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">chain</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">print</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;asm-chain&quot;</span><span class="p">;</span>
 
-<span class="cp">#[chain::contract]</span>
-<span class="k">mod</span> <span class="nn">hello</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">use</span><span class="w"> </span>::<span class="n">rust_chain</span>::<span class="p">{</span>
-<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">require_recipient</span><span class="p">,</span>
-<span class="w">        </span><span class="n">chain_println</span><span class="p">,</span>
-<span class="w">    </span><span class="p">};</span>
-
-<span class="w">    </span><span class="cp">#[chain(packer)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">SayHello</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="n">name</span>: <span class="nb">String</span>
-    <span class="p">}</span>
-
-<span class="w">    </span><span class="cp">#[chain(main)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Hello</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">Hello</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">receiver</span>: <span class="nc">receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">first_receiver</span>: <span class="nc">first_receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">action</span>: <span class="nc">action</span><span class="p">,</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
-
-<span class="w">        </span><span class="cp">#[chain(action=</span><span class="s">&quot;test&quot;</span><span class="cp">, notify)]</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">test</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">chain_println</span><span class="o">!</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">receiver</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">first_receiver</span><span class="p">);</span>
-<span class="w">            </span><span class="n">chain_println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;++++++++in receiver, name:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">);</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="kd">@contract</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">MyContract</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Contract</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">@action</span><span class="p">(</span><span class="s2">&quot;sayhello&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">notify</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">sayHello</span><span class="p">(</span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">print</span><span class="p">(</span><span class="sb">`notify: hello </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>解释下代码：</p>
 <ul>
-<li><code>sender</code>合约代码部署在<code>alice</code>这个合约账号中，其中的<code>test</code>action调用了<code>require_recipient</code>这个函数来通知<code>hello</code>这个账号自己调用了<code>test</code>这个action</li>
-<li><code>receiver</code>合约代码部署在<code>hello</code>这个账号中，从其中如下所示的代码，<code>#[chain(action="test", notify)]</code>这行代码与正常的action代码不同，其中的<code>notify</code>参数表示这个action是用来接收其它合约通知的。用于接收通知的action，其<code>self.receiver</code>和<code>self.first_receiver</code>是不相同的，在本例中,<code>self.first_receiver</code>为账号<code>alice</code>，<code>self.receiver</code>为<code>hello</code>，可以在运行测试时查看<code>chain_println!(self.receiver, self.first_receiver);</code>的输出即可知道。</li>
+<li><code>sender</code>合约代码部署在<code>alice</code>这个合约账号中，其中的<code>sayhello</code>action调用了<code>requireRecipient</code>这个函数来通知<code>hello</code>这个账号自己调用了<code>sayhello</code>这个action</li>
+<li><code>receiver</code>合约代码部署在<code>hello</code>这个账号中，从其中如下所示的代码，<code>#[chain(action="sayhello", notify)]</code>这行代码与正常的action代码不同，其中的<code>notify</code>参数表示这个action是用来接收其它合约通知的。用于接收通知的action，其<code>self.receiver</code>和<code>self.first_receiver</code>是不相同的，在本例中,<code>self.first_receiver</code>为账号<code>alice</code>，<code>self.receiver</code>为<code>hello</code>，可以在运行测试时查看<code>chain_println!(self.receiver, self.first_receiver);</code>的输出即可知道。</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="cp">#[chain(action=</span><span class="s">&quot;test&quot;</span><span class="cp">, notify)]</span>
-<span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">test</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>: <span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">chain_println</span><span class="o">!</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">receiver</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">first_receiver</span><span class="p">);</span>
-<span class="w">    </span><span class="n">chain_println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;++++++++in receiver, name:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="kd">@action</span><span class="p">(</span><span class="s2">&quot;sayhello&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">notify</span><span class="p">)</span>
+<span class="nx">sayHello</span><span class="p">(</span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">print</span><span class="p">(</span><span class="sb">`notify: hello </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">!`</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>以下是测试代码：</p>
@@ -532,38 +480,27 @@
 <span class="k">def</span> <span class="nf">test_notify</span><span class="p">(</span><span class="n">tester</span><span class="p">):</span>
     <span class="n">deploy_contracts</span><span class="p">(</span><span class="n">tester</span><span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;alice&#39;</span><span class="p">}</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;alice&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;alice&#39;</span><span class="p">,</span> <span class="s1">&#39;sayhello&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;alice&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;++++++elapsed: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;elapsed&#39;</span><span class="p">])</span>
     <span class="n">tester</span><span class="o">.</span><span class="n">produce_block</span><span class="p">()</span>
 </code></pre></div>
 <p>编译：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>examples/notify
-
-<span class="nb">pushd</span><span class="w"> </span>sender
-rust-contract<span class="w"> </span>build
-<span class="nb">popd</span>
-
-<span class="nb">pushd</span><span class="w"> </span>receiver
-rust-contract<span class="w"> </span>build
-<span class="nb">popd</span>
+yarn
+yarn<span class="w"> </span>build
 </code></pre></div>
 <p>测试：</p>
 <div class="highlight"><pre><span></span><code>ipyeos<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-x<span class="w"> </span>test.py<span class="w"> </span>-k<span class="w"> </span>test_notify
 </code></pre></div>
 <p>输出：</p>
-<div class="highlight"><pre><span></span><code>[(alice,test)-&gt;alice]: CONSOLE OUTPUT BEGIN =====================
-alice alice
-++++++++in sender, name is: alice
-
-[(alice,test)-&gt;alice]: CONSOLE OUTPUT END   =====================
-debug 2023-05-26T02:42:02.693 thread-0  apply_context.cpp:40          print_debug          ] 
-[(alice,test)-&gt;hello]: CONSOLE OUTPUT BEGIN =====================
-hello alice
-++++++++in receiver, name: alice
-
-[(alice,test)-&gt;hello]: CONSOLE OUTPUT END   =====================
+<div class="highlight"><pre><span></span><code>[(alice,sayhello)-&gt;alice]: CONSOLE OUTPUT BEGIN =====================
+hello alice!
+[(alice,sayhello)-&gt;alice]: CONSOLE OUTPUT END   =====================
+[(alice,sayhello)-&gt;hello]: CONSOLE OUTPUT BEGIN =====================
+notify: hello alice!
+[(alice,sayhello)-&gt;hello]: CONSOLE OUTPUT END   =====================
 </code></pre></div>
-<p><a href="https://github.com/learnforpractice/rscdk-book/tree/master/examples/notify">示例代码</a></p>
+<p><a href="https://github.com/learnforpractice/ascdk-book/tree/master/examples/notify">示例代码</a></p>
 
 
 
@@ -572,19 +509,19 @@ hello alice
   <h2 id="__comments">评论</h2>
   <!-- Insert generated snippet here -->
   <script src="https://giscus.app/client.js"
-  data-repo="learnforpractice/rscdk-book"
-  data-repo-id="R_kgDOJjgWNQ"
-  data-category="Q&A"
-  data-category-id="DIC_kwDOJjgWNc4CWwNt"
-  data-mapping="title"
-  data-strict="0"
-  data-reactions-enabled="1"
-  data-emit-metadata="0"
-  data-input-position="bottom"
-  data-theme="preferred_color_scheme"
-  data-lang="en"
-  crossorigin="anonymous"
-  async>
+        data-repo="learnforpractice/ascdk-book"
+        data-repo-id="R_kgDOJobMJw"
+        data-category="Q&A"
+        data-category-id="DIC_kwDOJobMJ84CW2ZH"
+        data-mapping="title"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
   </script>
 
   <!-- Synchronize Giscus theme with palette -->
