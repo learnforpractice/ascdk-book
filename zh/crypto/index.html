@@ -19,7 +19,7 @@
     
     
       
-        <title>密码学相关函数 - Rust Smart Contracts Development Cook Book</title>
+        <title>密码学相关函数 - AssemblyScript Smart Contracts Development Cook Book</title>
       
     
     
@@ -83,7 +83,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -96,7 +96,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Rust Smart Contracts Development Cook Book
+            AssemblyScript Smart Contracts Development Cook Book
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -174,13 +174,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
-    Rust Smart Contracts Development Cook Book
+    AssemblyScript Smart Contracts Development Cook Book
   </label>
   
     <div class="md-nav__source">
@@ -692,9 +692,6 @@ ipyeos -m pytest -s -x test.py -k test_recover_key
 <span class="n">sig</span> <span class="o">=</span> <span class="n">eos</span><span class="o">.</span><span class="n">sign_digest</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">priv</span><span class="p">)</span>
 </code></pre></div>
 <p>其中的<code>eos.sign_digest</code>用来对数据进行签名。</p>
-<p>在智能合约里，对应的代码是：</p>
-<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">digest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sha256</span><span class="p">(</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span>
-</code></pre></div>
 <p>下面是对<code>testrecover</code>的解释：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">@action</span><span class="p">(</span><span class="s2">&quot;testrecover&quot;</span><span class="p">)</span>
 <span class="nx">test_recover</span><span class="p">(</span><span class="nx">msg</span><span class="o">:</span><span class="w"> </span><span class="kt">u8</span><span class="p">[],</span><span class="w"> </span><span class="nx">sig</span><span class="o">:</span><span class="w"> </span><span class="kt">Signature</span><span class="p">,</span><span class="w"> </span><span class="nx">pub_key</span><span class="o">:</span><span class="w"> </span><span class="kt">PublicKey</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>

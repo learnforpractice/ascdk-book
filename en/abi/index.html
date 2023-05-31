@@ -17,7 +17,7 @@
     
     
       
-        <title>Detailed Explanation of ABI Types - Rust Smart Contracts Development Cook Book</title>
+        <title>Detailed Explanation of ABI Types - AssemblyScript Smart Contracts Development Cook Book</title>
       
     
     
@@ -81,7 +81,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -94,7 +94,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Rust Smart Contracts Development Cook Book
+            AssemblyScript Smart Contracts Development Cook Book
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -172,13 +172,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
-    Rust Smart Contracts Development Cook Book
+    AssemblyScript Smart Contracts Development Cook Book
   </label>
   
     <div class="md-nav__source">
@@ -279,7 +279,7 @@
   
     <li class="md-nav__item">
       <a href="../action/" class="md-nav__link">
-        Use of Inline Actions in Smart Contracts
+        Using Inline Action in Smart Contracts
       </a>
     </li>
   
@@ -425,39 +425,45 @@
 <h1 id="built-in-abi-types">Built-in ABI Types</h1>
 <p>Here are the built-in ABI types, a total of 31:</p>
 <ul>
-<li>Basic types: name bytes string</li>
-<li>Numerical types: bool int8 uint8 int16 uint16 int32 uint32 int64 uint64 int128 uint128 varint32 varuint32 float32 float64 float128</li>
-<li>Time-related: time_point time_point_sec block_timestamp_type</li>
-<li>Cryptographic function related: checksum160 checksum256 checksum512 public_key signature</li>
-<li>Token-related: symbol symbol_code asset extended_asset</li>
+<li>Basic types: name, bytes, string</li>
+<li>Numeric types: bool, int8, uint8, int16, uint16, int32, uint32, int64, uint64, int128, uint128, varint32, varuint32, float32, float64, float128</li>
+<li>Time-related: time_point, time_point_sec, block_timestamp_type</li>
+<li>Cryptographic function related: checksum160, checksum256, checksum512, public_key, signature</li>
+<li>Token related: symbol, symbol_code, asset, extended_asset</li>
 </ul>
-<p>The ones commonly used are as follows:</p>
+<p>The most commonly used are the following:</p>
 <div class="highlight"><pre><span></span><code>name bytes string bool uint64 checksum256
 public_key signature symbol asset extended_asset
 </code></pre></div>
-<h1 id="table-of-corresponding-relations-between-built-in-data-types-in-abi-and-data-types-in-rust">Table of Corresponding Relations between Built-in Data Types in ABI and Data Types in Rust</h1>
-<p>The table below shows the corresponding relations between built-in types in ABI and types in Rust. For the corresponding module, if it is not built-in, it is defined in the related module in the <code>rust-chain</code> Rust package. Moreover, these structures have been exported to <code>lib.rs</code>, so the corresponding structures can be referred to in the following way:</p>
-<div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">rust_chain</span>::<span class="p">{</span>
-<span class="w">    </span><span class="n">TimePoint</span><span class="p">,</span>
-<span class="w">    </span><span class="n">TimePointSec</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Name</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Checksum160</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Checksum256</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Checksum512</span><span class="p">,</span>
-<span class="w">    </span><span class="n">PublicKey</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Signature</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Symbol</span><span class="p">,</span>
-<span class="w">    </span><span class="n">SymbolCode</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Asset</span><span class="p">,</span>
-<span class="w">    </span><span class="n">ExtendedAsset</span><span class="p">,</span>
-<span class="p">};</span>
+<h1 id="correspondence-table-of-built-in-data-types-in-abi-and-assemblyscript">Correspondence Table of Built-in Data Types in ABI and AssemblyScript</h1>
+<p>The following table shows the correspondence between built-in types in ABI and types in AssemblyScript. If it is not built-in, it is defined in the relevant module in the <code>asm-chain</code> nodejs package and can be referenced using the structure as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Asset</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">Symbol</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">SymbolCode</span><span class="p">,</span>
+
+<span class="w">    </span><span class="nx">VarUint32</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">printString</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Checksum160</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Checksum256</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Checksum512</span><span class="p">,</span>
+
+<span class="w">    </span><span class="nx">PublicKey</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Signature</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">TimePoint</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">TimePointSec</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">ExtendedAsset</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">I128</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">U128</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;asm-chain&quot;</span><span class="p">;</span>
 </code></pre></div>
-<p>Relation Table:</p>
+<p>Relationship table:</p>
 <table>
 <thead>
 <tr>
 <th align="center">ABI Type</th>
-<th align="center">Rust Type</th>
+<th align="center">AssemblyScript Type</th>
 <th align="center">Module</th>
 </tr>
 </thead>
@@ -504,12 +510,12 @@ public_key signature symbol asset extended_asset
 </tr>
 <tr>
 <td align="center">int128</td>
-<td align="center">i128</td>
+<td align="center">I128</td>
 <td align="center">Built-in</td>
 </tr>
 <tr>
 <td align="center">uint128</td>
-<td align="center">u128</td>
+<td align="center">I128</td>
 <td align="center">Built-in</td>
 </tr>
 <tr>
@@ -523,34 +529,24 @@ public_key signature symbol asset extended_asset
 <td align="center">varint</td>
 </tr>
 <tr>
-<td align="center">float32</td>
-<td align="center">float32</td>
-<td align="center">Built-in</td>
-</tr>
-<tr>
 <td align="center">float64</td>
-<td align="center">float</td>
+<td align="center">f64</td>
 <td align="center">Built-in</td>
 </tr>
 <tr>
 <td align="center">float128</td>
 <td align="center">Float128</td>
-<td align="center">structs</td>
+<td align="center">float128</td>
 </tr>
 <tr>
 <td align="center">time_point</td>
 <td align="center">TimePoint</td>
-<td align="center">structs</td>
+<td align="center">time</td>
 </tr>
 <tr>
 <td align="center">time_point_sec</td>
 <td align="center">TimePointSec</td>
-<td align="center">structs</td>
-</tr>
-<tr>
-<td align="center">block_timestamp_type</td>
-<td align="center">BlockTimestampType</td>
-<td align="center">structs</td>
+<td align="center">time</td>
 </tr>
 <tr>
 <td align="center">name</td>
@@ -559,38 +555,38 @@ public_key signature symbol asset extended_asset
 </tr>
 <tr>
 <td align="center">bytes</td>
-<td align="center">Vec<u8></td>
+<td align="center">u8[]</td>
 <td align="center">Built-in</td>
 </tr>
 <tr>
 <td align="center">string</td>
-<td align="center">String</td>
+<td align="center">string</td>
 <td align="center">Built-in</td>
 </tr>
 <tr>
 <td align="center">checksum160</td>
 <td align="center">Checksum160</td>
-<td align="center">structs</td>
+<td align="center">crypto</td>
 </tr>
 <tr>
 <td align="center">checksum256</td>
 <td align="center">Checksum256/u256</td>
-<td align="center">structs</td>
+<td align="center">crypto</td>
 </tr>
 <tr>
 <td align="center">checksum512</td>
 <td align="center">Checksum512</td>
-<td align="center">structs</td>
+<td align="center">crypto</td>
 </tr>
 <tr>
 <td align="center">public_key</td>
 <td align="center">PublicKey</td>
-<td align="center">structs</td>
+<td align="center">crypto</td>
 </tr>
 <tr>
 <td align="center">signature</td>
 <td align="center">Signature</td>
-<td align="center">structs</td>
+<td align="center">crypto</td>
 </tr>
 <tr>
 <td align="center">symbol</td>
@@ -607,60 +603,21 @@ public_key signature symbol asset extended_asset
 <td align="center">Asset</td>
 <td align="center">asset</td>
 </tr>
+<tr>
+<td align="center">extended_asset</td>
+<td align="center">ExtendedAsset</td>
+<td align="center">asset</td>
+</tr>
 </tbody>
 </table>
+<h1 id="special-abi-types">Special ABI Types</h1>
+<h2 id="optional">optional</h2>
+<h2 id="variant">variant</h2>
+<h2 id="binaryextension">binaryextension</h2>
 
 
 
 
-
-  <h2 id="__comments">Comments</h2>
-  <!-- Insert generated snippet here -->
-  <script src="https://giscus.app/client.js"
-        data-repo="learnforpractice/ascdk-book"
-        data-repo-id="R_kgDOJobMJw"
-        data-category="Q&A"
-        data-category-id="DIC_kwDOJobMJ84CW2ZH"
-        data-mapping="title"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="preferred_color_scheme"
-        data-lang="en"
-        crossorigin="anonymous"
-        async>
-  </script>
-
-  <!-- Synchronize Giscus theme with palette -->
-  <script>
-    var giscus = document.querySelector("script[src*=giscus]")
-
-    /* Set palette on initial load */
-    var palette = __md_get("__palette")
-    if (palette && typeof palette.color === "object") {
-      var theme = palette.color.scheme === "slate" ? "dark" : "light"
-      giscus.setAttribute("data-theme", theme) 
-    }
-
-    /* Register event handlers after documented loaded */
-    // document.addEventListener("DOMContentLoaded", function() {
-    //   var ref = document.querySelector("[data-md-component=palette]")
-    //   ref.addEventListener("change", function() {
-    //     var palette = __md_get("__palette")
-    //     if (palette && typeof palette.color === "object") {
-    //       var theme = palette.color.scheme === "slate" ? "dark" : "light"
-
-    //       /* Instruct Giscus to change theme */
-    //       var frame = document.querySelector(".giscus-frame")
-    //       frame.contentWindow.postMessage(
-    //         { giscus: { setConfig: { theme } } },
-    //         "https://giscus.app"
-    //       )
-    //     }
-    //   })
-    // })
-  </script>
 
                 
               </article>

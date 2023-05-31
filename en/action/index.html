@@ -19,7 +19,7 @@
     
     
       
-        <title>Use of Inline Actions in Smart Contracts - Rust Smart Contracts Development Cook Book</title>
+        <title>Using Inline Action in Smart Contracts - AssemblyScript Smart Contracts Development Cook Book</title>
       
     
     
@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#use-of-inline-actions-in-smart-contracts" class="md-skip">
+        <a href="#using-inline-action-in-smart-contracts" class="md-skip">
           Skip to content
         </a>
       
@@ -83,7 +83,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -96,13 +96,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Rust Smart Contracts Development Cook Book
+            AssemblyScript Smart Contracts Development Cook Book
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Use of Inline Actions in Smart Contracts
+              Using Inline Action in Smart Contracts
             
           </span>
         </div>
@@ -174,13 +174,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
-    Rust Smart Contracts Development Cook Book
+    AssemblyScript Smart Contracts Development Cook Book
   </label>
   
     <div class="md-nav__source">
@@ -290,7 +290,7 @@
       
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Use of Inline Actions in Smart Contracts
+        Using Inline Action in Smart Contracts
       </a>
       
     </li>
@@ -423,80 +423,83 @@
   
 
 
-<h1 id="use-of-inline-actions-in-smart-contracts">Use of Inline Actions in Smart Contracts</h1>
-<p>In smart contracts, an action can also be initiated, which is known as an inline action. It should be noted that actions are asynchronous, that is, the contract code corresponding to the inline action will only be called after the entire code is executed. If the called contract does not define the relevant action or there is no deployed contract in the account, the call will have no effect, but no exception will be thrown. Such empty inline actions are not without any effect, for example, they can be used as on-chain logs for application queries.</p>
-<p>The following example illustrates the use of inline actions through EOS transfers.</p>
-<div class="highlight"><pre><span></span><code><span class="cp">#![cfg_attr(not(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">), no_std)]</span>
+<h1 id="using-inline-action-in-smart-contracts">Using Inline Action in Smart Contracts</h1>
+<p>An action can also be initiated within a smart contract, such action is called an inline action. It's important to note that actions are asynchronous, meaning that the contract code corresponding to the inline action will only be called after the entire code has been executed. If the contract being called does not define the related action or if there is no deployed contract in the account, the call will have no effect but no exceptions will be thrown. These empty inline actions are not without purpose, they can be used as on-chain logs for applications to query.</p>
+<p>The following example uses an inline action to make an EOS transfer to illustrate the use of inline actions.</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Contract</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Asset</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">Symbol</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Action</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">PermissionLevel</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">print</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">printString</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;asm-chain&quot;</span><span class="p">;</span>
 
-<span class="cp">#[rust_chain::contract]</span>
-<span class="k">mod</span> <span class="nn">inlineaction</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">rust_chain</span>::<span class="p">{</span>
-<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Action</span><span class="p">,</span>
-<span class="w">        </span><span class="n">PermissionLevel</span><span class="p">,</span><span class="w">    </span>
-<span class="w">        </span><span class="n">name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">ACTIVE</span><span class="p">,</span>
-<span class="w">        </span><span class="n">chain_println</span><span class="p">,</span>
-<span class="w">        </span><span class="n">serializer</span>::<span class="n">Packer</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Asset</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Symbol</span><span class="p">,</span>
-<span class="w">    </span><span class="p">};</span>
+<span class="kd">@packer</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">Transfer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">from</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">quantity</span><span class="o">:</span><span class="w"> </span><span class="kt">Asset</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">memo</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">from</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">quantity</span><span class="o">:</span><span class="w"> </span><span class="kt">Asset</span><span class="p">,</span><span class="w"> </span><span class="nx">memo</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">){</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="kr">from</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">from</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">to</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">to</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">quantity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">quantity</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">memo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">memo</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 
-<span class="w">    </span><span class="cp">#[chain(packer)]</span>
-<span class="w">    </span><span class="k">struct</span> <span class="nc">Transfer</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">from</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">to</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">quantity</span>: <span class="nc">Asset</span><span class="p">,</span>
-<span class="w">        </span><span class="n">memo</span>: <span class="nb">String</span>
-    <span class="p">}</span>
-
-<span class="w">    </span><span class="cp">#[chain(main)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Contract</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">,</span>
+<span class="kd">@contract</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">MyContract</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Contract</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">receiver</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">firstReceiver</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">super</span><span class="p">(</span><span class="nx">receiver</span><span class="p">,</span><span class="w"> </span><span class="nx">firstReceiver</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">Contract</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">receiver</span>: <span class="nc">receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">first_receiver</span>: <span class="nc">first_receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">action</span>: <span class="nc">action</span><span class="p">,</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">@action</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">test</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nx">transfer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Transfer</span><span class="p">(</span>
+<span class="w">            </span><span class="k">this</span><span class="p">.</span><span class="nx">receiver</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;alice&quot;</span><span class="p">),</span>
+<span class="w">            </span><span class="ow">new</span><span class="w"> </span><span class="nx">Asset</span><span class="p">(</span><span class="mf">10000</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Symbol</span><span class="p">(</span><span class="s2">&quot;EOS&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">4</span><span class="p">)),</span>
+<span class="w">            </span><span class="s2">&quot;hello&quot;</span>
+<span class="w">        </span><span class="p">);</span>
 
-<span class="w">        </span><span class="cp">#[chain(action = </span><span class="s">&quot;testaction&quot;</span><span class="cp">)]</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">test_action</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">transfer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Transfer</span><span class="p">{</span>
-<span class="w">                </span><span class="n">from</span>: <span class="nc">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">),</span>
-<span class="w">                </span><span class="n">to</span>: <span class="nc">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;alice&quot;</span><span class="p">),</span>
-<span class="w">                </span><span class="n">quantity</span>: <span class="nc">Asset</span>::<span class="n">new</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="w"> </span><span class="n">Symbol</span>::<span class="n">new</span><span class="p">(</span><span class="s">&quot;EOS&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">)),</span>
-<span class="w">                </span><span class="n">memo</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&quot;hello, world&quot;</span><span class="p">)</span>
-<span class="w">            </span><span class="p">};</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">perm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PermissionLevel</span>::<span class="n">new</span><span class="p">(</span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">));</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Action</span>::<span class="n">new</span><span class="p">(</span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;eosio.token&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;transfer&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">perm</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">transfer</span><span class="p">);</span>
-<span class="w">            </span><span class="n">action</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Action</span><span class="p">.</span><span class="ow">new</span><span class="p">(</span>
+<span class="w">            </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;eosio.token&quot;</span><span class="p">),</span>
+<span class="w">            </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;transfer&quot;</span><span class="p">),</span>
+<span class="w">            </span><span class="ow">new</span><span class="w"> </span><span class="nx">PermissionLevel</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">receiver</span><span class="p">,</span><span class="w"> </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">)),</span>
+<span class="w">            </span><span class="nx">transfer</span><span class="p">,</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">        </span><span class="nx">a</span><span class="p">.</span><span class="nx">send</span><span class="p">();</span>
+<span class="w">        </span><span class="nx">printString</span><span class="p">(</span><span class="sb">`Done!`</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>In the above code, it implements the function of transferring <code>1.0000 EOS</code> from the account <code>hello</code> to the account <code>alice</code>. The accounts <code>hello</code> and <code>alice</code> are both created when starting the test and can be used directly.</p>
+<p>The code above implements a function to transfer <code>1.0000 EOS</code> from the <code>hello</code> account to the <code>alice</code> account. The <code>hello</code> and <code>alice</code> accounts are both created when the test is started and can be used directly.</p>
 <p>Test code:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@chain_test</span>
-<span class="k">def</span> <span class="nf">test_inline_action</span><span class="p">(</span><span class="n">tester</span><span class="p">:</span> <span class="n">ChainTester</span><span class="p">):</span>
-    <span class="n">deploy_contract</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="s1">&#39;inlineaction&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_hello</span><span class="p">(</span><span class="n">tester</span><span class="p">):</span>
+    <span class="n">deploy_contract</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of hello before transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of alice before transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;alice&#39;</span><span class="p">))</span>
+
     <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;testaction&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;++++++elapsed: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;elapsed&#39;</span><span class="p">])</span>
     <span class="n">tester</span><span class="o">.</span><span class="n">produce_block</span><span class="p">()</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;+++++++</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of hello after transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of alice after transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;alice&#39;</span><span class="p">))</span>
 </code></pre></div>
-<p>Compilation:</p>
+<p>Compile:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>examples/inlineaction
-rust-contract<span class="w"> </span>build
+yarn
+yarn<span class="w"> </span>build
 </code></pre></div>
-<p>Run test:</p>
+<p>Run the test:</p>
 <div class="highlight"><pre><span></span><code>ipyeos<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-x<span class="w"> </span>test.py<span class="w"> </span>-k<span class="w"> </span>test_inline_action
 </code></pre></div>
 <p>Output:</p>
@@ -505,7 +508,7 @@ INFO     test:test.py:75 balance of alice before transfer: 50000000000
 INFO     test:test.py:81 balance of hello after transfer: 49999990000
 INFO     test:test.py:82 balance of alice after transfer: 50000010000
 </code></pre></div>
-<p>Note that in order to be able to call inline actions in the contract, you need to add the virtual permission <code>eosio.code</code> to the account's <code>active</code> permission. In the test code, the virtual permission <code>eosio.code</code> is added to the <code>active</code> permission through the following function.</p>
+<p>Please note that in order to call an inline action within a contract, you need to add the virtual permission <code>eosio.code</code> to the <code>active</code> permission of the account. In the test code, the function below is used to add the <code>eosio.code</code> virtual permission to the <code>active</code> permission.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">update_auth</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">account</span><span class="p">):</span>
     <span class="n">a</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;account&quot;</span><span class="p">:</span> <span class="n">account</span><span class="p">,</span>
@@ -525,9 +528,9 @@ INFO     test:test.py:82 balance of alice after transfer: 50000010000
     <span class="p">}</span>
     <span class="n">chain</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;eosio&#39;</span><span class="p">,</span> <span class="s1">&#39;updateauth&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="p">{</span><span class="n">account</span><span class="p">:</span><span class="s1">&#39;active&#39;</span><span class="p">})</span>
 </code></pre></div>
-<p>In conclusion:</p>
-<p>In EOS, besides being able to call contract code by including actions in a Transaction, contract code can also initiate an Action to call contract code. Such an Action is known as an Inline Action. To allow contract code to use Inline Actions, you must add the virtual permission <code>eosio.code</code> to the <code>active</code> permission of the contract account.</p>
-<p><a href="https://github.com/learnforpractice/rscdk-book/tree/master/examples/inlineaction">Complete example</a></p>
+<p>In summary:</p>
+<p>In EOS, in addition to including actions in a Transaction to call contract code, an Action can also be initiated in the contract code to call other contract code. This kind of Action is called an Inline Action. To allow contract code to use Inline Actions, the <code>eosio.code</code> virtual permission must be added to the <code>active</code> permission of the contract account.</p>
+<p><a href="https://github.com/learnforpractice/ascdk-book/tree/master/examples/inlineaction">Complete Example</a></p>
 
 
 

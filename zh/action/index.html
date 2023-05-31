@@ -19,7 +19,7 @@
     
     
       
-        <title>内联Action在智能合约的使用 - Rust Smart Contracts Development Cook Book</title>
+        <title>内联Action在智能合约的使用 - AssemblyScript Smart Contracts Development Cook Book</title>
       
     
     
@@ -83,7 +83,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-header__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -96,7 +96,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Rust Smart Contracts Development Cook Book
+            AssemblyScript Smart Contracts Development Cook Book
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -174,13 +174,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../" title="Rust Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="Rust Smart Contracts Development Cook Book" data-md-component="logo">
+    <a href="../" title="AssemblyScript Smart Contracts Development Cook Book" class="md-nav__button md-logo" aria-label="AssemblyScript Smart Contracts Development Cook Book" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
-    Rust Smart Contracts Development Cook Book
+    AssemblyScript Smart Contracts Development Cook Book
   </label>
   
     <div class="md-nav__source">
@@ -426,75 +426,78 @@
 <h1 id="action">内联Action在智能合约的使用</h1>
 <p>在智能合约中也可以发起一个action，这样的action称之为内联action(inline action)。需要注意的是，action是异步的，也就是说，只有在整个代码执行完后，内联action对应的合约代码才会被调用，如果被调用的合约没有定义相关的action或者账号中没有部属合约，那么调用将没有影响，但也不会有异常抛出。像这些空的内联action也不是没有任何作用，例如可以当作链上的日志，以供应用程序来查询。</p>
 <p>下面通过利用inline action来进行EOS转账的列子来说明inline action的用法。</p>
-<div class="highlight"><pre><span></span><code><span class="cp">#![cfg_attr(not(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">), no_std)]</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Contract</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Asset</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">Symbol</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Action</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">PermissionLevel</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">print</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">printString</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;asm-chain&quot;</span><span class="p">;</span>
 
-<span class="cp">#[rust_chain::contract]</span>
-<span class="k">mod</span> <span class="nn">inlineaction</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">rust_chain</span>::<span class="p">{</span>
-<span class="w">        </span><span class="n">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Action</span><span class="p">,</span>
-<span class="w">        </span><span class="n">PermissionLevel</span><span class="p">,</span><span class="w">    </span>
-<span class="w">        </span><span class="n">name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">ACTIVE</span><span class="p">,</span>
-<span class="w">        </span><span class="n">chain_println</span><span class="p">,</span>
-<span class="w">        </span><span class="n">serializer</span>::<span class="n">Packer</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Asset</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Symbol</span><span class="p">,</span>
-<span class="w">    </span><span class="p">};</span>
+<span class="kd">@packer</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">Transfer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">from</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">quantity</span><span class="o">:</span><span class="w"> </span><span class="kt">Asset</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">memo</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">from</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">to</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">quantity</span><span class="o">:</span><span class="w"> </span><span class="kt">Asset</span><span class="p">,</span><span class="w"> </span><span class="nx">memo</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">){</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="kr">from</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">from</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">to</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">to</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">quantity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">quantity</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">memo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">memo</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 
-<span class="w">    </span><span class="cp">#[chain(packer)]</span>
-<span class="w">    </span><span class="k">struct</span> <span class="nc">Transfer</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">from</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">to</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">quantity</span>: <span class="nc">Asset</span><span class="p">,</span>
-<span class="w">        </span><span class="n">memo</span>: <span class="nb">String</span>
-    <span class="p">}</span>
-
-<span class="w">    </span><span class="cp">#[chain(main)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Contract</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span>
-<span class="w">        </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">,</span>
+<span class="kd">@contract</span>
+<span class="kd">class</span><span class="w"> </span><span class="nx">MyContract</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Contract</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">receiver</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">firstReceiver</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="kt">Name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">super</span><span class="p">(</span><span class="nx">receiver</span><span class="p">,</span><span class="w"> </span><span class="nx">firstReceiver</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="k">impl</span><span class="w"> </span><span class="n">Contract</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">first_receiver</span>: <span class="nc">Name</span><span class="p">,</span><span class="w"> </span><span class="n">action</span>: <span class="nc">Name</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">receiver</span>: <span class="nc">receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">first_receiver</span>: <span class="nc">first_receiver</span><span class="p">,</span>
-<span class="w">                </span><span class="n">action</span>: <span class="nc">action</span><span class="p">,</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">@action</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">test</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nx">transfer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Transfer</span><span class="p">(</span>
+<span class="w">            </span><span class="k">this</span><span class="p">.</span><span class="nx">receiver</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;alice&quot;</span><span class="p">),</span>
+<span class="w">            </span><span class="ow">new</span><span class="w"> </span><span class="nx">Asset</span><span class="p">(</span><span class="mf">10000</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Symbol</span><span class="p">(</span><span class="s2">&quot;EOS&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">4</span><span class="p">)),</span>
+<span class="w">            </span><span class="s2">&quot;hello&quot;</span>
+<span class="w">        </span><span class="p">);</span>
 
-<span class="w">        </span><span class="cp">#[chain(action = </span><span class="s">&quot;testaction&quot;</span><span class="cp">)]</span>
-<span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">test_action</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">transfer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Transfer</span><span class="p">{</span>
-<span class="w">                </span><span class="n">from</span>: <span class="nc">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">),</span>
-<span class="w">                </span><span class="n">to</span>: <span class="nc">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;alice&quot;</span><span class="p">),</span>
-<span class="w">                </span><span class="n">quantity</span>: <span class="nc">Asset</span>::<span class="n">new</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="w"> </span><span class="n">Symbol</span>::<span class="n">new</span><span class="p">(</span><span class="s">&quot;EOS&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">)),</span>
-<span class="w">                </span><span class="n">memo</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&quot;hello, world&quot;</span><span class="p">)</span>
-<span class="w">            </span><span class="p">};</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">perm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PermissionLevel</span>::<span class="n">new</span><span class="p">(</span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">));</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Action</span>::<span class="n">new</span><span class="p">(</span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;eosio.token&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">name</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;transfer&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">perm</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">transfer</span><span class="p">);</span>
-<span class="w">            </span><span class="n">action</span><span class="p">.</span><span class="n">send</span><span class="p">();</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Action</span><span class="p">.</span><span class="ow">new</span><span class="p">(</span>
+<span class="w">            </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;eosio.token&quot;</span><span class="p">),</span>
+<span class="w">            </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;transfer&quot;</span><span class="p">),</span>
+<span class="w">            </span><span class="ow">new</span><span class="w"> </span><span class="nx">PermissionLevel</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">receiver</span><span class="p">,</span><span class="w"> </span><span class="nx">Name</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">)),</span>
+<span class="w">            </span><span class="nx">transfer</span><span class="p">,</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">        </span><span class="nx">a</span><span class="p">.</span><span class="nx">send</span><span class="p">();</span>
+<span class="w">        </span><span class="nx">printString</span><span class="p">(</span><span class="sb">`Done!`</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>在上面的代码中，实现了从<code>hello</code>这个账号转账<code>1.0000 EOS</code>到<code>alice</code>这个账号的功能。<code>hello</code>和<code>alice</code>这两个账号都是在启动测试的时候创建好的，可以直接使用。</p>
 <p>测试代码：</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@chain_test</span>
-<span class="k">def</span> <span class="nf">test_inline_action</span><span class="p">(</span><span class="n">tester</span><span class="p">:</span> <span class="n">ChainTester</span><span class="p">):</span>
-    <span class="n">deploy_contract</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="s1">&#39;inlineaction&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_hello</span><span class="p">(</span><span class="n">tester</span><span class="p">):</span>
+    <span class="n">deploy_contract</span><span class="p">(</span><span class="n">tester</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of hello before transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of alice before transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;alice&#39;</span><span class="p">))</span>
+
     <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;testaction&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">tester</span><span class="o">.</span><span class="n">push_action</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">})</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;++++++elapsed: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;elapsed&#39;</span><span class="p">])</span>
     <span class="n">tester</span><span class="o">.</span><span class="n">produce_block</span><span class="p">()</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;+++++++</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of hello after transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;balance of alice after transfer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="n">tester</span><span class="o">.</span><span class="n">get_balance</span><span class="p">(</span><span class="s1">&#39;alice&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>编译：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>examples/inlineaction
-rust-contract<span class="w"> </span>build
+yarn
+yarn<span class="w"> </span>build
 </code></pre></div>
 <p>运行测试：</p>
 <div class="highlight"><pre><span></span><code>ipyeos<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-s<span class="w"> </span>-x<span class="w"> </span>test.py<span class="w"> </span>-k<span class="w"> </span>test_inline_action
@@ -527,7 +530,7 @@ INFO     test:test.py:82 balance of alice after transfer: 50000010000
 </code></pre></div>
 <p>总结：</p>
 <p>在EOS中，除了可以通过在Transaction里包含action来调用合约的代码之外，在合约的代码里，也可以发起一个Action来调用合约的代码，这样的Action称之为Inline Action. 要允许合约代码使用Inline Action，还必须在合约账号的<code>active</code>权限中添加<code>eosio.code</code>这个虚拟权限。</p>
-<p><a href="https://github.com/learnforpractice/rscdk-book/tree/master/examples/inlineaction">完整示例</a></p>
+<p><a href="https://github.com/learnforpractice/ascdk-book/tree/master/examples/inlineaction">完整示例</a></p>
 
 
 
