@@ -4,11 +4,11 @@ comments: true
 
 # 与数字钱包进行交互
 
-当智能合约写好后，下一个步骤就是如何设计用户界面来与智能合约进行交互。在用户界面要调用链上的智能合约，必须通过数字钱包软件，正面的示例是演示的通过`Anchor`这个钱包来发送交易。实现的功能是调用`eosio.token`这个账号里的智能合约的`transfer`Action。
+当智能合约写好后，下一个步骤就是如何设计用户界面来与智能合约进行交互。在用户界面要调用链上的智能合约，必须通过数字钱包软件，下面的示例是演示的通过`Anchor`这个钱包来发送交易。实现的功能是调用`eosio.token`这个账号里的智能合约的`transfer`Action。
 
 ## 下载Anchor钱包
 
-桌面版本通过正面的链接下载选择最新版本下载：
+桌面版本通过下面的链接下载选择最新版本下载：
 
 ```
 https://github.com/greymass/anchor/tags
@@ -317,7 +317,7 @@ await wallet.logout()
 注意`login`和`logout`两个函数都是异步的
 
 
-输入合法的转账账号和转账的数额，然后点`Transfer`即会在手机或者桌面软件上弹出授权对话框进行授权。请确保界面上描述的Action准确无误后才能确认授权。正面是相关的代码，调用了`eosio.token`的`transfer`这个Action。
+输入合法的转账账号和转账的数额，然后点`Transfer`即会在手机或者桌面软件上弹出授权对话框进行授权。请确保界面上描述的Action准确无误后才能确认授权。下面是相关的代码，调用了`eosio.token`的`transfer`这个Action。
 
 ```javascript
 let user = wallet.users[0];
@@ -339,7 +339,7 @@ var ret = await user.session.transact(args);
 
 总结：
 
-上面的例子中`anchor.min.js`是用的用到了正面的库经过webpack后生成的代码
+上面的例子中`anchor.min.js`是用的用到了下面的库经过webpack后生成的代码
 
 ```
 https://github.com/greymass/ual-anchor
