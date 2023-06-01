@@ -289,5 +289,5 @@ struct permission_level {
 
 - `version`用来指定ABI的版本
 - `structs`用来指定数据结构，会在`actions`和`tables`这两个结构里被用到
-- `actions`用来描述可以智能合约中的action，每个action实际上都是对应一个智能合约函数
+- `actions`用来描述智能合约中的action的参数，每个action实际上都是对应一个智能合约函数
 - `tables`用来描述表的信息，这样，你网页应用程序就可以通过`get_table_rows`这个RPC API来查询链上的数据库信息
