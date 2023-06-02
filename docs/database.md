@@ -285,7 +285,7 @@ Detailed explanation for `key_type`:
 
 - "name" is a `name` type string.
 - "i64" can be a numeric type or a string of numbers, such as 123 or "123".
-- "i128" can be a numeric type, a string of numbers, or a 32-character hexadecimal string, such as: 123, "123", "0xaabb", "aabb".
+- "i128" can be a numeric type, a string of numbers, or a hexadecimal string, such as: 123, "123", "0xaabb", "aabb".
 - "i256" when the value of `encode_type` is `"dec"` or an empty string `""`, the encoding format is: a hexadecimal string, represented in **little-endian mode**, 64 characters in length. For example: `fb54b91bfed2fe7fe39a92d999d002c550f0fa8360ec998f4bb65b00c86282f5` will be converted into two `uint128_t` type values in little-endian mode: `50f0fa8360ec998f4bb65b00c86282f5` and `fb54b91bfed2fe7fe39a92d999d002c5`. When the value of `encode_type` is `"hex"`, it uses the same encoding method as the `"sha256"` type, which is big-endian mode.
 - "float64": The value is a floating-point string, like `"123.456"`.
 - "float128": When the value of `encode_type` is `"dec"` or an empty string `""`, the value is a floating-point string, like `"123.456"`, and the range it represents can only be within the range allowed by `float64`. When the value of `encode_type` is `"hex"`, `encode_type` represents the data as a hexadecimal string in little-endian mode.
