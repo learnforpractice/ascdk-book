@@ -762,26 +762,46 @@ yarn<span class="w"> </span>build
                                 <span class="n">limit</span><span class="p">,</span>
                                 <span class="n">key_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                                 <span class="n">index_position</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> 
+                                <span class="n">encode_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                                 <span class="n">reverse</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">show_payer</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Fetch smart contract data from an account. </span>
 <span class="sd">    key_type: &quot;i64&quot;|&quot;i128&quot;|&quot;i256&quot;|&quot;float64&quot;|&quot;float128&quot;|&quot;sha256&quot;|&quot;ripemd160&quot;</span>
 <span class="sd">    index_position: &quot;2&quot;|&quot;3&quot;|&quot;4&quot;|&quot;5&quot;|&quot;6&quot;|&quot;7&quot;|&quot;8&quot;|&quot;9&quot;|&quot;10&quot;</span>
+<span class="sd">    encode_type: &quot;dec&quot; or &quot;hex&quot;, default to &quot;dec&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div>
 <p>解释下这个接口的参数：</p>
 <ul>
-<li><code>_json</code>: True 返回json格式的数据，False返回16进制表示的原始数据</li>
+<li><code>_json</code>: True 返回json格式的数据库的记录，False返回16进制表示的原始数据</li>
 <li><code>code</code>： 表所在的账号，</li>
 <li><code>scope</code>： 一般设置为空字符串，当有相同的<code>code</code>，<code>table</code>时，不同的<code>scope</code>可以用来区别不同的表</li>
 <li><code>table</code>： 要查询的数据表名</li>
-<li><code>lower_bound</code>：查询起始主键，字符串类型或者数值类型，字符串类型时可以表示一个<code>name</code>类型，如果是以<code>0x</code>开头的十六进制字符串，则表示一个数值类型,为空时表示从起始位置开始查询</li>
-<li><code>upper_bound</code>：查询结束主键，字符串类型或者数值类型，字符串类型时可以表示一个<code>name</code>类型，如果是以<code>0x</code>开头的十六进制字符串，则表示一个数值类型, 为空时表示没有设置上限，将返回&gt;=<code>lower_bound</code>的所有值</li>
-<li><code>limit</code>：用于限制返回的值的个数</li>
-<li><code>key_type</code>：用于指定索引的类型,默认为64位的无符号整数类型</li>
+<li><code>lower_bound</code>：起始主索引值或者二重索引值，类型由<code>key_type</code>指定，可以是数值类型，也可以是数值字符串，也可以是十六进制字符串。</li>
+<li><code>upper_bound</code>：结束主索引值或者二重索引值，类型由<code>key_type</code>指定，可以是数值类型，也可以是数值字符串，也可以是十六进制字符串。为空时表示没有设置上限，如果设置了一个非空的值，结果将返回<code>&gt;=lower_bound</code>并且<code>&lt;=upper_bound</code>的所有值</li>
+<li><code>limit</code>：用于限制返回的值的个数，如果查询的记录多于limit，返回的值中<code>more</code>将被设置成<code>true</code>, <code>next_key</code>: 指向下一个有效的索引。</li>
+<li><code>key_type</code>：值可以为：<code>"name"</code>，<code>"i64"</code>，<code>"i128"</code>，<code>"i256"</code>，<code>"float64"</code>，<code>"float128"</code>，<code>"sha256"</code>，<code>"ripemd160"</code>。对于主索引，也就是<code>index_position</code>为<code>1</code>时，值只能是<code>"name"</code>或者<code>"i64"</code>，对于<code>index_position &gt;= 2</code>的二重索引，值可能是其中的任意一个。会在下面单独讲解各个取值时，<code>lower_bound</code>和<code>upper_bound</code>的编码方式。</li>
 <li><code>index_position</code>：用于指定索引的相对位置，为空或者为<code>1</code>表示主索引，从<code>2</code>以上表示二重索引的位置</li>
+<li><code>encode_type</code>：什为<code>"dec"</code>或者<code>"hex"</code>，默认为<code>dec</code>。指定<code>lower_bound</code>，<code>upper_bound</code>的编码格式，以及返回值<code>next_key</code>的格式</li>
 <li><code>reverse</code>：指定是否要返回倒序表示的数据</li>
 <li><code>show_payer</code>：指定是否显示RAM资源的付费账号</li>
+</ul>
+<p><code>key_type</code>详解：</p>
+<ul>
+<li>"name" 是一个<code>name</code>类型的字符串</li>
+<li>"i64" 可以是数值类型，也可以是数值字符串，例如123, "123"</li>
+<li>"i128" 可以是数值类型，或者数值字符串，或者32个字符的十六进制字符串，例如:123, "123", "0xaabb", "aabb"</li>
+<li>"i256" 当<code>encode_type</code>值为<code>"dec"</code>或者空字符串<code>""</code>时，编码格式为：<strong>小端模式</strong>表示的十六进制的字符串，长度为64个字符。例如：
+<code>fb54b91bfed2fe7fe39a92d999d002c550f0fa8360ec998f4bb65b00c86282f5</code>将被转换成二个小端模式的<code>uint128_t</code>类型的值:<code>50f0fa8360ec998f4bb65b00c86282f5</code>, <code>fb54b91bfed2fe7fe39a92d999d002c5</code>。当<code>encode_type</code>的值为<code>"hex"</code>时，采用和<code>"sha256"</code>类型一样的大端模式的编码方式。</li>
+<li>"float64" 值为浮点字符串，如<code>"123.456"</code></li>
+<li>"float128" 当<code>encode_type</code>值为<code>"dec"</code>或者空字符串<code>""</code>时，值为浮点字符串，如<code>"123.456"</code>，表示的范围只能是<code>float64</code>所允许的范围。当<code>encode_type</code>的值为<code>"hex"</code>时，encode_type值为小端模式表示的十六进制的数据。
+"sha256" <strong>大端模式</strong>表示的十六进制的字符串，长度为64个字符，会被转换成两个小端模式的uint128_t类型的值：如<code>f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb</code>会被转换成<code>50f0fa8360ec998f4bb65b00c86282f5</code>和<code>fb54b91bfed2fe7fe39a92d999d002c5</code>，可参考<a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900">keytype_converter</a>结构的代码。
+"ripemd160" 十六进制的字符串，长度为64个字符，大端模式，会被转换成两个小端模式的uint128_t类型的值：如<code>83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000</code>会被转换成<code>ed69184fc5336ff6334cc676383aa883</code>和<code>0000000000000000000000004a5d5bef</code>，可参考<a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918">keytype_converter</a>结构的代码。</li>
+</ul>
+<p><code>get_table_rows</code>接口的参数还是非常复杂的，作下总结：</p>
+<ul>
+<li>如果<code>lower_bound</code>和<code>upper_bound</code>为空，表示查询不限范围</li>
+<li>当<code>key_type</code>的值为<code>"i256"</code>和<code>"float128"</code>时，<code>lower_bound</code>和<code>upper_bound</code>的编码方式还受<code>encode_type</code>的影响</li>
 </ul>
 <p>要通过<code>get_table_rows</code>来查询表，表的结构必须在ABI的描述中可见，在<code>db_example1</code>这个例子中，生成的<code>test.abi</code>中，包含如下信息即是对表的描述：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&quot;tables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>

@@ -764,26 +764,45 @@ yarn<span class="w"> </span>build
                                 <span class="n">limit</span><span class="p">,</span>
                                 <span class="n">key_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                                 <span class="n">index_position</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> 
+                                <span class="n">encode_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                                 <span class="n">reverse</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                 <span class="n">show_payer</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Fetch smart contract data from an account. </span>
 <span class="sd">    key_type: &quot;i64&quot;|&quot;i128&quot;|&quot;i256&quot;|&quot;float64&quot;|&quot;float128&quot;|&quot;sha256&quot;|&quot;ripemd160&quot;</span>
 <span class="sd">    index_position: &quot;2&quot;|&quot;3&quot;|&quot;4&quot;|&quot;5&quot;|&quot;6&quot;|&quot;7&quot;|&quot;8&quot;|&quot;9&quot;|&quot;10&quot;</span>
+<span class="sd">    encode_type: &quot;dec&quot; or &quot;hex&quot;, default to &quot;dec&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div>
-<p>Explanation of the parameters of this interface:</p>
+<p>Let's break down the parameters for this function:</p>
 <ul>
-<li><code>_json</code>: True returns data in JSON format, False returns raw data represented in hexadecimal</li>
-<li><code>code</code>: the account where the table is located</li>
-<li><code>scope</code>: usually set to an empty string. When there are the same <code>code</code> and <code>table</code>, different <code>scope</code> can be used to distinguish different tables</li>
-<li><code>table</code>: the name of the data table to query</li>
-<li><code>lower_bound</code>: query starting primary key, string type or numeric type. The string type can represent a <code>name</code> type. If it is a hexadecimal string starting with <code>0x</code>, it represents a numeric type. If it is empty, it indicates that the query starts from the beginning</li>
-<li><code>upper_bound</code>: query ending primary key, string type or numeric type. The string type can represent a <code>name</code> type. If it is a hexadecimal string starting with <code>0x</code>, it represents a numeric type. If it is empty, it means that the upper limit is not set, and all values &gt;= <code>lower_bound</code> will be returned</li>
-<li><code>limit</code>: used to limit the number of returned values</li>
-<li><code>key_type</code>: used to specify the type of index, default is 64-bit unsigned integer type</li>
-<li><code>index_position</code>: used to specify the relative position of the index. If it is empty or <code>1</code>, it means the main index, and above <code>2</code> means the position of the secondary index</li>
-<li><code>reverse</code>: specifies whether to return data represented in reverse order</li>
-<li><code>show_payer</code>: specifies whether to display the account that pays for RAM resources</li>
+<li><code>_json</code>: If True, it returns JSON-formatted database records, if False, it returns the raw data in hexadecimal format.</li>
+<li><code>code</code>: Represents the account where the table is located.</li>
+<li><code>scope</code>: Generally set as an empty string. When <code>code</code> and <code>table</code> are the same, different <code>scope</code> can be used to differentiate different tables.</li>
+<li><code>table</code>: The name of the table to be queried.</li>
+<li><code>lower_bound</code>: The starting value of the primary or secondary index, specified by <code>key_type</code>. It can be numeric, a string of numbers, or a hexadecimal string.</li>
+<li><code>upper_bound</code>: The ending value of the primary or secondary index, specified by <code>key_type</code>. It can be numeric, a string of numbers, or a hexadecimal string. If empty, it means no upper limit has been set. If a non-empty value is set, the results will return all values that are <code>&gt;=lower_bound</code> and <code>&lt;=upper_bound</code>.</li>
+<li><code>limit</code>: Limits the number of returned values. If the queried records exceed the limit, <code>more</code> will be set to <code>true</code> in the returned values, and <code>next_key</code> will point to the next valid index.</li>
+<li><code>key_type</code>: The values can be: <code>"name"</code>, <code>"i64"</code>, <code>"i128"</code>, <code>"i256"</code>, <code>"float64"</code>, <code>"float128"</code>, <code>"sha256"</code>, <code>"ripemd160"</code>. For the primary index (i.e., <code>index_position</code> is <code>1</code>), the value can only be <code>"name"</code> or <code>"i64"</code>. For secondary index (i.e., <code>index_position &gt;= 2</code>), the value could be any of the listed types. The encoding method of <code>lower_bound</code> and <code>upper_bound</code> under each value will be explained separately below.</li>
+<li><code>index_position</code>: Specifies the relative position of the index. If it's empty or <code>1</code>, it denotes the primary index. Any number above <code>2</code> denotes the position of the secondary index.</li>
+<li><code>encode_type</code>: It's either <code>"dec"</code> or <code>"hex"</code>, defaulting to <code>"dec"</code>. It specifies the encoding format of <code>lower_bound</code>, <code>upper_bound</code>, and the return value <code>next_key</code>.</li>
+<li><code>reverse</code>: Specifies whether the data should be returned in reverse order.</li>
+<li><code>show_payer</code>: Specifies whether to display the RAM resource paying account.</li>
+</ul>
+<p>Detailed explanation for <code>key_type</code>:</p>
+<ul>
+<li>"name" is a <code>name</code> type string.</li>
+<li>"i64" can be a numeric type or a string of numbers, such as 123 or "123".</li>
+<li>"i128" can be a numeric type, a string of numbers, or a 32-character hexadecimal string, such as: 123, "123", "0xaabb", "aabb".</li>
+<li>"i256" when the value of <code>encode_type</code> is <code>"dec"</code> or an empty string <code>""</code>, the encoding format is: a hexadecimal string, represented in <strong>little-endian mode</strong>, 64 characters in length. For example: <code>fb54b91bfed2fe7fe39a92d999d002c550f0fa8360ec998f4bb65b00c86282f5</code> will be converted into two <code>uint128_t</code> type values in little-endian mode: <code>50f0fa8360ec998f4bb65b00c86282f5</code> and <code>fb54b91bfed2fe7fe39a92d999d002c5</code>. When the value of <code>encode_type</code> is <code>"hex"</code>, it uses the same encoding method as the <code>"sha256"</code> type, which is big-endian mode.</li>
+<li>"float64": The value is a floating-point string, like <code>"123.456"</code>.</li>
+<li>"float128": When the value of <code>encode_type</code> is <code>"dec"</code> or an empty string <code>""</code>, the value is a floating-point string, like <code>"123.456"</code>, and the range it represents can only be within the range allowed by <code>float64</code>. When the value of <code>encode_type</code> is <code>"hex"</code>, <code>encode_type</code> represents the data as a hexadecimal string in little-endian mode.</li>
+<li>"sha256": A hexadecimal string represented in <strong>big-endian mode</strong>, 64 characters long, will be converted into two <code>uint128_t</code> type values in little-endian mode: such as <code>f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb</code> will be converted into <code>50f0fa8360ec998f4bb65b00c86282f5</code> and <code>fb54b91bfed2fe7fe39a92d999d002c5</code>. Refer to the <a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900">keytype_converter</a> structure's code for more details.</li>
+<li>"ripemd160": A hexadecimal string, 64 characters long, big-endian mode, will be converted into two <code>uint128_t</code> type values in little-endian mode: such as <code>83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000</code> will be converted into <code>ed69184fc5336ff6334cc676383aa883</code> and <code>0000000000000000000000004a5d5bef</code>. Refer to the <a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918">keytype_converter</a> structure's code for more details.</li>
+</ul>
+<p>The <code>get_table_rows</code> function's parameters are quite complex, here's a summary:</p>
+<ul>
+<li>If <code>lower_bound</code> and <code>upper_bound</code> are empty, it means the query has no range limit.</li>
+<li>When the value of <code>key_type</code> is <code>"i256"</code> and <code>"float128"</code>, the encoding method of <code>lower_bound</code> and <code>upper_bound</code> is also affected by <code>encode_type</code>.</li>
 </ul>
 <p>To query a table through <code>get_table_rows</code>, the structure of the table must be visible in the description of ABI. In the <code>db_example1</code> example, the generated <code>test.abi</code> contains the following information, which is a description of the table:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&quot;tables&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
