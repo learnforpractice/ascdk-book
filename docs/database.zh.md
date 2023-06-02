@@ -276,7 +276,7 @@ def get_table_rows(self, _json, code, scope, table,
 - `limit`：用于限制返回的值的个数，如果查询的记录多于limit，返回的值中`more`将被设置成`true`, `next_key`: 指向下一个有效的索引。
 - `key_type`：值可以为：`"name"`，`"i64"`，`"i128"`，`"i256"`，`"float64"`，`"float128"`，`"sha256"`，`"ripemd160"`。对于主索引，也就是`index_position`为`1`时，值只能是`"name"`或者`"i64"`，对于`index_position >= 2`的二重索引，值可能是其中的任意一个。会在下面单独讲解各个取值时，`lower_bound`和`upper_bound`的编码方式。
 - `index_position`：用于指定索引的相对位置，为空或者为`1`表示主索引，从`2`以上表示二重索引的位置
-- `encode_type`：什为`"dec"`或者`"hex"`，默认为`dec`。指定`lower_bound`，`upper_bound`的编码格式，以及返回值`next_key`的格式
+- `encode_type`：值为`"dec"`或者`"hex"`，默认为`dec`。指定`lower_bound`，`upper_bound`的编码格式，以及返回值`next_key`的格式
 - `reverse`：指定是否要返回倒序表示的数据
 - `show_payer`：指定是否显示RAM资源的付费账号
 
@@ -290,8 +290,8 @@ def get_table_rows(self, _json, code, scope, table,
 `fb54b91bfed2fe7fe39a92d999d002c550f0fa8360ec998f4bb65b00c86282f5`将被转换成二个小端模式的`uint128_t`类型的值:`50f0fa8360ec998f4bb65b00c86282f5`, `fb54b91bfed2fe7fe39a92d999d002c5`。当`encode_type`的值为`"hex"`时，采用和`"sha256"`类型一样的大端模式的编码方式。
 - "float64" 值为浮点字符串，如`"123.456"`
 - "float128" 当`encode_type`值为`"dec"`或者空字符串`""`时，值为浮点字符串，如`"123.456"`，表示的范围只能是`float64`所允许的范围。当`encode_type`的值为`"hex"`时，encode_type值为小端模式表示的十六进制的数据。
-"sha256" **大端模式**表示的十六进制的字符串，长度为64个字符，会被转换成两个小端模式的uint128_t类型的值：如`f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb`会被转换成`50f0fa8360ec998f4bb65b00c86282f5`和`fb54b91bfed2fe7fe39a92d999d002c5`，可参考[keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900)结构的代码。
-"ripemd160" 十六进制的字符串，长度为64个字符，大端模式，会被转换成两个小端模式的uint128_t类型的值：如`83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000`会被转换成`ed69184fc5336ff6334cc676383aa883`和`0000000000000000000000004a5d5bef`，可参考[keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918)结构的代码。
+- "sha256" **大端模式**表示的十六进制的字符串，长度为64个字符，会被转换成两个小端模式的uint128_t类型的值：如`f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb`会被转换成`50f0fa8360ec998f4bb65b00c86282f5`和`fb54b91bfed2fe7fe39a92d999d002c5`，可参考[keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900)结构的代码。
+- "ripemd160" 十六进制的字符串，长度为64个字符，大端模式，会被转换成两个小端模式的uint128_t类型的值：如`83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000`会被转换成`ed69184fc5336ff6334cc676383aa883`和`0000000000000000000000004a5d5bef`，可参考[keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918)结构的代码。
 
 
 `get_table_rows`接口的参数还是非常复杂的，作下总结：
