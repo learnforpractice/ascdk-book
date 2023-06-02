@@ -782,7 +782,7 @@ yarn<span class="w"> </span>build
 <li><code>limit</code>：用于限制返回的值的个数，如果查询的记录多于limit，返回的值中<code>more</code>将被设置成<code>true</code>, <code>next_key</code>: 指向下一个有效的索引。</li>
 <li><code>key_type</code>：值可以为：<code>"name"</code>，<code>"i64"</code>，<code>"i128"</code>，<code>"i256"</code>，<code>"float64"</code>，<code>"float128"</code>，<code>"sha256"</code>，<code>"ripemd160"</code>。对于主索引，也就是<code>index_position</code>为<code>1</code>时，值只能是<code>"name"</code>或者<code>"i64"</code>，对于<code>index_position &gt;= 2</code>的二重索引，值可能是其中的任意一个。会在下面单独讲解各个取值时，<code>lower_bound</code>和<code>upper_bound</code>的编码方式。</li>
 <li><code>index_position</code>：用于指定索引的相对位置，为空或者为<code>1</code>表示主索引，从<code>2</code>以上表示二重索引的位置</li>
-<li><code>encode_type</code>：什为<code>"dec"</code>或者<code>"hex"</code>，默认为<code>dec</code>。指定<code>lower_bound</code>，<code>upper_bound</code>的编码格式，以及返回值<code>next_key</code>的格式</li>
+<li><code>encode_type</code>：值为<code>"dec"</code>或者<code>"hex"</code>，默认为<code>dec</code>。指定<code>lower_bound</code>，<code>upper_bound</code>的编码格式，以及返回值<code>next_key</code>的格式</li>
 <li><code>reverse</code>：指定是否要返回倒序表示的数据</li>
 <li><code>show_payer</code>：指定是否显示RAM资源的付费账号</li>
 </ul>
@@ -790,13 +790,13 @@ yarn<span class="w"> </span>build
 <ul>
 <li>"name" 是一个<code>name</code>类型的字符串</li>
 <li>"i64" 可以是数值类型，也可以是数值字符串，例如123, "123"</li>
-<li>"i128" 可以是数值类型，或者数值字符串，或者32个字符的十六进制字符串，例如:123, "123", "0xaabb", "aabb"</li>
+<li>"i128" 可以是数值类型，或者数值字符串，或者十六进制字符串，例如:123, "123", "0xaabb", "aabb"</li>
 <li>"i256" 当<code>encode_type</code>值为<code>"dec"</code>或者空字符串<code>""</code>时，编码格式为：<strong>小端模式</strong>表示的十六进制的字符串，长度为64个字符。例如：
 <code>fb54b91bfed2fe7fe39a92d999d002c550f0fa8360ec998f4bb65b00c86282f5</code>将被转换成二个小端模式的<code>uint128_t</code>类型的值:<code>50f0fa8360ec998f4bb65b00c86282f5</code>, <code>fb54b91bfed2fe7fe39a92d999d002c5</code>。当<code>encode_type</code>的值为<code>"hex"</code>时，采用和<code>"sha256"</code>类型一样的大端模式的编码方式。</li>
 <li>"float64" 值为浮点字符串，如<code>"123.456"</code></li>
-<li>"float128" 当<code>encode_type</code>值为<code>"dec"</code>或者空字符串<code>""</code>时，值为浮点字符串，如<code>"123.456"</code>，表示的范围只能是<code>float64</code>所允许的范围。当<code>encode_type</code>的值为<code>"hex"</code>时，encode_type值为小端模式表示的十六进制的数据。
-"sha256" <strong>大端模式</strong>表示的十六进制的字符串，长度为64个字符，会被转换成两个小端模式的uint128_t类型的值：如<code>f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb</code>会被转换成<code>50f0fa8360ec998f4bb65b00c86282f5</code>和<code>fb54b91bfed2fe7fe39a92d999d002c5</code>，可参考<a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900">keytype_converter</a>结构的代码。
-"ripemd160" 十六进制的字符串，长度为64个字符，大端模式，会被转换成两个小端模式的uint128_t类型的值：如<code>83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000</code>会被转换成<code>ed69184fc5336ff6334cc676383aa883</code>和<code>0000000000000000000000004a5d5bef</code>，可参考<a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918">keytype_converter</a>结构的代码。</li>
+<li>"float128" 当<code>encode_type</code>值为<code>"dec"</code>或者空字符串<code>""</code>时，值为浮点字符串，如<code>"123.456"</code>，表示的范围只能是<code>float64</code>所允许的范围。当<code>encode_type</code>的值为<code>"hex"</code>时，encode_type值为小端模式表示的十六进制的数据。</li>
+<li>"sha256" <strong>大端模式</strong>表示的十六进制的字符串，长度为64个字符，会被转换成两个小端模式的uint128_t类型的值：如<code>f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb</code>会被转换成<code>50f0fa8360ec998f4bb65b00c86282f5</code>和<code>fb54b91bfed2fe7fe39a92d999d002c5</code>，可参考<a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900">keytype_converter</a>结构的代码。</li>
+<li>"ripemd160" 十六进制的字符串，长度为64个字符，大端模式，会被转换成两个小端模式的uint128_t类型的值：如<code>83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000</code>会被转换成<code>ed69184fc5336ff6334cc676383aa883</code>和<code>0000000000000000000000004a5d5bef</code>，可参考<a href="https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918">keytype_converter</a>结构的代码。</li>
 </ul>
 <p><code>get_table_rows</code>接口的参数还是非常复杂的，作下总结：</p>
 <ul>
