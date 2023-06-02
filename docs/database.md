@@ -249,33 +249,53 @@ The above examples are all about how to operate the on-chain database tables thr
 
 In Python code, the definition of `get_table_rows` is as follows:
 
+
 ```python
 def get_table_rows(self, _json, code, scope, table,
                                 lower_bound, upper_bound,
                                 limit,
                                 key_type='',
                                 index_position='', 
+                                encode_type='',
                                 reverse = False,
                                 show_payer = False):
     """ Fetch smart contract data from an account. 
     key_type: "i64"|"i128"|"i256"|"float64"|"float128"|"sha256"|"ripemd160"
     index_position: "2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"10"
+    encode_type: "dec" or "hex", default to "dec"
     """
 ```
 
-Explanation of the parameters of this interface:
+Let's break down the parameters for this function:
 
-- `_json`: True returns data in JSON format, False returns raw data represented in hexadecimal
-- `code`: the account where the table is located
-- `scope`: usually set to an empty string. When there are the same `code` and `table`, different `scope` can be used to distinguish different tables
-- `table`: the name of the data table to query
-- `lower_bound`: query starting primary key, string type or numeric type. The string type can represent a `name` type. If it is a hexadecimal string starting with `0x`, it represents a numeric type. If it is empty, it indicates that the query starts from the beginning
-- `upper_bound`: query ending primary key, string type or numeric type. The string type can represent a `name` type. If it is a hexadecimal string starting with `0x`, it represents a numeric type. If it is empty, it means that the upper limit is not set, and all values >= `lower_bound` will be returned
-- `limit`: used to limit the number of returned values
-- `key_type`: used to specify the type of index, default is 64-bit unsigned integer type
-- `index_position`: used to specify the relative position of the index. If it is empty or `1`, it means the main index, and above `2` means the position of the secondary index
-- `reverse`: specifies whether to return data represented in reverse order
-- `show_payer`: specifies whether to display the account that pays for RAM resources
+- `_json`: If True, it returns JSON-formatted database records, if False, it returns the raw data in hexadecimal format.
+- `code`: Represents the account where the table is located.
+- `scope`: Generally set as an empty string. When `code` and `table` are the same, different `scope` can be used to differentiate different tables.
+- `table`: The name of the table to be queried.
+- `lower_bound`: The starting value of the primary or secondary index, specified by `key_type`. It can be numeric, a string of numbers, or a hexadecimal string.
+- `upper_bound`: The ending value of the primary or secondary index, specified by `key_type`. It can be numeric, a string of numbers, or a hexadecimal string. If empty, it means no upper limit has been set. If a non-empty value is set, the results will return all values that are `>=lower_bound` and `<=upper_bound`.
+- `limit`: Limits the number of returned values. If the queried records exceed the limit, `more` will be set to `true` in the returned values, and `next_key` will point to the next valid index.
+- `key_type`: The values can be: `"name"`, `"i64"`, `"i128"`, `"i256"`, `"float64"`, `"float128"`, `"sha256"`, `"ripemd160"`. For the primary index (i.e., `index_position` is `1`), the value can only be `"name"` or `"i64"`. For secondary index (i.e., `index_position >= 2`), the value could be any of the listed types. The encoding method of `lower_bound` and `upper_bound` under each value will be explained separately below.
+- `index_position`: Specifies the relative position of the index. If it's empty or `1`, it denotes the primary index. Any number above `2` denotes the position of the secondary index.
+- `encode_type`: It's either `"dec"` or `"hex"`, defaulting to `"dec"`. It specifies the encoding format of `lower_bound`, `upper_bound`, and the return value `next_key`.
+- `reverse`: Specifies whether the data should be returned in reverse order.
+- `show_payer`: Specifies whether to display the RAM resource paying account.
+
+Detailed explanation for `key_type`:
+
+- "name" is a `name` type string.
+- "i64" can be a numeric type or a string of numbers, such as 123 or "123".
+- "i128" can be a numeric type, a string of numbers, or a 32-character hexadecimal string, such as: 123, "123", "0xaabb", "aabb".
+- "i256" when the value of `encode_type` is `"dec"` or an empty string `""`, the encoding format is: a hexadecimal string, represented in **little-endian mode**, 64 characters in length. For example: `fb54b91bfed2fe7fe39a92d999d002c550f0fa8360ec998f4bb65b00c86282f5` will be converted into two `uint128_t` type values in little-endian mode: `50f0fa8360ec998f4bb65b00c86282f5` and `fb54b91bfed2fe7fe39a92d999d002c5`. When the value of `encode_type` is `"hex"`, it uses the same encoding method as the `"sha256"` type, which is big-endian mode.
+- "float64": The value is a floating-point string, like `"123.456"`.
+- "float128": When the value of `encode_type` is `"dec"` or an empty string `""`, the value is a floating-point string, like `"123.456"`, and the range it represents can only be within the range allowed by `float64`. When the value of `encode_type` is `"hex"`, `encode_type` represents the data as a hexadecimal string in little-endian mode.
+- "sha256": A hexadecimal string represented in **big-endian mode**, 64 characters long, will be converted into two `uint128_t` type values in little-endian mode: such as `f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb` will be converted into `50f0fa8360ec998f4bb65b00c86282f5` and `fb54b91bfed2fe7fe39a92d999d002c5`. Refer to the [keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900) structure's code for more details.
+- "ripemd160": A hexadecimal string, 64 characters long, big-endian mode, will be converted into two `uint128_t` type values in little-endian mode: such as `83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000` will be converted into `ed69184fc5336ff6334cc676383aa883` and `0000000000000000000000004a5d5bef`. Refer to the [keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918) structure's code for more details.
+
+The `get_table_rows` function's parameters are quite complex, here's a summary:
+
+- If `lower_bound` and `upper_bound` are empty, it means the query has no range limit.
+- When the value of `key_type` is `"i256"` and `"float128"`, the encoding method of `lower_bound` and `upper_bound` is also affected by `encode_type`.
 
 To query a table through `get_table_rows`, the structure of the table must be visible in the description of ABI. In the `db_example1` example, the generated `test.abi` contains the following information, which is a description of the table:
 

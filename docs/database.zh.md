@@ -255,27 +255,49 @@ def get_table_rows(self, _json, code, scope, table,
                                 limit,
                                 key_type='',
                                 index_position='', 
+                                encode_type='',
                                 reverse = False,
                                 show_payer = False):
     """ Fetch smart contract data from an account. 
     key_type: "i64"|"i128"|"i256"|"float64"|"float128"|"sha256"|"ripemd160"
     index_position: "2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"|"10"
+    encode_type: "dec" or "hex", default to "dec"
     """
 ```
 
 解释下这个接口的参数：
 
-- `_json`: True 返回json格式的数据，False返回16进制表示的原始数据
+- `_json`: True 返回json格式的数据库的记录，False返回16进制表示的原始数据
 - `code`： 表所在的账号，
 - `scope`： 一般设置为空字符串，当有相同的`code`，`table`时，不同的`scope`可以用来区别不同的表
 - `table`： 要查询的数据表名
-- `lower_bound`：查询起始主键，字符串类型或者数值类型，字符串类型时可以表示一个`name`类型，如果是以`0x`开头的十六进制字符串，则表示一个数值类型,为空时表示从起始位置开始查询
-- `upper_bound`：查询结束主键，字符串类型或者数值类型，字符串类型时可以表示一个`name`类型，如果是以`0x`开头的十六进制字符串，则表示一个数值类型, 为空时表示没有设置上限，将返回>=`lower_bound`的所有值
-- `limit`：用于限制返回的值的个数
-- `key_type`：用于指定索引的类型,默认为64位的无符号整数类型
+- `lower_bound`：起始主索引值或者二重索引值，类型由`key_type`指定，可以是数值类型，也可以是数值字符串，也可以是十六进制字符串。
+- `upper_bound`：结束主索引值或者二重索引值，类型由`key_type`指定，可以是数值类型，也可以是数值字符串，也可以是十六进制字符串。为空时表示没有设置上限，如果设置了一个非空的值，结果将返回`>=lower_bound`并且`<=upper_bound`的所有值
+- `limit`：用于限制返回的值的个数，如果查询的记录多于limit，返回的值中`more`将被设置成`true`, `next_key`: 指向下一个有效的索引。
+- `key_type`：值可以为：`"name"`，`"i64"`，`"i128"`，`"i256"`，`"float64"`，`"float128"`，`"sha256"`，`"ripemd160"`。对于主索引，也就是`index_position`为`1`时，值只能是`"name"`或者`"i64"`，对于`index_position >= 2`的二重索引，值可能是其中的任意一个。会在下面单独讲解各个取值时，`lower_bound`和`upper_bound`的编码方式。
 - `index_position`：用于指定索引的相对位置，为空或者为`1`表示主索引，从`2`以上表示二重索引的位置
+- `encode_type`：什为`"dec"`或者`"hex"`，默认为`dec`。指定`lower_bound`，`upper_bound`的编码格式，以及返回值`next_key`的格式
 - `reverse`：指定是否要返回倒序表示的数据
 - `show_payer`：指定是否显示RAM资源的付费账号
+
+
+`key_type`详解：
+
+- "name" 是一个`name`类型的字符串
+- "i64" 可以是数值类型，也可以是数值字符串，例如123, "123"
+- "i128" 可以是数值类型，或者数值字符串，或者32个字符的十六进制字符串，例如:123, "123", "0xaabb", "aabb"
+- "i256" 当`encode_type`值为`"dec"`或者空字符串`""`时，编码格式为：**小端模式**表示的十六进制的字符串，长度为64个字符。例如：
+`fb54b91bfed2fe7fe39a92d999d002c550f0fa8360ec998f4bb65b00c86282f5`将被转换成二个小端模式的`uint128_t`类型的值:`50f0fa8360ec998f4bb65b00c86282f5`, `fb54b91bfed2fe7fe39a92d999d002c5`。当`encode_type`的值为`"hex"`时，采用和`"sha256"`类型一样的大端模式的编码方式。
+- "float64" 值为浮点字符串，如`"123.456"`
+- "float128" 当`encode_type`值为`"dec"`或者空字符串`""`时，值为浮点字符串，如`"123.456"`，表示的范围只能是`float64`所允许的范围。当`encode_type`的值为`"hex"`时，encode_type值为小端模式表示的十六进制的数据。
+"sha256" **大端模式**表示的十六进制的字符串，长度为64个字符，会被转换成两个小端模式的uint128_t类型的值：如`f58262c8005bb64b8f99ec6083faf050c502d099d9929ae37ffed2fe1bb954fb`会被转换成`50f0fa8360ec998f4bb65b00c86282f5`和`fb54b91bfed2fe7fe39a92d999d002c5`，可参考[keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L900)结构的代码。
+"ripemd160" 十六进制的字符串，长度为64个字符，大端模式，会被转换成两个小端模式的uint128_t类型的值：如`83a83a3876c64c33f66f33c54f1869edef5b5d4a000000000000000000000000`会被转换成`ed69184fc5336ff6334cc676383aa883`和`0000000000000000000000004a5d5bef`，可参考[keytype_converter](https://github.com/AntelopeIO/leap/blob/db132c5fd44e0b1c492e46e3f51e185cd5c59ed0/plugins/chain_plugin/include/eosio/chain_plugin/chain_plugin.hpp#L918)结构的代码。
+
+
+`get_table_rows`接口的参数还是非常复杂的，作下总结：
+
+- 如果`lower_bound`和`upper_bound`为空，表示查询不限范围
+- 当`key_type`的值为`"i256"`和`"float128"`时，`lower_bound`和`upper_bound`的编码方式还受`encode_type`的影响
 
 要通过`get_table_rows`来查询表，表的结构必须在ABI的描述中可见，在`db_example1`这个例子中，生成的`test.abi`中，包含如下信息即是对表的描述：
 
