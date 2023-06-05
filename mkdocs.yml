@@ -16,15 +16,15 @@ nav:
     - 'prelude.md'
     - 'env.md'
     - 'helloworld.md'
-    - 'deploy.md'
-    - 'ui.md'
+    - 'common.md'
     - 'action.md'
     - 'notify.md'
     - 'database.md'
     - 'crypto.md'
-    - 'common.md'
     - 'abi.md'
     - 'callc.md'
+    - 'deploy.md'
+    - 'ui.md'
 markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:

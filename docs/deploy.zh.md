@@ -34,3 +34,9 @@ eosapi.deploy_contract(account_name, code, abi)
 ```python
 eosapi.deploy_contract(account_name, code, abi， indices=[0,])
 ```
+
+另外，如果你的wasm代码过大而导致发布失败，可以尝试在调用deploy_contract的时候加上参数：`compress=True`
+
+```python
+eosapi.deploy_contract(account_name, code, abi， compress=True)
+```

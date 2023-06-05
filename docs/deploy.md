@@ -37,3 +37,8 @@ If you have the private key corresponding to the active permission saved in a Le
 eosapi.deploy_contract(account_name, code, abi， indices=[0,])
 ```
 
+Additionally, if your WASM code is too large and causing deployment failures, you can try adding the parameter `compress=True` when calling `deploy_contract`:
+
+```python
+eosapi.deploy_contract(account_name, code, abi, compress=True)
+```

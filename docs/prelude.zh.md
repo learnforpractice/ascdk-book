@@ -10,7 +10,7 @@ comments: true
 
 ## 什么是智能合约
 
-智能合约是可以在链上执行的代码
+智能合约是可以在链上执行的代码。区块链是一个分布式的数据库，或者称之为分布式账本。由一群有着相同功能的节点（计算机）负责维护。每个节点都保存了这个分布式数据库的一个副本。这些节点共同组成了一个区块链网络。所谓链上执行，即智能合约在每个节点都会被执行。智能合约的主要功能是对数据库进行增删改查等操作，并且由节点软件来确保每个节点的执行结果的一致性。
 
 ## 什么是 AssemblyScript 智能合约
 
@@ -25,6 +25,8 @@ EOS是一个基于代理权益证明(DPOS - Delegated Proof of Stake)共识算�
 下面是通过EOS的`get_account`RPC接口返回的信息来分集一下包含在账号里的信息：
 
 ```python
+from pyeoskit import eosapi
+eosapi.set_node("https://eos.greymass.com")
 eosapi.get_account("testaccount")
 ```
 
