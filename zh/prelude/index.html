@@ -345,23 +345,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../deploy/" class="md-nav__link">
-        发布智能合约
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../ui/" class="md-nav__link">
-        与数字钱包进行交互
+      <a href="../common/" class="md-nav__link">
+        常用智能合约函数
       </a>
     </li>
   
@@ -435,21 +420,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../common/" class="md-nav__link">
-        常用智能合约函数
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../abi/" class="md-nav__link">
         ABI类型详解
       </a>
@@ -467,6 +437,36 @@
     <li class="md-nav__item">
       <a href="../../callc.md" class="md-nav__link">
         None
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy/" class="md-nav__link">
+        发布智能合约
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui/" class="md-nav__link">
+        与数字钱包进行交互
       </a>
     </li>
   
@@ -583,7 +583,7 @@
 <h2 id="_2">如何使用本文档</h2>
 <p>本文档采用通过示例代码来介绍相关智能合约的相关的知识点。智能合约涉及到的知识点相对比较少，为了更快速的掌握智能合约的用法，需要读者在阅读本文档的同时，运行和修改示例以加深对内容的理解。</p>
 <h2 id="_3">什么是智能合约</h2>
-<p>智能合约是可以在链上执行的代码</p>
+<p>智能合约是可以在链上执行的代码。区块链是一个分布式的数据库，或者称之为分布式账本。由一群有着相同功能的节点（计算机）负责维护。每个节点都保存了这个分布式数据库的一个副本。这些节点共同组成了一个区块链网络。所谓链上执行，即智能合约在每个节点都会被执行。智能合约的主要功能是对数据库进行增删改查等操作，并且由节点软件来确保每个节点的执行结果的一致性。</p>
 <h2 id="assemblyscript">什么是 AssemblyScript 智能合约</h2>
 <p>AssemblyScript 智能合约是用 AssemblyScript 语言(一种语法和 Typescript 兼容的语言)写的可在链上执行的代码。以EOS网络为例，AssemblyScript智能合约的代码会被编译成叫 Webassebmly 的二进制文件，并且可以发布到链上并被执行，从而达成某种操作效果。</p>
 <h2 id="eos">什么是EOS</h2>
@@ -591,7 +591,9 @@
 <h2 id="account">账号(Account)</h2>
 <p>不同于以太坊的通过地址（公钥）来进行交易，EOS区块链的交易的实体是比地址更复杂的账号。账号的名称是一个name结构，在下一节会讲到。账号在C++代码里表示的结构比较复杂。</p>
 <p>下面是通过EOS的<code>get_account</code>RPC接口返回的信息来分集一下包含在账号里的信息：</p>
-<div class="highlight"><pre><span></span><code><span class="n">eosapi</span><span class="o">.</span><span class="n">get_account</span><span class="p">(</span><span class="s2">&quot;testaccount&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">pyeoskit</span> <span class="kn">import</span> <span class="n">eosapi</span>
+<span class="n">eosapi</span><span class="o">.</span><span class="n">set_node</span><span class="p">(</span><span class="s2">&quot;https://eos.greymass.com&quot;</span><span class="p">)</span>
+<span class="n">eosapi</span><span class="o">.</span><span class="n">get_account</span><span class="p">(</span><span class="s2">&quot;testaccount&quot;</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w"> </span><span class="nt">&quot;account_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testaccount&quot;</span><span class="p">,</span>
